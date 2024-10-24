@@ -1,0 +1,19 @@
+
+
+ontap/export_policy/create
+--------------------------
+cluster:
+  management_ip: 10.65.59.210
+
+svm:
+  name: svm_alexeym50
+
+export_policy:
+  name: Q_DAEF701
+  rules:
+  - client_match: 0.0.0.0/0
+    protocol: nfs
+    ro_rule: any
+    rw_rule: any
+    super_user_security: sys
+

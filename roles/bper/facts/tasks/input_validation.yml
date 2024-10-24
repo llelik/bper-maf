@@ -1,0 +1,18 @@
+---
+
+- name: Validate input control parameters
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env }}"
+  when:
+    - ((input_env is not defined) or (input_env not in vars_defaults.storage_env)) and (input_env[:3] not in ['FUS'])
+    
+    
+- name: Validate input size parameters
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_size not given or incorrect size. Input value: {{ input_size }}"
+  when:
+    - (input_size is not defined) or (input_size | int not in vars_defaults.volume_sizes)
+
+...

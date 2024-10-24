@@ -1,0 +1,35 @@
+##########################################################################
+#
+# - naming convention 
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
+---
+vars_local:
+  volume:
+    name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+    size: "{{ input_size }}"
+    #aggregate_exclude_name_regex: lock
+  qtree:
+    name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+  export_policy:
+    name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact]  |default(input_env_fact) }}01"
+    rules:
+      - client_match: 0.0.0.0/0
+        ro_rule: any
+        rw_rule: any
+        protocol: nfs
+        super_user_security: sys
+
+  snapmirror:
+    destination:
+      volume:
+        name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+vars_external:
+vars_templates:
+vars_overrides:
+...

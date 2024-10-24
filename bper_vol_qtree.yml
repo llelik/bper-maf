@@ -1,0 +1,44 @@
+##########################################################################
+#
+# - Main playbook for creating a volume, qtree and volume protection SnapMirror
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
+---
+- name: "Create volume and qtree"
+  hosts: localhost
+  become: false
+  gather_facts: false
+  vars_files:
+    - "vars/customers/bper/defaults.yml"
+    - "vars/customers/bper/local.yml"
+    - "vars/customers/bper/inventory.yml"
+  vars:
+    qlogname: "test_create_v_q_ep.bper"
+
+  roles:
+    - { role: bper/facts, qtask: credentials }
+    - { role: bper/facts, qtask: input_validation }
+    - { role: bper/facts, qtask: prepare_facts }
+    - { role: bper/logic, qtask: volume_check }
+    
+    - { role: bper/logic, qtask: find_svm }
+    - { role: bper/logic, qtask: find_vault_svm }
+
+    - { role: ontap/volume, qtask: facts }
+    - { role: ontap/volume, qtask: create }
+    - { role: ontap/qtree, qtask: facts }
+    - { role: ontap/qtree, qtask: create }
+    
+    - { role: ontap/export_policy, qtask: facts }
+    - { role: ontap/export_policy, qtask: create }
+    
+
+    - { role: ontap/snapmirror, qtask: facts }
+    - { role: ontap/snapmirror, qtask: create_destination }
+
+...

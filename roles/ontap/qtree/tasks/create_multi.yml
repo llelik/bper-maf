@@ -1,0 +1,13 @@
+---
+# unfortunately, ansible doesn't allow looping roles
+# so we have a local tasks "create_one" which includes facts & create of the qtree role
+# hence we can create multiple qtrees in a loop
+
+# - debug: var=qtask_child
+
+- name: create multiple qtrees
+  include_tasks: "create_one.yml" 
+  loop_control:
+    loop_var: qtree_item
+    label: "Creating qtree {{ qtree_item.name }}"
+  loop: "{{ qtrees }}"

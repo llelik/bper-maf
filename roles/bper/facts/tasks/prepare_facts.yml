@@ -1,0 +1,16 @@
+##########################################################################
+#
+# - input valiables preparation tasks
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
+---
+# shorten name for FUS environment
+- name: Prepare special case environment FUS-n
+  ansible.builtin.set_fact:
+    input_env_fact: "{{ input_env | shorten_fus }}"
+...

@@ -1,0 +1,21 @@
+
+
+ontap/snapmirror/create
+-----------------------
+snapmirror:
+  destination:
+    cluster:
+      management_ip: 10.65.59.220
+      name: jamaica
+    svm:
+      name: svm_alexeym40
+    volume:
+      name: DAEF701_vault
+  source:
+    cluster:
+      name: jamaica
+    svm:
+      name: svm_alexeym50
+    volume:
+      name: DAEF701
+

@@ -1,0 +1,60 @@
+##########################################################################
+#
+# - find suitable vault SVM for the volume
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
+---
+- name: "Vault SVM finder"
+  block:
+  - name: Set cluster credentials
+    ansible.builtin.set_fact:
+      auth: &auth
+        hostname:        "{{ ansible_host | default(omit) }}"
+        username:        "{{ ontap_username | default(omit) }}"
+        password:        "{{ ontap_password | default(omit) }}"
+        validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest:        always
+        use_python_keys: true
+    no_log: true
+
+  - set_fact:
+      source_data_svm: "{{ vars_local.svm.name }}"
+  
+  ### need fix
+  - set_fact:
+      suitable_vault_svm:         "{{ svm.name }}"
+      suitable_vault_cluster:    "{{ svm.cluster_name }}"
+      suitable_vault_cluster_ip: "{{ svm.cluster_mgmt }}"  
+    loop: "{{ inventory_svms_vault.hosts }}"
+    loop_control:
+      loop_var: svm
+    when:
+      - source_data_svm[-1:] in "{{svm.name}}"
+
+  - debug: var=suitable_vault_cluster
+  - debug: var=suitable_vault_svm
+  
+  - name: Define destination SVM
+    ansible.builtin.set_fact:
+      vars_local_update:
+          snapmirror:
+            destination:
+              cluster:
+                name: "{{ suitable_vault_cluster }}"
+                management_ip: "{{ suitable_vault_cluster_ip }}"
+              svm:
+                name: "{{ suitable_vault_svm }}"
+              
+
+  - name: Merging logic local facts with vars_local
+    ansible.builtin.set_fact:
+      vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
+    
+  
+  when: inventory_svms_mcc.keys() | length > 0
+...
