@@ -1,5 +1,15 @@
+##########################################################################
+#
+# - Role pre-req checks
+# - Will fail if not complainat options found
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
 ---
-
 - name: Validate input control parameters
   ansible.builtin.fail:
     msg:
@@ -14,5 +24,19 @@
       - "Input data isn't correct. Cannot continue: input_size not given or incorrect size. Input value: {{ input_size }}"
   when:
     - (input_size is not defined) or (input_size | int not in vars_defaults.volume_sizes)
+
+- name: Validate input aggregate Snaplock parameters
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_snaplock not given or incorrect value. Input value: {{ input_snaplock|default('') }}"
+  when:
+    - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false'])
+
+- name: Validate input Export policy Clientmatch parameters
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_clientmatch not given or incorrect value. Input value: {{ input_clientmatch }}"
+  when:
+    - input_clientmatch is not ansible.utils.ipv4
 
 ...

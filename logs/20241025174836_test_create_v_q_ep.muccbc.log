@@ -1,0 +1,21 @@
+
+
+ontap/snapmirror/create
+-----------------------
+snapmirror:
+  destination:
+    cluster:
+      management_ip: 10.65.59.220
+      name: trinidad
+    svm:
+      name: svm_alexeym91_cse_vault
+    volume:
+      name: IAEPR01_vault
+  source:
+    cluster:
+      name: trinidad
+    svm:
+      name: svm_alexeym90_cse_01
+    volume:
+      name: IAEPR01
+

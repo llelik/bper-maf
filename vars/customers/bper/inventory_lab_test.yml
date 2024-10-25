@@ -11,28 +11,22 @@
 ---
 inventory_svms_mcc: 
   hosts:
-    - name: svm_alexeym40
+    - name: svm_alexeym90_moa_01
       cluster_mgmt: 10.65.59.220
       cluster_name: trinidad
-    - name: svm_alexeym40
+    - name: svm_alexeym90_cse_01
       cluster_mgmt: 10.65.59.220
       cluster_name: trinidad
-    - name: svm_alexeym57
-      cluster_mgmt: 10.65.59.220
-      cluster_name: trinidad
-    - name: svm_alexeym50
-      cluster_mgmt: 10.65.59.210
-      cluster_name: jamaica
   vars:
     ansible_python_interpreter: /usr/bin/python3
 inventory_svms_vault: 
   hosts:
-    - name: svm_alexeym70
-      cluster_mgmt: 10.65.59.210
-      cluster_name: jamaica
-    - name: svm_alexeym40
-      cluster_mgmt: 10.65.59.210
-      cluster_name: jamaica
+    - name: svm_alexeym91_moa_vault
+      cluster_mgmt: 10.65.59.220
+      cluster_name: trinidad
+    - name: svm_alexeym91_cse_vault
+      cluster_mgmt: 10.65.59.220
+      cluster_name: trinidad
   vars:
     ansible_python_interpreter: /usr/bin/python3
 ...

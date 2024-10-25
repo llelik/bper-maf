@@ -17,8 +17,9 @@
     - "vars/customers/bper/defaults.yml"
     - "vars/customers/bper/local.yml"
     - "vars/customers/bper/inventory.yml"
+    - "vars/customers/bper/inventory_lab_test.yml"
   vars:
-    qlogname: "test_create_v_q_ep.bper"
+    qlogname: "test_create_v_q_ep.muccbc"
 
   roles:
     - { role: bper/facts, qtask: credentials }
@@ -30,11 +31,12 @@
     - { role: bper/logic, qtask: find_vault_svm }
 
     - { role: ontap/volume, qtask: facts }
-    - { role: ontap/volume, qtask: create }
     - { role: ontap/qtree, qtask: facts }
+    - { role: ontap/export_policy, qtask: facts }
+    - { role: ontap/volume, qtask: create }
     - { role: ontap/qtree, qtask: create }
     
-    - { role: ontap/export_policy, qtask: facts }
+    
     - { role: ontap/export_policy, qtask: create }
     
 

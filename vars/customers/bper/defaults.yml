@@ -44,7 +44,7 @@ vars_defaults:
     "COLL":     CO
     "FUS":      xxx        # kept for the record, FUS-n is checked in 
 
-  # Volumes sizes defined. Must be integers
+  # Volumes sizes defined in GB. Must be integers
   volume_sizes:
     - 5
     - 10

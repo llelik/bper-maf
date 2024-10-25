@@ -25,16 +25,16 @@
   - set_fact:
       source_data_svm: "{{ vars_local.svm.name }}"
   
-  ### need fix
+  ### need fix for svm name extraction
   - set_fact:
-      suitable_vault_svm:         "{{ svm.name }}"
-      suitable_vault_cluster:    "{{ svm.cluster_name }}"
-      suitable_vault_cluster_ip: "{{ svm.cluster_mgmt }}"  
+      suitable_vault_svm:        "{{ svm_item.name }}"
+      suitable_vault_cluster:    "{{ svm_item.cluster_name }}"
+      suitable_vault_cluster_ip: "{{ svm_item.cluster_mgmt }}"  
     loop: "{{ inventory_svms_vault.hosts }}"
     loop_control:
-      loop_var: svm
+      loop_var: svm_item
     when:
-      - source_data_svm[-1:] in "{{svm.name}}"
+      - source_data_svm[-6:-3] in "{{ svm_item.name }}"
 
   - debug: var=suitable_vault_cluster
   - debug: var=suitable_vault_svm
