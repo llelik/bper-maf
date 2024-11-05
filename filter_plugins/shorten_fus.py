@@ -1,3 +1,13 @@
+##########################################################################
+#
+# - convert input FUSn to Fn
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
 def shorten_fus(value):
     # Check if the value starts with "FUS"
     if value.startswith("FUS"):

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-# - check for existing volumes
+# - check for existing volumes and generate new volume name incremented by 1
 # 
 #
 # 
@@ -27,28 +27,53 @@
         reduced_inventory: "{{ reduced_hosts | default([]) + [{'cluster_mgmt': item.cluster_mgmt}] }}"
       loop: "{{ inventory_svms_mcc.hosts }}"
 
-    - debug: var=reduced_inventory
+    #- debug: var=reduced_inventory
     
-    - name: Collecting existing volumes on all clusters against volume "{{ vars_local.volume.name }}"
+    - name: Collecting existing volumes on all clusters against volume "{{ vars_local.source.volume.name }}"
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
         gather_subset:
           - volume_info
         parameters:
-          name: "{{ vars_local.volume.name }}"
+          name: "{{ vars_local.source.volume.name[:-2] }}*"
+        fields:
+          - name
         hostname: "{{ svm.cluster_mgmt }}"
       register: existing_vols
       loop: "{{ reduced_inventory | unique}}"
       loop_control:
         loop_var: svm
 
-    - name: Check clusters output for volume "{{ vars_local.volume.name }}"
-      ansible.builtin.fail:
-        msg: "Volume {{ vars_local.volume.name }} already exists on cluster"
-      when: item.ontap_info.storage_volumes.num_records > 0
-      loop: "{{ existing_vols.results }}"    
+    - ansible.builtin.set_fact:
+        existing_volumes_list: "{{ existing_volumes_list | default([]) + item.ontap_info.storage_volumes.records | map(attribute='name') | list | sort}}"
+      loop: "{{ existing_vols.results }}"
+
+    - ansible.builtin.set_fact:
+        new_volume_name: "{{ existing_volumes_list | increment_names(1) }}"
+     
+    - name: Define incremented volume name
+      ansible.builtin.set_fact:
+        vars_local_update:
+          source:
+            volume:
+              name:   "{{ new_volume_name | default(vars_local.source.volume.name) }}"
+            export_policy:
+              name:   "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+            qtree:
+              name:   "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+          snapmirror:
+            destination:
+              volume:
+                name: "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
+          destination:
+            volume:
+              name:   "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
+      when: existing_volumes_list | length > 0
     
-    - debug: var=existing_vols.results
+    - name: Merging logic local facts with vars_local
+      ansible.builtin.set_fact:
+        vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
+      when: existing_volumes_list | length > 0
     
   when: inventory_svms_mcc.keys() | length > 0
 ...

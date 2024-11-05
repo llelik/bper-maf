@@ -6,8 +6,6 @@
     svm          : "{{ 'svm'           | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
     cluster      : "{{ 'cluster'       | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
-- debug: var=export_policy
-
 - name: Set naming facts
   no_log: true
   ansible.builtin.set_fact:

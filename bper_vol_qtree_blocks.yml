@@ -16,63 +16,102 @@
   vars_files:
     - "vars/customers/bper/defaults.yml"
     - "vars/customers/bper/local.yml"
-    - "vars/customers/bper/inventory.yml"
+   # BPER PROD:
+   # - "vars/customers/bper/inventory.yml"
+   # NetApp lab:
     - "vars/customers/bper/inventory_lab_test.yml"
+   # BPER lab:
+   # - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
     qlogname: "test_create_v_q_ep.muccbc"
 
   tasks:
+
+    # Setup credentials
     - include_role:
         name: bper/facts
       vars:
         qtask: credentials
+
+    # Validate input variables
     - include_role:
         name: bper/facts
       vars:
         qtask: input_validation
+
+    # Prepare facts (Ex.: FUSn)
     - include_role:
         name: bper/facts
       vars:
         qtask: prepare_facts
+    
+    # Check if volume already exists and set new volume name incerementing by 1
     - include_role:
         name: bper/logic
       vars:
         qtask: volume_check
+
+    # Find suitable source SVM
     - include_role:
         name: bper/logic
       vars:
         qtask: find_svm
+
+    # Find suitable destination vault SVM
     - include_role:
         name: bper/logic
       vars:
         qtask: find_vault_svm
-    - include_role:
-        name: ontap/volume
-      vars:
-        qtask: facts
-    - include_role:
-        name: ontap/qtree
-      vars:
-        qtask: facts
+
+    # Collect export policy facts variables
     - include_role:
         name: ontap/export_policy
       vars:
         qtask: facts
+        qchild: source
+    
+    # Collect snapmirror facts variables
     - include_role:
         name: ontap/snapmirror
       vars:
         qtask: facts
+
+
+########### CREATE STEP 1
+# no block/rescue when creating source volume since if it wasn't created - there is nothing to rollback
+    - include_role:
+        name: ontap/volume
+      vars:
+        qtask: facts
+        qchild: source
+
+########## debug
+    # - debug: var=vars_local
+    # - fail:
+    #     msg: STOP
+########## debug end
+
     - include_role:
         name: ontap/volume
       vars:
         qtask: create
+        qchild: source
 
-########### CREATE
+########### CREATE STEP 2
+# collect source volume qtree facts and trying to create
+# otherwise we rollback source volume creation
     - block:      
       - include_role:
           name: ontap/qtree
         vars:
+          qtask: facts
+          qchild: source
+
+      - include_role:
+          name: ontap/qtree
+        vars:
           qtask: create
+          qchild: source
       rescue:
       - debug:
           msg: "Qtree Create task failed"
@@ -80,12 +119,46 @@
           name: ontap/volume
         vars:
           qtask: delete
-    
+          qchild: source
+
+########### CREATE STEP 3
+# collect destination volume facts and trying to create
+# otherwise we rollback source volume and qtree creation
+    - block:
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: destination
+
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: create
+          qchild: destination
+      rescue:
+      - debug:
+          msg: "Vault volume create task failed"
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: delete
+          qchild: destination
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: delete
+          qchild: source
+
+########### CREATE STEP 4
+# create export policy and rules
+# otherwise we rollback source volume, qtree and destination volume creation
     - block:
       - include_role: 
           name: ontap/export_policy
         vars:
           qtask: create
+          qchild: source
       rescue:
       - debug:
           msg: "Export policy Create task failed"
@@ -93,16 +166,21 @@
           name: ontap/qtree
         vars:
           qtask: delete
+          qchild: source
       - include_role:
           name: ontap/volume
         vars:
           qtask: delete
-      
+          qchild: source
+
+########### CREATE STEP 5
+# create snapmirror relationship
+# otherwise we rollback source volume, qtree, destination volume and export policy creation
     - block:
       - include_role:
           name: ontap/snapmirror
         vars:
-          qtask: create_destination
+          qtask: create
       rescue:
       - debug:
           msg: "Snapmirror create task failed"
@@ -110,38 +188,26 @@
           name: ontap/snapmirror
         vars:
           qtask: delete
+          qchild: source
       - include_role:
           name: ontap/qtree
         vars:
           qtask: delete
+          qchild: source
+      - include_role: 
+          name: ontap/export_policy
+        vars:
+          qtask: delete
+          qchild: source
       - include_role:
           name: ontap/volume
         vars:
-          qtask: delete 
-    
-    
-
-
-
-  # roles:
-  #   - { role: bper/facts, qtask: credentials }
-  #   - { role: bper/facts, qtask: input_validation }
-  #   - { role: bper/facts, qtask: prepare_facts }
-  #   - { role: bper/logic, qtask: volume_check }
-    
-  #   - { role: bper/logic, qtask: find_svm }
-  #   - { role: bper/logic, qtask: find_vault_svm }
-
-  #   - { role: ontap/volume, qtask: facts }
-  #   - { role: ontap/volume, qtask: create }
-  #   - { role: ontap/qtree, qtask: facts }
-  #   - { role: ontap/qtree, qtask: create }
-    
-  #   - { role: ontap/export_policy, qtask: facts }
-  #   - { role: ontap/export_policy, qtask: create }
-    
-
-  #   - { role: ontap/snapmirror, qtask: facts }
-  #   - { role: ontap/snapmirror, qtask: create_destination }
+          qtask: delete
+          qchild: source
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: delete
+          qchild: destination
 
 ...

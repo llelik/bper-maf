@@ -1,0 +1,22 @@
+
+
+ontap/snapmirror/create
+-----------------------
+snapmirror:
+  destination:
+    cluster:
+      management_ip: 10.65.59.220
+      name: trinidad
+    svm:
+      name: svm_alexeym91_moa_vault
+    volume:
+      name: XAEPR01_vault
+      type: dp
+  source:
+    cluster:
+      name: trinidad
+    svm:
+      name: svm_alexeym90_moa_01
+    volume:
+      name: XAEPR01
+

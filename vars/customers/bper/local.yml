@@ -10,26 +10,33 @@
 ##########################################################################
 ---
 vars_local:
-  volume:
-    name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
-    size: "{{ input_size }}"
-    aggregate_exclude_name_regex: "{{ exclude_name_regex | default(omit) }}"
-    aggregate_include_name_regex: "{{ include_name_regex | default(omit) }}"
-  qtree:
-    name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
-  export_policy:
-    name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact]  |default(input_env_fact) }}01"
-    rules:
-      - client_match: "{{ input_clientmatch | default('0.0.0.0/0') }}"
-        ro_rule: any
-        rw_rule: any
-        protocol: nfs
-        super_user_security: sys
+  source:
+    volume:
+      name: "{{ input_proc | upper }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+      size: "{{ input_size }}"
+      aggregate_exclude_name_regex: "{{ exclude_name_regex | default(omit) }}"
+      aggregate_include_name_regex: "{{ include_name_regex | default(omit) }}"
+    qtree:
+      name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+    export_policy:
+      name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact]  |default(input_env_fact) }}01"
+      rules:
+        - client_match: "{{ input_clientmatch | default('0.0.0.0/0') }}"
+          rule_index: 1
+          ro_rule: any
+          rw_rule: any
+          protocol: nfs
+          super_user_security: sys
 
-  snapmirror:
-    destination:
-      volume:
-        name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+    # snapmirror:
+    #   destination:
+    #     volume:
+    #       name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+    #       type: dp
+  destination:
+    volume:
+      name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+      type: dp
 vars_external:
 vars_templates:
 vars_overrides:

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-# - Inventory
+# - BPER lab inventory
 # 
 #
 # 
@@ -9,28 +9,16 @@
 # Professional Services 2024
 ##########################################################################
 ---
-inventory_svms_mcc: 
+inventory_svms_mcc:
   hosts:
-    - name: svm_cse_01
-      cluster_mgmt: 192.168.78.22
-      cluster_name: fas8200-cse
-    - name: svm_cse_02
-      cluster_mgmt: 192.168.78.22
-      cluster_name: fas8200-cse
-    - name: svm_moa_01
-      cluster_mgmt: 192.168.68.53
-      cluster_name: fas8200-moa
-    - name: svm_moa_02
+    - name: svm_moa_test
       cluster_mgmt: 192.168.68.53
       cluster_name: fas8200-moa
   vars:
     ansible_python_interpreter: /usr/bin/python3
-inventory_svms_vault: 
+inventory_svms_vault:
   hosts:
-    - name: svm_cse_new_vault
-      cluster_mgmt: 192.168.65.207
-      cluster_name: fas2820-moc
-    - name: svm_moa_new_vault
+    - name: svm_test_new_vault 
       cluster_mgmt: 192.168.65.207
       cluster_name: fas2820-moc
   vars:

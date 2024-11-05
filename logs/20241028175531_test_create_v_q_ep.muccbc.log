@@ -1,0 +1,18 @@
+
+
+ontap/qtree/create
+------------------
+cluster:
+  management_ip: 10.65.59.220
+
+svm:
+  name: svm_alexeym90_moa_01
+
+volume:
+  aggregate_exclude_name_regex: lock
+  name: VAEPR01
+  size: '5'
+
+qtree:
+  name: Q_VAEPR01
+

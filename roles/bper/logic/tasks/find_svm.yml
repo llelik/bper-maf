@@ -10,7 +10,7 @@
 ##########################################################################
 
 ---
-- name: "SVM finder"
+- name: "Source SVM finder"
   block:
     - name: Set cluster credentials
       ansible.builtin.set_fact:
@@ -23,7 +23,7 @@
           use_python_keys: true
       no_log: true
 
-    - name: Get volume count for SVM
+    - name: Get volume count for source SVM
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
         gather_subset:
@@ -34,9 +34,9 @@
       register: svms_volcount
       loop: "{{ inventory_svms_mcc.hosts }}"
       loop_control:
-        loop_var: svm   
+        loop_var: svm
 
-    - name: Collect volume count on SVMs
+    - name: Collect volume count on source SVMs
       ansible.builtin.set_fact:
         data_svm_volcount_list: "{{ data_svm_volcount_list | default([]) + [ {
         'name':         svm.svm.name,
@@ -46,23 +46,35 @@
         } ] }}"
       loop: "{{ svms_volcount.results }}"
       loop_control:
-        loop_var: svm 
+        loop_var: svm
     
-    - debug: var=data_svm_volcount_list
-
-    - name: Define most suiting SVM details
+    - name: Define most suiting source SVM details
       ansible.builtin.set_fact:
         target_svm: "{{ data_svm_volcount_list | sort(attribute='count') | first }}"
-      
     
-    - name: Defining target SVM - vars_local facts
+    - name: Get available aggregates for source SVM
+      netapp.ontap.na_ontap_rest_info:
+        <<: *auth
+        gather_subset:
+          - vserver_info
+        fields:
+          - aggregates
+        parameters:
+          name:   "{{ target_svm.name }}"
+        hostname: "{{ target_svm.cluster_name }}"
+      register: svm_aggregates
+      
+    - name: Defining target source SVM - vars_local facts
       ansible.builtin.set_fact:
         vars_local_update:
+          source:
           # sort SVMs by volume count, take the one with least volumes
-          svm:
-            name:           "{{ target_svm.name }}"
-          cluster:
-            management_ip:  "{{ target_svm.cluster_mgmt }}"
+            svm:
+              name:               "{{ target_svm.name }}"
+              aggregates: "{{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list }}"
+            cluster:
+                  name:           "{{ target_svm.cluster_name }}"
+                  management_ip:  "{{ target_svm.cluster_mgmt }}"
           snapmirror:
             source:
               cluster:
@@ -70,10 +82,7 @@
               svm:
                 name:       "{{ target_svm.name }}"
               volume:
-                name:       "{{ vars_local.volume.name }}"
-
-    - debug: var=vars_local_update
-
+                name:       "{{ vars_local.source.volume.name }}"
 
     - name: Merging logic local facts with vars_local
       ansible.builtin.set_fact:

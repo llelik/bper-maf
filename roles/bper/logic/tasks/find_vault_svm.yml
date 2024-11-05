@@ -1,6 +1,6 @@
 ##########################################################################
 #
-# - find suitable vault SVM for the volume
+# - find suitable target vault SVM for Snapmirror destination volume
 # 
 #
 # 
@@ -9,7 +9,7 @@
 # Professional Services 2024
 ##########################################################################
 ---
-- name: "Vault SVM finder"
+- name: Vault SVM finder
   block:
   - name: Set cluster credentials
     ansible.builtin.set_fact:
@@ -22,35 +22,60 @@
         use_python_keys: true
     no_log: true
 
-  - set_fact:
-      source_data_svm: "{{ vars_local.svm.name }}"
+  - ansible.builtin.set_fact:
+      source_data_svm: "{{ vars_local.source.svm.name }}"
   
   ### need fix for svm name extraction
-  - set_fact:
-      suitable_vault_svm:        "{{ svm_item.name }}"
-      suitable_vault_cluster:    "{{ svm_item.cluster_name }}"
-      suitable_vault_cluster_ip: "{{ svm_item.cluster_mgmt }}"  
+  - ansible.builtin.set_fact:
+      target_vault_svm:        "{{ svm_item.name }}"
+      target_vault_cluster:    "{{ svm_item.cluster_name }}"
+      target_vault_cluster_ip: "{{ svm_item.cluster_mgmt }}"  
     loop: "{{ inventory_svms_vault.hosts }}"
     loop_control:
       loop_var: svm_item
     when:
-      - source_data_svm[-6:-3] in "{{ svm_item.name }}"
+      - source_data_svm[-5:] in svm_item.name
+      # PROD: - source_data_svm[-6:-3] in svm_item.name
+      # Lab setup:
+      # svm_moa_test
+      # svm_test_new_vault
 
-  - debug: var=suitable_vault_cluster
-  - debug: var=suitable_vault_svm
+  - name: Get available aggregates for vault SVM
+    netapp.ontap.na_ontap_rest_info:
+      <<: *auth
+      gather_subset:
+        - vserver_info
+      fields:
+        - aggregates
+      parameters:
+        name:   "{{ target_svm.name }}"
+      hostname: "{{ target_svm.cluster_name }}"
+    register: svm_aggregates
+    when: target_vault_svm is defined
   
-  - name: Define destination SVM
+  - name: Fail if no suitable vault SVM found
+    ansible.builtin.fail:
+      msg: "No suitable vault SVM found for the volume"
+    when: target_vault_svm is not defined
+  
+  - name: Define destination vault SVM - vars_local facts
     ansible.builtin.set_fact:
       vars_local_update:
-          snapmirror:
-            destination:
-              cluster:
-                name: "{{ suitable_vault_cluster }}"
-                management_ip: "{{ suitable_vault_cluster_ip }}"
-              svm:
-                name: "{{ suitable_vault_svm }}"
+        snapmirror:
+          destination:
+            cluster:
+              name:          "{{ target_vault_cluster }}"
+              management_ip: "{{ target_vault_cluster_ip }}"
+            svm:
+              name:          "{{ target_vault_svm }}"
+        destination:
+          cluster:
+            name:            "{{ target_vault_cluster }}"
+            management_ip:   "{{ target_vault_cluster_ip }}"
+          svm:
+            name:            "{{ target_vault_svm }}"
+            aggregates:      "{{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list }}"
               
-
   - name: Merging logic local facts with vars_local
     ansible.builtin.set_fact:
       vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"

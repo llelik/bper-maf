@@ -9,27 +9,47 @@
 # Professional Services 2024
 ##########################################################################
 vars_defaults:
-  volume:
-    wait_for_completion   : true
-    percent_snapshot_space: 0
-    space_guarantee       : none
-    read_realloc          : space_optimized
-    language              : c.utf_8
-    type                  : rw
-    size_unit             : gb
-    snapshot_policy       : none
-    tiering_policy.name   : none
-    efficiency:
-        enable_inline_compression: true
-        enable_compression:        true
-        compression_type:          secondary
-        volume_efficiency:         start
-        policy:                    default
-  qtree:
-    security_style:    unix
-    unix_group:        root
-    unix_user:         root
-    
+  source:
+    volume:
+      wait_for_completion: true
+      percent_snapshot_space: 0
+      space_guarantee:        none
+      read_realloc:           space_optimized
+      language:               c.utf_8           # ???
+      type:                   rw
+      size_unit:              gb
+      snapshot_policy:        none             # ???
+      fractional_reserve:     0           # ???
+      security_style:         unix         # ???
+      snaplock:
+        enable:               true # or false
+        type:                 non_snaplock #??? options: compliance, enterprise, non_snaplock
+        retention_period:     0
+        compliance_clock:     false
+      tiering_policy:
+        name:                 none
+      volume_autosize:
+        mode:                 off          
+      efficiency:
+          enable_inline_compression: true
+          enable_compression:        true
+          compression_type:          secondary
+          volume_efficiency:         start
+          policy:                    default
+    qtree:
+      security_style:    unix
+      unix_group:        root
+      unix_user:         root
+      oplocks:           #true
+      security_style:    #unix
+  destination:
+    volume:
+      wait_for_completion:    true
+      type:                   dp
+      language:               c.utf_8
+      size_unit:              gb
+  snapmirror:
+    policy:                   DPDefault
 
   # BPER storage environments. Used for naming convention.
   storage_env:

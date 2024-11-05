@@ -39,4 +39,11 @@
   when:
     - input_clientmatch is not ansible.utils.ipv4
 
+- name: Validate input procedure parameters
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_proc not given or incorrect. Input value: {{ input_proc }}"
+  when:
+    - input_proc | length != 3
+
 ...

@@ -1,0 +1,18 @@
+
+
+ontap/qtree/create
+------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  name: svm_alexeym91_moa_vault
+
+volume:
+  name: RAEPR01_vault
+  type: dp
+
+qtree:
+  name: Q_RAEPR01
+

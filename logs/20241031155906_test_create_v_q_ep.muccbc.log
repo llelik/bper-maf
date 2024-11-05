@@ -1,0 +1,20 @@
+
+
+ontap/volume/create
+-------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  aggregates:
+  - aggr1_trinidad_01
+  - aggr1_trinidad_02
+  - aggr0_trinidad_01
+  - aggr0_trinidad_02
+  name: svm_alexeym91_moa_vault
+
+volume:
+  name: AAEPR02_vault
+  type: dp
+
