@@ -71,7 +71,7 @@
               name:          "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
       when: existing_volumes_list | length > 0
     
-    - name: Merging logic local facts with vars_local
+    - name: Merging logic found facts with vars_local
       ansible.builtin.set_fact:
         vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
       when: existing_volumes_list | length > 0

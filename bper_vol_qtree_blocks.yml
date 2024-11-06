@@ -50,13 +50,13 @@
         name: bper/logic
       vars:
         qtask: volume_check
-
+    
     # Find suitable source SVM
     - include_role:
         name: bper/logic
       vars:
         qtask: find_svm
-
+    
     # Find suitable destination vault SVM
     - include_role:
         name: bper/logic
@@ -69,14 +69,14 @@
       vars:
         qtask: facts
         qchild: source
-    
+
     # Collect snapmirror facts variables
     - include_role:
         name: ontap/snapmirror
       vars:
         qtask: facts
 
-
+    
 ########### CREATE STEP 1
 # no block/rescue when creating source volume since if it wasn't created - there is nothing to rollback
     - include_role:

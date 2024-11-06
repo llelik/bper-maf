@@ -1,13 +1,6 @@
 ---
 # - debug: var=vars_local
 
-## Naming facts
-# - name: vars_local debug
-#   debug:
-#     msg:
-#       - "{{ vars_local }}"
-
-
 - name: Merge Extravars
   ansible.builtin.set_fact:
     # note in volume, l = volume_item => the volume role implements multiple => volume_item is the loop item, which is merged too.
@@ -16,13 +9,10 @@
     cluster: "{{ 'cluster'     | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
 - debug: var=vars_defaults
-- debug: 
-    msg: 
-      - "volume  = {{ volume }}"
-      - "svm     = {{ svm }}"
-      - "cluster = {{ cluster }}"
-- fail:
-    msg: STOP
+- debug: var=volume
+- debug: var=svm
+- debug: var=cluster
+#- fail: msg=STOP
 
 - name: Set naming facts - Assign everything
   no_log: true

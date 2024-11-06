@@ -70,7 +70,16 @@
       unix_permissions                : "{{ volume.unix_permissions       | default(omit) }}"
       user_id                         : "{{ volume.user_id                | default(omit) }}"
       volume_security_style           : "{{ volume.security_style         | default(omit) }}"
-      snaplock                        : "{{ volume.snaplock               | default(omit) }}"
+      #snaplock                        : "{{ volume.snaplock               | default(omit) }}"
+      snaplock:
+        type:                           "{{ volume.snaplock.type | default(omit) }}"
+        retention: 
+          default:                      "{{ volume.snaplock.retention.default | default(omit) }}"
+          maximum:                      "{{ volume.snaplock.retention.maximum | default(omit) }}"
+          minimum:                      "{{ volume.snaplock.retention.minimum | default(omit) }}"
+        autocommit_period:              "{{ volume.snaplock.autocommit_period | default(omit) }}"
+        privileged_delete:              "{{ volume.snaplock.privileged_delete | default(omit) }}"
+        append_mode_enabled:            "{{ volume.snaplock.append_mode_enabled | default(omit) }}"
       volume_space_logical_reporting  : "{{ volume.logical_space_reporting | default(omit) }}"
       volume_space_logical_enforcement: "{{ volume.logical_space_enforcement | default(omit) }}"
       efficiency_policy               : "{{ volume.efficiency_policy.name        | default(omit) }}"

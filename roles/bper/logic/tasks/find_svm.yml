@@ -73,8 +73,8 @@
               name:               "{{ target_svm.name }}"
               aggregates: "{{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list }}"
             cluster:
-                  name:           "{{ target_svm.cluster_name }}"
-                  management_ip:  "{{ target_svm.cluster_mgmt }}"
+              name:           "{{ target_svm.cluster_name }}"
+              management_ip:  "{{ target_svm.cluster_mgmt }}"
           snapmirror:
             source:
               cluster:

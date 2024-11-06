@@ -10,12 +10,22 @@
 # Professional Services 2024
 ##########################################################################
 ---
+- name: Validate all input params are provided
+  ansible.builtin.assert:
+    that:
+      - input_env is defined
+      - input_size is defined
+      - input_snaplock is defined
+      - input_clientmatch is defined
+      - input_proc is defined
+    msg: "Input data isn't correct. Cannot continue: input_env, input_size, input_snaplock, input_clientmatch, input_proc are mandatory"
+
 - name: Validate input control parameters
   ansible.builtin.fail:
     msg:
       - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env }}"
   when:
-    - ((input_env is not defined) or (input_env not in vars_defaults.storage_env)) and (input_env[:3] not in ['FUS'])
+    - ((input_env is not defined) or (input_env not in storage_env)) and (input_env[:3] not in ['FUS'])
     
     
 - name: Validate input size parameters
@@ -23,7 +33,7 @@
     msg:
       - "Input data isn't correct. Cannot continue: input_size not given or incorrect size. Input value: {{ input_size }}"
   when:
-    - (input_size is not defined) or (input_size | int not in vars_defaults.volume_sizes)
+    - (input_size is not defined) or (input_size | int not in volume_sizes)
 
 - name: Validate input aggregate Snaplock parameters
   ansible.builtin.fail:

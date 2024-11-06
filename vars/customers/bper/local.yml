@@ -12,15 +12,24 @@
 vars_local:
   source:
     volume:
-      name: "{{ input_proc | upper }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+      name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       size: "{{ input_size }}"
       aggregate_exclude_name_regex: "{{ exclude_name_regex | default(omit) }}"
       aggregate_include_name_regex: "{{ include_name_regex | default(omit) }}"
-      junction_path: "/{{ input_proc | upper }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+      junction_path: "/{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
+      snaplock:
+        type:                           "{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
+        # retention: 
+        #   default:                      "{{ volume.snaplock.retention.default | default(omit) }}"
+        #   maximum:                      "{{ volume.snaplock.retention.maximum | default(omit) }}"
+        #   minimum:                      "{{ volume.snaplock.retention.minimum | default(omit) }}"
+        # autocommit_period:              "{{ volume.snaplock.autocommit_period | default(omit) }}"
+        # privileged_delete:              "{{ volume.snaplock.privileged_delete | default(omit) }}"
+        # append_mode_enabled:            "{{ volume.snaplock.append_mode_enabled | default(omit) }}"
     qtree:
-      name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01"
+      name: "Q_{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     export_policy:
-      name: "Q_{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact]  |default(input_env_fact) }}01"
+      name: "Q_{{ input_proc }}{{ storage_env[input_env_fact]  |default(input_env_fact) }}01"
       rules:
         - client_match: "{{ input_clientmatch | default('0.0.0.0/0') }}"
           rule_index: 1
@@ -28,17 +37,10 @@ vars_local:
           rw_rule: any
           protocol: nfs
           super_user_security: sys
-
-    # snapmirror:
-    #   destination:
-    #     volume:
-    #       name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
-    #       type: dp
   destination:
     volume:
-      name: "{{ input_proc }}{{ vars_defaults.storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+      name: "{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
       type: dp
-vars_external:
 vars_templates:
 vars_overrides:
 ...
