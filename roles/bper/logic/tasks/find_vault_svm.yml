@@ -34,11 +34,13 @@
     loop_control:
       loop_var: svm_item
     when:
-      - source_data_svm[-5:] in svm_item.name
+      - source_data_svm[-6:-3] in svm_item.name
+      #- source_data_svm[-5:] in svm_item.name
+
       # PROD: - source_data_svm[-6:-3] in svm_item.name
       # Lab setup:
-      # svm_moa_test
-      # svm_test_new_vault
+      # prod: svm_moa_test
+      # vault: svm_test_new_vault
 
   - name: Get available aggregates for vault SVM
     netapp.ontap.na_ontap_rest_info:

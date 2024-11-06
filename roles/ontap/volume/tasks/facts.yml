@@ -15,11 +15,14 @@
     svm    : "{{ 'svm'         | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
     cluster: "{{ 'cluster'     | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
+- debug: var=vars_defaults
 - debug: 
     msg: 
       - "volume  = {{ volume }}"
       - "svm     = {{ svm }}"
       - "cluster = {{ cluster }}"
+- fail:
+    msg: STOP
 
 - name: Set naming facts - Assign everything
   no_log: true

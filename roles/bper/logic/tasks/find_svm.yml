@@ -87,6 +87,9 @@
     - name: Merging logic local facts with vars_local
       ansible.builtin.set_fact:
         vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
+    # - name: Merging logic local facts with defaults_local
+    #   ansible.builtin.set_fact:
+    #     vars_local: "{{ vars_defaults | default({}) | combine(vars_local, recursive=true)}}"
     
   when: inventory_svms_mcc.keys() | length > 0
 ...

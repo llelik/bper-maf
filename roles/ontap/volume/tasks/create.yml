@@ -18,7 +18,6 @@
       l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
       l_volume:  "{{ volume  | to_nice_yaml(2) | indent(2,true) | do_log('','volume',qlogname) }}"
 
-  - debug: var=volume
   # get best aggregate
   - name: "Find best aggregate [{{ volume.name }}]" 
     get_best_aggregate:

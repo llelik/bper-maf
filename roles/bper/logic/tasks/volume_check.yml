@@ -29,7 +29,7 @@
 
     #- debug: var=reduced_inventory
     
-    - name: Collecting existing volumes on all clusters against volume "{{ vars_local.source.volume.name }}"
+    - name: Collecting existing volumes on all clusters against volume "{{ vars_local.source.volume.name | default('None') }}"
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
         gather_subset:
@@ -56,18 +56,19 @@
         vars_local_update:
           source:
             volume:
-              name:   "{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              name:          "{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              junction_path: "/{{ new_volume_name | default(vars_local.source.volume.name) }}"
             export_policy:
-              name:   "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              name:          "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
             qtree:
-              name:   "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              name:          "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
           snapmirror:
             destination:
               volume:
-                name: "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
+                name:        "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
           destination:
             volume:
-              name:   "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
+              name:          "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
       when: existing_volumes_list | length > 0
     
     - name: Merging logic local facts with vars_local

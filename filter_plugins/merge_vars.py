@@ -49,17 +49,22 @@ class FilterModule(object):
     try:
 
       defaults = d or {}
+      #print(f"defaults!!!!!!!!!!!!!!!!!!!: {defaults}")
       templates = t or {}
       external = v or {}
+      #print(f"external!!!!!!!!!!!!!!!!!!!: {external}")
       local = l or {}
       overrides = o or {}
       child = c or None
       if child:
         external = external.get(child,{})
+        print (f"qtask object: {external}")
         
       s = str(s)
       # grab the default object
       default_object         = defaults.get(object_name,{})                                                          # default values
+      print (f"object_name: {object_name}")
+      print (f"default_object: {default_object}")
       # grab the global template name
       template_name_global   = external.get("template","")                                                           # global template name
       # grab the local template name
@@ -73,11 +78,11 @@ class FilterModule(object):
       # grab the override object
       overrides_object       = overrides.get(object_name,{})                                                         # override values
 
-      # print ("-"*80)
+      print ("-"*80)
       # print (f"object_name: {object_name}")
       # print (f"template_name_global: {template_name_global}")
       # print (f"template_name_local: {template_name_local}")
-      # print (f"default_object: {default_object}")
+      print (f"default_object: {default_object}")
       # print (f"template_object_global: {template_object_global}")
       # print (f"template_object: {template_object_local}")
       # print (f"external_object: {external_object}")
@@ -89,10 +94,10 @@ class FilterModule(object):
       step3 = merge(external_object,step2)                 # merge external values
       step4 = merge(overrides_object,step3)                # merge override values
 
-      # print (f"step1: {step1}")
-      # print (f"step2: {step2}")
-      # print (f"step3: {step3}")
-      # print (f"step4: {step4}")
+      print (f"step1: {step1}")
+      print (f"step2: {step2}")
+      print (f"step3: {step3}")
+      print (f"step4: {step4}")
 
       return step4
     

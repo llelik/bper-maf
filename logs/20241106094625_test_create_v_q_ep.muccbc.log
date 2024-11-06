@@ -1,0 +1,22 @@
+
+
+ontap/volume/create
+-------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  aggregates:
+  - aggr1_trinidad_01
+  - aggr1_trinidad_02
+  - aggr0_trinidad_01
+  - aggr0_trinidad_02
+  name: svm_alexeym90_moa_01
+
+volume:
+  aggregate_exclude_name_regex: lock
+  junction_path: /AAEPR10
+  name: AAEPR10
+  size: '5'
+
