@@ -70,26 +70,23 @@
           source:
           # sort SVMs by volume count, take the one with least volumes
             svm:
-              name:               "{{ target_svm.name }}"
-              aggregates: "{{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list }}"
+              name:          "{{ target_svm.name }}"
+              aggregates:    "{{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list }}"
             cluster:
-              name:           "{{ target_svm.cluster_name }}"
-              management_ip:  "{{ target_svm.cluster_mgmt }}"
+              name:          "{{ target_svm.cluster_name }}"
+              management_ip: "{{ target_svm.cluster_mgmt }}"
           snapmirror:
             source:
               cluster:
-                name:       "{{ target_svm.cluster_name }}"
+                name:        "{{ target_svm.cluster_name }}"
               svm:
-                name:       "{{ target_svm.name }}"
+                name:        "{{ target_svm.name }}"
               volume:
-                name:       "{{ vars_local.source.volume.name }}"
+                name:        "{{ vars_local.source.volume.name }}"
 
     - name: Merging logic local facts with vars_local
       ansible.builtin.set_fact:
         vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
-    # - name: Merging logic local facts with defaults_local
-    #   ansible.builtin.set_fact:
-    #     vars_local: "{{ vars_defaults | default({}) | combine(vars_local, recursive=true)}}"
     
   when: inventory_svms_mcc.keys() | length > 0
 ...

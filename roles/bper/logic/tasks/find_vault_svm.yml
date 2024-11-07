@@ -82,6 +82,5 @@
     ansible.builtin.set_fact:
       vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
     
-  
   when: inventory_svms_mcc.keys() | length > 0
 ...

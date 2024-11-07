@@ -18,7 +18,7 @@
       l_svm: "{{ svm | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
       l_export_policy: "{{ export_policy | to_nice_yaml(2) | indent(2,true) | do_log('','export_policy',qlogname) }}"
 
-  - debug: var=export_policy
+  #- debug: var=export_policy
 
     ## Delete rules labeled as deleted
   - name: Delete rules

@@ -8,9 +8,9 @@
 # NetApp Deutschland GmbH
 # Professional Services 2024
 ##########################################################################
----
 vars_defaults:
   source:
+    template: source
     volume:
       wait_for_completion: true
       percent_snapshot_space: 5 #ONTAP default
@@ -22,17 +22,21 @@ vars_defaults:
       snapshot_policy:        Prod_snapshot_3_3
       fractional_reserve:     100 #ONTAP default
       security_style:         unix
+      snaplock:
+        #enable:               true # or false
+        type:                 non_snaplock #??? options: compliance, enterprise, non_snaplock
+        #retention_period:     0
+        #compliance_clock:     false
       tiering_policy:
         name:                 none
       volume_autosize:
         mode:                 off #ONTAP default
       volume_efficiency:
-          enable_inline_compression: false
+          enable_inline_compression: true
           enable_compression:        true
-          storage_efficiency_mode:   default
-          enable_data_compaction:    false
-          enable_inline_dedupe:      false
+          compression_type:          secondary
           volume_efficiency:         start
+          policy:                    default
     qtree:
       security_style:    unix
       unix_group:        root
@@ -40,6 +44,7 @@ vars_defaults:
       oplocks:           true
       security_style:    unix
   destination:
+    template: destination
     volume:
       wait_for_completion:    true
       type:                   dp
@@ -47,6 +52,8 @@ vars_defaults:
       size_unit:              gb
   snapmirror:
     policy:                   DPDefault
+
+
 
   # BPER storage environments. Used for naming convention.
 storage_env:

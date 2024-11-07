@@ -56,16 +56,12 @@ class FilterModule(object):
       child = c or None
       if child:
         external = external.get(child,{})
-        #print (f"qtask external: {external}")
         defaults = defaults.get(child,{})
-        #print (f"qtask defaults: {defaults}")
         
       s = str(s)
       # grab the default object
       default_object         = defaults.get(object_name,{})                                                          # default values
-      # print (f"object_name: {object_name}")
-      # print (f"default_object: {default_object}")
-      # grab the global template name
+       # grab the global template name
       template_name_global   = external.get("template","")                                                           # global template name
       # grab the local template name
       template_name_local    = local.get("template",None) or external.get(object_name+s,{}).get("template","")       # object template name (local or external, local wins)
@@ -75,8 +71,6 @@ class FilterModule(object):
       template_object_local  = templates.get(template_name_local,{}).get(object_name+s,{})                           # object template values
       # grab the external object
       external_object        = local or external.get(object_name+s,{})                                               # external values (local or external, local wins)
-      # print (f"external object: {external_object}")
-      # print (f"default object: {default_object}")
       # grab the override object
       overrides_object       = overrides.get(object_name,{})                                                         # override values
 
@@ -158,5 +152,4 @@ class FilterModule(object):
         return [x for x in merged_list if all(k in x for k in required_keys)]
       else:
         return merged_list
-
-          
+      
