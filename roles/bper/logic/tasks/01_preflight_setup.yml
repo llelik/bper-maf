@@ -27,8 +27,6 @@
         reduced_inventory: "{{ reduced_hosts | default([]) + [{'cluster_mgmt': item.cluster_mgmt}] }}"
       loop: "{{ inventory_svms_mcc.hosts }}"
 
-    #- debug: var=reduced_inventory
-
 ######### Incrementing volume name by 1
 # We retrieve existing volumes with generated name pattern without last 2 digits
 # This should give a list of volumes named vol01,vol02,vol03 etc. (filetr=vol*)
@@ -48,6 +46,7 @@
       loop: "{{ reduced_inventory | unique}}"
       loop_control:
         loop_var: svm
+      no_log: "{{ nolog }}"
 
 ######### Incrementing volume name by 1 cont.
 # We build a list of volumes if received
@@ -58,6 +57,7 @@
       ansible.builtin.set_fact:
         existing_volumes_list: "{{ existing_volumes_list | default([]) + item.ontap_info.storage_volumes.records | map(attribute='name') | list | sort}}"
       loop: "{{ existing_vols.results }}"
+      no_log: "{{ nolog }}"
 
 ######### Incrementing volume name by 1 cont.
 # Inceremting the last volume name by 1

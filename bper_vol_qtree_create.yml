@@ -26,7 +26,6 @@
     qlogname: "test_create_v_q_ep.bper"
 
   tasks:
-
     # Setup credentials
     - include_role:
         name: bper/facts

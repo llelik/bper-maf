@@ -70,7 +70,12 @@ volume_sizes:
   - 25
   - 50
 
-# BPER prod
+# option to reduce console output on large collections
+nolog: true
+
+
+
+# BPER prod production -> vault SVM mapping
 # svm_source_vault_mapping:
 #   svm_cse_01: svm_cse_new_vault
 #   svm_cse_02: svm_cse_new_vault
@@ -82,7 +87,7 @@ volume_sizes:
 #   svm_alexeym90_moa_01: svm_alexeym91_moa_vault
 #   svm_alexeym90_cse_01: svm_alexeym91_cse_vault
 
-# BPER lab
+# BPER lab test SVM mapping
 svm_source_vault_mapping:
   svm_moa_test: svm_test_new_vault
   

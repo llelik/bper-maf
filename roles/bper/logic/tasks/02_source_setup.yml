@@ -36,6 +36,7 @@
       loop_control:
         loop_var: svm
         label: svm
+      no_log: "{{ nolog }}"
 
     - name: Collect volume count on source SVMs
       ansible.builtin.set_fact:
@@ -49,6 +50,7 @@
       loop_control:
         loop_var: svm
         label: svm
+      no_log: "{{ nolog }}"
     
     - name: Define most suiting source SVM details
       ansible.builtin.set_fact:
