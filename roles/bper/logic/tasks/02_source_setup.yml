@@ -23,7 +23,7 @@
           use_python_keys: true
       no_log: true
 
-    - name: Get volume count for source SVM
+    - name: Get volume count for all source candidate SVMs
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
         gather_subset:
@@ -35,6 +35,7 @@
       loop: "{{ inventory_svms_mcc.hosts }}"
       loop_control:
         loop_var: svm
+        label: svm
 
     - name: Collect volume count on source SVMs
       ansible.builtin.set_fact:
@@ -47,6 +48,7 @@
       loop: "{{ svms_volcount.results }}"
       loop_control:
         loop_var: svm
+        label: svm
     
     - name: Define most suiting source SVM details
       ansible.builtin.set_fact:

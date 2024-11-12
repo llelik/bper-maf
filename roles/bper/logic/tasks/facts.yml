@@ -2,9 +2,9 @@
 ## Naming facts
 - name: Merge Extravars
   ansible.builtin.set_fact:
-    logic   : "{{ 'logic'    | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,l=logic_item,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
-    svm           : "{{ 'svm'            | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
-    cluster       : "{{ 'cluster'        | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
+    logic         : "{{ 'logic'    | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,l=logic_item,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
+    svm           : "{{ 'svm'      | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
+    cluster       : "{{ 'cluster'  | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
 - name: Set naming facts
   no_log: true

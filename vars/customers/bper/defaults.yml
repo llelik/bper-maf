@@ -13,24 +13,21 @@ vars_defaults:
     template: source
     volume:
       wait_for_completion: true
-      percent_snapshot_space: 5 #ONTAP default
+      percent_snapshot_space: 5                   #ONTAP default
       space_guarantee:        none
-      read_realloc:           off #ONTAP default
+      read_realloc:           off                 #ONTAP default
       language:               c.utf_8
       type:                   rw
       size_unit:              gb
       snapshot_policy:        Prod_snapshot_3_3
-      fractional_reserve:     100 #ONTAP default
+      fractional_reserve:     100                 #ONTAP default
       security_style:         unix
       snaplock:
-        #enable:               true # or false
-        type:                 non_snaplock #??? options: compliance, enterprise, non_snaplock
-        #retention_period:     0
-        #compliance_clock:     false
+        type:                 non_snaplock        #??? options: compliance, enterprise, non_snaplock
       tiering_policy:
         name:                 none
       volume_autosize:
-        mode:                 off #ONTAP default
+        mode:                 off                 #ONTAP default
       volume_efficiency:
           enable_inline_compression: true
           enable_compression:        true
@@ -53,8 +50,6 @@ vars_defaults:
   snapmirror:
     policy:                   DPDefault
 
-
-
   # BPER storage environments. Used for naming convention.
 storage_env:
   "PROD":     PR
@@ -75,3 +70,19 @@ volume_sizes:
   - 25
   - 50
 
+# BPER prod
+# svm_source_vault_mapping:
+#   svm_cse_01: svm_cse_new_vault
+#   svm_cse_02: svm_cse_new_vault
+#   svm_moa_01: svm_moa_new_vault
+#   svm_moa_02: svm_moa_new_vault
+
+# NetApp lab
+# svm_source_vault_mapping:
+#   svm_alexeym90_moa_01: svm_alexeym91_moa_vault
+#   svm_alexeym90_cse_01: svm_alexeym91_cse_vault
+
+# BPER lab
+svm_source_vault_mapping:
+  svm_moa_test: svm_test_new_vault
+  

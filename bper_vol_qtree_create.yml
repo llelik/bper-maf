@@ -23,7 +23,7 @@
    # BPER lab:
     - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
-    qlogname: "test_create_v_q_ep.muccbc"
+    qlogname: "test_create_v_q_ep.bper"
 
   tasks:
 
@@ -45,23 +45,35 @@
       vars:
         qtask: prepare_facts
     
+    - debug: var=vars_local
+
     # Check if volume already exists and set new volume name incerementing by 1
     - include_role:
         name: bper/logic
       vars:
-        qtask: volume_check
+        qtask: 01_preflight_setup
+    
+    - debug: var=vars_local
     
     # Find suitable source SVM
     - include_role:
         name: bper/logic
       vars:
-        qtask: find_svm
+        qtask: 02_source_setup
+
+    - debug: var=vars_local
     
     # Find suitable destination vault SVM
     - include_role:
         name: bper/logic
       vars:
-        qtask: find_vault_svm
+        qtask: 03_vault_setup
+
+########## debug
+    - debug: var=vars_local
+    # - fail:
+    #     msg: STOP
+########## debug end
 
     # Collect export policy facts variables
     - include_role:
@@ -84,12 +96,6 @@
       vars:
         qtask: facts
         qchild: source
-
-########## debug
-    # - debug: var=vars_local
-    # - fail:
-    #     msg: STOP
-########## debug end
 
     - include_role:
         name: ontap/volume
@@ -114,7 +120,7 @@
           qchild: source
       rescue:
       - debug:
-          msg: "Qtree Create task failed"
+          msg: "Qtree Create task failed. Created objects will be deleted."
       - include_role:
           name: ontap/volume
         vars:
@@ -138,7 +144,7 @@
           qchild: destination
       rescue:
       - debug:
-          msg: "Vault volume create task failed"
+          msg: "Vault volume create task failed. Created objects will be deleted."
       - include_role:
           name: ontap/volume
         vars:
@@ -161,11 +167,17 @@
           qchild: source
       rescue:
       - debug:
-          msg: "Export policy Create task failed"
+          msg: "Export policy Create task failed. Created objects will be deleted."
       - include_role:
           name: ontap/qtree
         vars:
           qtask: delete
+          qchild: source
+      # re-collecting facts to setup values for active svm/volume values       
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
           qchild: source
       - include_role:
           name: ontap/volume
@@ -183,7 +195,7 @@
           qtask: create
       rescue:
       - debug:
-          msg: "Snapmirror create task failed"
+          msg: "Snapmirror create task failed. Created objects will be deleted."
       - include_role:
           name: ontap/snapmirror
         vars:
@@ -199,11 +211,23 @@
         vars:
           qtask: delete
           qchild: source
+      # re-collecting facts to setup values for active svm/volume values       
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: source
       - include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      # re-collecting facts to setup values for active svm/volume values  
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: destination
       - include_role:
           name: ontap/volume
         vars:

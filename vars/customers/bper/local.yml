@@ -41,6 +41,13 @@ vars_local:
     volume:
       name: "{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
       type: dp
+  snapmirror:
+    source:
+      volume:
+        name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
+    destination:
+      volume:
+        name: "{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
 vars_templates:
 vars_overrides:
 ...

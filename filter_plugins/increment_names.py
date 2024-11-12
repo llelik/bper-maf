@@ -9,6 +9,7 @@
 # Professional Services 2024
 ##########################################################################
 def increment_names(names, step=1):
+    ''' increments names index in the list by the specified step '''
     sorted_names = sorted(names)
     for name in reversed(sorted_names):
         if name[-2:].isdigit():

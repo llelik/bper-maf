@@ -9,9 +9,9 @@
 # Professional Services 2024
 ##########################################################################
 ---
-- name: "Volume existance check"
+- name: Volume existance check
   block:
-    - name: Set cluster credentials
+    - name: Set cluster credentials 
       ansible.builtin.set_fact:
         auth: &auth
           hostname:        "{{ svm.cluster_mgmt | default(omit) }}"
@@ -28,7 +28,12 @@
       loop: "{{ inventory_svms_mcc.hosts }}"
 
     #- debug: var=reduced_inventory
-    
+
+######### Incrementing volume name by 1
+# We retrieve existing volumes with generated name pattern without last 2 digits
+# This should give a list of volumes named vol01,vol02,vol03 etc. (filetr=vol*)
+# We then increment the last 2 digits by 1
+#######################################
     - name: Collecting existing volumes on all clusters against volume "{{ vars_local.source.volume.name | default('None') }}"
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
@@ -44,16 +49,29 @@
       loop_control:
         loop_var: svm
 
-######### name!
+######### Incrementing volume name by 1 cont.
+# We build a list of volumes if received
+# sort them and take the last one
+# if return empty list if no volumes found by the pattern
+#######################################
     - name: Set existing volumes list
       ansible.builtin.set_fact:
         existing_volumes_list: "{{ existing_volumes_list | default([]) + item.ontap_info.storage_volumes.records | map(attribute='name') | list | sort}}"
       loop: "{{ existing_vols.results }}"
 
+######### Incrementing volume name by 1 cont.
+# Inceremting the last volume name by 1
+# if list is empty we return empty var
+#######################################
     - name: Set new volume name
       ansible.builtin.set_fact:
         new_volume_name: "{{ existing_volumes_list | increment_names(1) }}"
-     
+
+######### Incrementing volume name by 1 cont.
+# if list was empty - new_volume_name is set to None 
+# then we use default volume name vol01, qtree and exp policy (from defaults)
+# also generate qtree, exp policy names accodingly if needed
+#######################################
     - name: Define incremented volume name specification
       ansible.builtin.set_fact:
         vars_local_update:

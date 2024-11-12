@@ -20,6 +20,13 @@
       - input_proc is defined
     msg: "Input data isn't correct. Cannot continue: input_env, input_size, input_snaplock, input_clientmatch, input_proc are mandatory"
 
+- name: Validate inventory
+  ansible.builtin.assert:
+    that:
+      - (inventory_svms_mcc is defined) and (inventory_svms_mcc.keys() | length > 0)
+      - (inventory_svms_vault is defined) and (inventory_svms_vault.keys() | length > 0)
+    msg: "Inventory data isn't correct. Cannot continue: inventory_svms_mcc, inventory_svms_vault are mandatory"
+
 - name: Validate input control parameters
   ansible.builtin.fail:
     msg:

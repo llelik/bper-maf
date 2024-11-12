@@ -22,27 +22,38 @@
         use_python_keys: true
     no_log: true
 
-  # - name: Set source SVM name
-  #   ansible.builtin.set_fact:
-  #     source_data_svm: "{{ vars_local.source.svm.name }}"
+  - name: Set target vault SVM name
+    ansible.builtin.set_fact:
+      target_vault_svm:  "{{ svm_source_vault_mapping[vars_local.source.svm.name] }}"
   
   ### need fix for svm name extraction
-  - Set target vault SVM facts
-    ansible.builtin.set_fact:
-      target_vault_svm:        "{{ svm_item.name }}"
-      target_vault_cluster:    "{{ svm_item.cluster_name }}"
-      target_vault_cluster_ip: "{{ svm_item.cluster_mgmt }}"  
-    loop: "{{ inventory_svms_vault.hosts }}"
-    loop_control:
-      loop_var: svm_item
-    when:
-      - vars_local.source.svm.name[-6:-3] in svm_item.name
-      #- vars_local.source.svm.name[-5:] in svm_item.name
+  # - name: Set target vault SVM facts
+  #   ansible.builtin.set_fact:
+  #     target_vault_svm:        "{{ svm_item.name }}"
+  #     target_vault_cluster:    "{{ svm_item.cluster_name }}"
+  #     target_vault_cluster_ip: "{{ svm_item.cluster_mgmt }}"  
+  #   loop: "{{ inventory_svms_vault.hosts }}"
+  #   loop_control:
+  #     loop_var: svm_item
+  #   when:
+  #     - vars_local.source.svm.name[-6:-3] in svm_item.name
+          #- vars_local.source.svm.name[-5:] in svm_item.name
 
-      # PROD: - source_data_svm[-6:-3] in svm_item.name
-      # Lab setup:
-      # prod: svm_moa_test
-      # vault: svm_test_new_vault
+          # PROD: - source_data_svm[-6:-3] in svm_item.name
+          # Lab setup:
+          # prod: svm_moa_test
+          # vault: svm_test_new_vault
+
+  - name: Fail if no suitable vault SVM found
+    ansible.builtin.assert:
+      that:
+        - target_vault_svm is defined
+      msg: "No suitable vault SVM found for the volume {{ vars_local.source.svm.name }}"
+
+  - name: Set target vault SVM facts
+    ansible.builtin.set_fact:
+      target_vault_cluster:    "{{ (inventory_svms_vault.hosts | selectattr('name', 'equalto', target_vault_svm))[0]['cluster_name'] }}"
+      target_vault_cluster_ip: "{{ (inventory_svms_vault.hosts | selectattr('name', 'equalto', target_vault_svm))[0]['cluster_mgmt'] }}"  
 
   - name: Get available aggregates for vault SVM
     netapp.ontap.na_ontap_rest_info:
@@ -56,12 +67,7 @@
       hostname: "{{ target_svm.cluster_name }}"
     register: svm_aggregates
     when: target_vault_svm is defined
-  
-  - name: Fail if no suitable vault SVM found
-    ansible.builtin.fail:
-      msg: "No suitable vault SVM found for the volume {{ vars_local.source.svm.name }}"
-    when: target_vault_svm is not defined
-  
+    
   - name: Define destination vault SVM - vars_local facts
     ansible.builtin.set_fact:
       vars_local_update:

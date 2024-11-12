@@ -32,7 +32,7 @@
       - snapmirror.destination.volume.name | default(false)
       - snapmirror.source.volume.name | default(false)
 
-  - name: "Removing snapmirror {{ volume1_name }} -/-> {{ volume2_name }}"  
+  - name: "Removing snapmirror {{ snapmirror.source.volume.name }} -/-> {{ snapmirror.destination.volume.name }}"  
     netapp.ontap.na_ontap_snapmirror:
       use_rest                    : always
       state                       : absent
