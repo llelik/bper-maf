@@ -22,11 +22,13 @@
         use_python_keys: true
     no_log: true
 
-  - ansible.builtin.set_fact:
-      source_data_svm: "{{ vars_local.source.svm.name }}"
+  # - name: Set source SVM name
+  #   ansible.builtin.set_fact:
+  #     source_data_svm: "{{ vars_local.source.svm.name }}"
   
   ### need fix for svm name extraction
-  - ansible.builtin.set_fact:
+  - Set target vault SVM facts
+    ansible.builtin.set_fact:
       target_vault_svm:        "{{ svm_item.name }}"
       target_vault_cluster:    "{{ svm_item.cluster_name }}"
       target_vault_cluster_ip: "{{ svm_item.cluster_mgmt }}"  
@@ -34,8 +36,8 @@
     loop_control:
       loop_var: svm_item
     when:
-      - source_data_svm[-6:-3] in svm_item.name
-      #- source_data_svm[-5:] in svm_item.name
+      - vars_local.source.svm.name[-6:-3] in svm_item.name
+      #- vars_local.source.svm.name[-5:] in svm_item.name
 
       # PROD: - source_data_svm[-6:-3] in svm_item.name
       # Lab setup:
@@ -57,7 +59,7 @@
   
   - name: Fail if no suitable vault SVM found
     ansible.builtin.fail:
-      msg: "No suitable vault SVM found for the volume"
+      msg: "No suitable vault SVM found for the volume {{ vars_local.source.svm.name }}"
     when: target_vault_svm is not defined
   
   - name: Define destination vault SVM - vars_local facts

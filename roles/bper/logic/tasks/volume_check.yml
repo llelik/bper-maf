@@ -44,14 +44,17 @@
       loop_control:
         loop_var: svm
 
-    - ansible.builtin.set_fact:
+######### name!
+    - name: Set existing volumes list
+      ansible.builtin.set_fact:
         existing_volumes_list: "{{ existing_volumes_list | default([]) + item.ontap_info.storage_volumes.records | map(attribute='name') | list | sort}}"
       loop: "{{ existing_vols.results }}"
 
-    - ansible.builtin.set_fact:
+    - name: Set new volume name
+      ansible.builtin.set_fact:
         new_volume_name: "{{ existing_volumes_list | increment_names(1) }}"
      
-    - name: Define incremented volume name
+    - name: Define incremented volume name specification
       ansible.builtin.set_fact:
         vars_local_update:
           source:

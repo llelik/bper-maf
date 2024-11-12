@@ -13,7 +13,7 @@ inventory_svms_mcc:
   hosts:
     - name: svm_moa_test
       cluster_mgmt: 192.168.68.53
-      cluster_name: fas8200-moa
+      cluster_name: fas9000-moa #fas8200-moa
   vars:
     ansible_python_interpreter: /usr/bin/python3
 inventory_svms_vault:
