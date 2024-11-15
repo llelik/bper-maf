@@ -33,7 +33,13 @@
       - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env }}"
   when:
     - ((input_env is not defined) or (input_env not in storage_env)) and (input_env[:3] not in ['FUS'])
-    
+
+- name: Validate input control parameters cont
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_dryrun not in ['true', 'false', 'yes', 'no']. input value: {{ input_dryrun }}"
+  when:
+    - input_dryrun | lower is not in ['true', 'false', 'yes', 'no']
     
 - name: Validate input size parameters
   ansible.builtin.fail:

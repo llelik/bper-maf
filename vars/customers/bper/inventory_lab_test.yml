@@ -14,9 +14,11 @@ inventory_svms_mcc:
     - name: svm_alexeym90_moa_01
       cluster_mgmt: 10.65.59.220
       cluster_name: trinidad
+      vault_svm: svm_alexeym91_moa_vault
     - name: svm_alexeym90_cse_01
       cluster_mgmt: 10.65.59.220
       cluster_name: trinidad
+      vault_svm: svm_alexeym91_cse_vault
   vars:
     ansible_python_interpreter: /usr/bin/python3
 inventory_svms_vault: 

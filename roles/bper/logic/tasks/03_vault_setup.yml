@@ -22,20 +22,22 @@
         use_python_keys: true
     no_log: true
 
+  - debug: var=vars_local.source.svm.name
   - name: Set target vault SVM name
     ansible.builtin.set_fact:
-      target_vault_svm:  "{{ svm_source_vault_mapping[vars_local.source.svm.name] }}"
+      target_svm_hostvars:  "{{ inventory_svms_mcc.hosts | selectattr('name', 'equalto', vars_local.source.svm.name) }}"
   
-  - name: Fail if no suitable vault SVM found
+  - name: Check suitable vault SVM found
     ansible.builtin.assert:
       that:
-        - target_vault_svm is defined
-      msg: "No suitable vault SVM found for the volume {{ vars_local.source.svm.name }}"
+        - target_svm_hostvars[0] is defined
+      msg: "No suitable vault SVM found for the volume {{ vars_local.source.volume.name }}"
 
   - name: Set target vault SVM facts
     ansible.builtin.set_fact:
-      target_vault_cluster:    "{{ (inventory_svms_vault.hosts | selectattr('name', 'equalto', target_vault_svm))[0]['cluster_name'] }}"
-      target_vault_cluster_ip: "{{ (inventory_svms_vault.hosts | selectattr('name', 'equalto', target_vault_svm))[0]['cluster_mgmt'] }}"  
+      target_vault_svm:        "{{ target_svm_hostvars[0].vault_svm }}"
+      target_vault_cluster:    "{{ target_svm_hostvars[0].cluster_name }}"
+      target_vault_cluster_ip: "{{ target_svm_hostvars[0].cluster_mgmt }}"  
   
   - name: Get available aggregates for vault SVM
     netapp.ontap.na_ontap_rest_info:
@@ -49,7 +51,16 @@
       hostname: "{{ target_vault_cluster_ip }}"
     register: svm_aggregates
     when: target_vault_svm is defined
-    
+  
+  - debug: var=svm_aggregates
+
+  - assert:
+      that: svm_aggregates.ontap_info.svm_svms.num_records > 0
+      msg: "SVM {{ target_vault_svm }} not found on cluster {{ target_vault_cluster }}. Please check the inventory file."
+  - assert:
+      that: svm_aggregates.ontap_info.svm_svms.records[0].aggregates | length > 0
+      msg: "No aggregates found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
+     
   - name: Define destination vault SVM - vars_local facts
     ansible.builtin.set_fact:
       vars_local_update:
@@ -72,5 +83,7 @@
     ansible.builtin.set_fact:
       vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
     
-  when: inventory_svms_mcc.keys() | length > 0
+  when: 
+    - inventory_svms_mcc.keys() | length > 0
+    - target_svm is defined
 ...

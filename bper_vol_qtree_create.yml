@@ -9,7 +9,7 @@
 # Professional Services 2024
 ##########################################################################
 ---
-- name: "Create volume and qtree"
+- name: "Create: volume, qtree, export_policy, destination volume, snapmirror"
   hosts: localhost
   become: false
   gather_facts: false
@@ -68,12 +68,6 @@
       vars:
         qtask: 03_vault_setup
 
-########## debug
-    - debug: var=vars_local
-    # - fail:
-    #     msg: STOP
-########## debug end
-
     # Collect export policy facts variables
     - include_role:
         name: ontap/export_policy
@@ -87,6 +81,13 @@
       vars:
         qtask: facts
 
+########## debug + dryrun
+    - debug: var=vars_local
+    - fail:
+        msg: "Data collection completed. Dryrun exit."
+      when: input_dryrun | bool
+#    - fail: msg=STOP
+########## debug end
     
 ########### CREATE STEP 1
 # no block/rescue when creating source volume since if it wasn't created - there is nothing to rollback

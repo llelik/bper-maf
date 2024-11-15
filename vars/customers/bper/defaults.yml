@@ -70,8 +70,11 @@ volume_sizes:
   - 25
   - 50
 
-# option to reduce console output on large collections
+############# optional features 
+# to reduce console output on large collections
 nolog: true
+# set dryrun to true to see what would be applied (before creating any instance)
+input_dryrun: false
 
 
 
@@ -88,6 +91,7 @@ nolog: true
 #   svm_alexeym90_cse_01: svm_alexeym91_cse_vault
 
 # BPER lab test SVM mapping
-svm_source_vault_mapping:
-  svm_moa_test: svm_test_new_vault
+#svm_source_vault_mapping:
+#  svm_moa_test: svm_moa_test_vault
+#  svm_cse_test: svm_cse_test_vault
   

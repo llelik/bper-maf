@@ -14,11 +14,19 @@ inventory_svms_mcc:
     - name: svm_moa_test
       cluster_mgmt: 192.168.68.53
       cluster_name: fas8200-moa
+      vault_svm: svm_moa_test_vault
+    - name: svm_cse_test
+      cluster_mgmt: 192.168.78.22
+      cluster_name: fas8200-cse
+      vault_svm: svm_cse_test_vault
   vars:
     ansible_python_interpreter: /usr/bin/python3
 inventory_svms_vault:
   hosts:
-    - name: svm_test_new_vault 
+    - name: svm_cse_test_vault 
+      cluster_mgmt: 192.168.65.207
+      cluster_name: fas2820-moc
+    - name: svm_moa_test_vault 
       cluster_mgmt: 192.168.65.207
       cluster_name: fas2820-moc
   vars:

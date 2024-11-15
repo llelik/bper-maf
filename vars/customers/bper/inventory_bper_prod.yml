@@ -14,15 +14,19 @@ inventory_svms_mcc:
     - name: svm_cse_01
       cluster_mgmt: 192.168.78.22
       cluster_name: fas8200-cse
+      vault_svm: svm_cse_new_vault
     - name: svm_cse_02
       cluster_mgmt: 192.168.78.22
       cluster_name: fas8200-cse
+      vault_svm: svm_cse_new_vault
     - name: svm_moa_01
       cluster_mgmt: 192.168.68.53
       cluster_name: fas8200-moa
+      vault_svm: svm_moa_new_vault
     - name: svm_moa_02
       cluster_mgmt: 192.168.68.53
       cluster_name: fas8200-moa
+      vault_svm: svm_moa_new_vault
   vars:
     ansible_python_interpreter: /usr/bin/python3
 inventory_svms_vault: 

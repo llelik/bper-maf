@@ -1,0 +1,21 @@
+
+
+ontap/volume/create
+-------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  aggregates:
+  - aggr1_trinidad_01
+  - aggr1_trinidad_02
+  name: svm_alexeym91_cse_vault
+
+volume:
+  language: c.utf_8
+  name: AAEPR16_vault
+  size_unit: gb
+  type: dp
+  wait_for_completion: true
+
