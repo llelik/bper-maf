@@ -46,6 +46,12 @@
     
     - debug: var=vars_local
 
+    # Check inventory SVMs svailability
+    - include_role:
+        name: bper/logic
+      vars:
+        qtask: 00_preflight_check
+
     # Check if volume already exists and set new volume name incerementing by 1
     - include_role:
         name: bper/logic

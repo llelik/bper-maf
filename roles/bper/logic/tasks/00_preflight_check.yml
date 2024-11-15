@@ -1,0 +1,79 @@
+##########################################################################
+#
+# - check inventory for primary and secondary storage SVMs
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
+---
+- name: Pre-flights checks against inventory
+  block:
+    - name: Set cluster credentials 
+      ansible.builtin.set_fact:
+        auth: &auth
+          username:        "{{ ontap_username | default(omit) }}"
+          password:        "{{ ontap_password | default(omit) }}"
+          validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
+          use_rest:        always
+          use_python_keys: true
+      no_log: false
+
+    - name: Pre-flight availability check - primary storage inventory
+      netapp.ontap.na_ontap_rest_info:
+        <<: *auth
+        gather_subset:
+          - vserver_info
+        parameters:
+          name: "{{ svm.name }}*"
+        fields:
+          - name
+        hostname: "{{ svm.cluster_mgmt }}"
+      register: svm_check
+      loop: "{{ inventory_svms_mcc.hosts }}"
+      loop_control:
+        loop_var: svm
+      no_log: "{{ nolog }}"
+    
+    - name: Check primary SVMs
+      ansible.builtin.assert:
+        that:
+          - inventory_item.ontap_info.svm_svms.num_records > 0
+        msg: "SVM {{ inventory_item.svm.name }} not found on the cluster {{ inventory_item.svm.cluster_name }}. Please check primary storage inventory file and ONTAP cluster configuration."
+        quiet: true
+      loop: "{{ svm_check.results }}"
+      loop_control:
+        loop_var: inventory_item
+    
+    - name: Pre-flight availability check - secondary storage inventory
+      netapp.ontap.na_ontap_rest_info:
+        <<: *auth
+        gather_subset:
+          - vserver_info
+        parameters:
+          name: "{{ svm.name }}*"
+        fields:
+          - name
+        hostname: "{{ svm.cluster_mgmt }}"
+      register: svm_check
+      loop: "{{ inventory_svms_vault.hosts }}"
+      loop_control:
+        loop_var: svm
+      no_log: "{{ nolog }}"
+
+    - name: Check secondary SVMs
+      ansible.builtin.assert:
+        that:
+          - inventory_item.ontap_info.svm_svms.num_records > 0
+        msg: "SVM {{ inventory_item.svm.name }} not found on the cluster {{ inventory_item.svm.cluster_name }}. Please check primary storage inventory file and ONTAP cluster configuration."
+        quiet: true
+      loop: "{{ svm_check.results }}"
+      loop_control:
+        loop_var: inventory_item
+  when: 
+    - precheck_inventory | bool
+    #- debug: var=svm_check
+    #- fail: msg=STOP
+...
