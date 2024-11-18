@@ -15,7 +15,7 @@
     - name: Set cluster credentials
       ansible.builtin.set_fact:
         auth: &auth
-          hostname:        "{{ svm.cluster_mgmt | default(omit) }}"
+          #hostname:        "{{ svm.cluster_mgmt | default(omit) }}"
           username:        "{{ ontap_username | default(omit) }}"
           password:        "{{ ontap_password | default(omit) }}"
           validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"

@@ -14,7 +14,7 @@
   - name: Set cluster credentials
     ansible.builtin.set_fact:
       auth: &auth
-        hostname:        "{{ ansible_host | default(omit) }}"
+        #hostname:        "{{ ansible_host | default(omit) }}"
         username:        "{{ ontap_username | default(omit) }}"
         password:        "{{ ontap_password | default(omit) }}"
         validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
@@ -22,22 +22,28 @@
         use_python_keys: true
     no_log: true
 
-  - debug: var=vars_local.source.svm.name
-  - name: Set target vault SVM name
+  - name: Get source SVM hostvars
     ansible.builtin.set_fact:
       target_svm_hostvars:  "{{ inventory_svms_mcc.hosts | selectattr('name', 'equalto', vars_local.source.svm.name) }}"
   
-  - name: Check suitable vault SVM found
+  - name: Check hostvars for suitable vault SVM
     ansible.builtin.assert:
       that:
         - target_svm_hostvars[0] is defined
+        - target_svm_hostvars[0].vault_svm is defined
       msg: "No suitable vault SVM found for the volume {{ vars_local.source.volume.name }}"
-
+  
+   # Retrieve target vault SVM hostvar facts
+  - name: Get target vault SVM hostvars
+    ansible.builtin.set_fact:
+      target_vault_svm_hostvars:  "{{ inventory_svms_vault.hosts | selectattr('name', 'equalto', target_svm_hostvars[0].vault_svm) }}"
+    
+  # Set target vault SVM vars 
   - name: Set target vault SVM facts
     ansible.builtin.set_fact:
-      target_vault_svm:        "{{ target_svm_hostvars[0].vault_svm }}"
-      target_vault_cluster:    "{{ target_svm_hostvars[0].cluster_name }}"
-      target_vault_cluster_ip: "{{ target_svm_hostvars[0].cluster_mgmt }}"  
+      target_vault_svm:        "{{ target_vault_svm_hostvars[0].name }}"
+      target_vault_cluster:    "{{ target_vault_svm_hostvars[0].cluster_name }}"
+      target_vault_cluster_ip: "{{ target_vault_svm_hostvars[0].cluster_mgmt }}"  
   
   - name: Get available aggregates for vault SVM
     netapp.ontap.na_ontap_rest_info:
