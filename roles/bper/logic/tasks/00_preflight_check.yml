@@ -74,6 +74,9 @@
         loop_var: inventory_item
   when: 
     - precheck_inventory | bool
-    #- debug: var=svm_check
-    #- fail: msg=STOP
+
+- name: Check logs folder exists
+  ansible.builtin.file:
+    path: ./logs
+    state: directory
 ...
