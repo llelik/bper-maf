@@ -13,7 +13,7 @@
     # the next 2 lines are for the certificate based authentication
     # we assume the certificate is in the format of clustername___username (with .key and .ctr extensions)
     netapp_api_certificate_base: "{{ playbook_dir }}/{{ vars_defaults.config.api_certificate_folder | default('api_certificates') }}/{{ cluster.name | default('') }}___{{ vars_defaults.config.api_username | default('api_user') }}"
-    netapp_api_use_certificate : "{{ vars_defaults.config.api_use_certificate           | default(false) }}"
+    netapp_api_use_certificate : "{{ vars_defaults.config.api_use_certificate      | default(false) }}"
     netapp_hostname            : "{{ snapmirror.destination.cluster.management_ip  | default(ansible_host) }}" # target the destination cluster
     netapp_username            : "{{ ontap_username }}"
     netapp_password            : "{{ ontap_password }}"

@@ -16,31 +16,44 @@
   - set_fact:
       l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/delete','snapmirror',qlogname) }}"
 
+  - name: Pre-flight availability check - primary storage inventory
+    netapp.ontap.na_ontap_rest_info:
+      <<: *auth
+      use_python_keys: true
+      gather_subset:
+        - snapmirror_info
+      parameters:
+        source.path:       "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name }}"
+        destination.path:  "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name }}"
+    register: sm_exists
+    no_log: "{{ nolog }}"
+
   - name: Modify policy SnapMirror (bug fix) - to allow snapmirror break
     netapp.ontap.na_ontap_snapmirror:
       state: present
       policy                      : "MirrorAllSnapshots"
       source_endpoint             : 
-        cluster                   : "{{ snapmirror.source.cluster.name }}"
+        #cluster                   : "{{ snapmirror.source.cluster.name }}"
         path                      : "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name }}"
       destination_endpoint        : 
-        cluster                   : "{{ snapmirror.destination.cluster.name }}"
+        #cluster                   : "{{ snapmirror.destination.cluster.name }}"
         path                      : "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name }}"
       <<: *auth
     delegate_to: localhost
     when:
       - snapmirror.destination.volume.name | default(false)
       - snapmirror.source.volume.name | default(false)
+      - sm_exists.ontap_info.snapmirror_relationships.num_records > 0
 
   - name: "Removing snapmirror {{ snapmirror.source.volume.name }} -/-> {{ snapmirror.destination.volume.name }}"  
     netapp.ontap.na_ontap_snapmirror:
       use_rest                    : always
       state                       : absent
       source_endpoint             : 
-        cluster                   : "{{ snapmirror.source.cluster.name }}"
+        #cluster                   : "{{ snapmirror.source.cluster.name }}"
         path                      : "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name | default('') }}"
       destination_endpoint        : 
-        cluster                   : "{{ snapmirror.destination.cluster.name }}"
+        #cluster                   : "{{ snapmirror.destination.cluster.name }}"
         path                      : "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name | default('') }}"
       <<: *auth
     delegate_to: localhost

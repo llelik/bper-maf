@@ -10,7 +10,6 @@
 ##########################################################################
 vars_defaults:
   source:
-    template: source
     volume:
       wait_for_completion: true
       percent_snapshot_space: 5                   #ONTAP default
@@ -39,14 +38,16 @@ vars_defaults:
       unix_group:        root
       unix_user:         root
       oplocks:           true
-      security_style:    unix
   destination:
-    template: destination
     volume:
       wait_for_completion:    true
       type:                   dp
       language:               c.utf_8
       size_unit:              gb
+      volume_efficiency:
+          enable_inline_compression: true
+          enable_compression:        true
+          policy:                    '-'
   snapmirror:
     policy:                   DPDefault
 

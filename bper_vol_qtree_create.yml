@@ -19,9 +19,9 @@
    # BPER PROD:
    # - "vars/customers/bper/inventory.yml"
    # NetApp lab:
-    - "vars/customers/bper/inventory_lab_test.yml"
+   # - "vars/customers/bper/inventory_lab_test.yml"
    # BPER lab:
-   # - "vars/customers/bper/inventory_bper_lab.yml"
+    - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
     qlogname: "test_create_v_q_ep.bper"
 
@@ -97,17 +97,35 @@
     
 ########### CREATE STEP 1
 # no block/rescue when creating source volume since if it wasn't created - there is nothing to rollback
-    - include_role:
-        name: ontap/volume
-      vars:
-        qtask: facts
-        qchild: source
+    - block: 
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: source
 
-    - include_role:
-        name: ontap/volume
-      vars:
-        qtask: create
-        qchild: source
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: create
+          qchild: source
+      rescue:
+      - debug:
+          msg: "Source volume create task failed. Created objects will be deleted."
+      
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: source
+
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: delete
+          qchild: source
+      
+      - meta: end_play
 
 ########### CREATE STEP 2
 # collect source volume qtree facts and trying to create
@@ -127,11 +145,20 @@
       rescue:
       - debug:
           msg: "Qtree Create task failed. Created objects will be deleted."
+
+      - include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: source
+
       - include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      
+      - meta: end_play
 
 ########### CREATE STEP 3
 # collect destination volume facts and trying to create
@@ -157,10 +184,17 @@
           qtask: delete
           qchild: destination
       - include_role:
+          name: ontap/qtree
+        vars:
+          qtask: facts
+          qchild: source
+      - include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      
+      - meta: end_play
 
 ########### CREATE STEP 4
 # create export policy and rules
@@ -190,6 +224,8 @@
         vars:
           qtask: delete
           qchild: source
+
+      - meta: end_play
 
 ########### CREATE STEP 5
 # create snapmirror relationship
@@ -239,5 +275,7 @@
         vars:
           qtask: delete
           qchild: destination
+      
+      - meta: end_play
 
 ...

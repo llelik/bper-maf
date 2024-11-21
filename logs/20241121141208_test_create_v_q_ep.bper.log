@@ -1,0 +1,41 @@
+
+
+ontap/volume/delete
+-------------------
+cluster:
+  management_ip: 10.65.59.185
+  name: barbuda
+
+svm:
+  aggregates:
+  - barbuda_01_SSD_1
+  - barbuda_02_SSD_1
+  name: svm_alexeym100
+
+volume:
+  aggregate_exclude_name_regex: lock
+  fractional_reserve: 100
+  junction_path: /AAEPR11
+  language: c.utf_8
+  name: AAEPR11
+  percent_snapshot_space: 5
+  read_realloc: false
+  security_style: unix
+  size: '5'
+  size_unit: gb
+  snaplock:
+    type: non_snaplock
+  snapshot_policy: Prod_snapshot_3_3
+  space_guarantee: none
+  tiering_policy:
+    name: none
+  type: rw
+  volume_autosize:
+    mode: false
+  volume_efficiency:
+    enable_compression: true
+    enable_inline_compression: true
+    policy: default
+    volume_efficiency: start
+  wait_for_completion: true
+

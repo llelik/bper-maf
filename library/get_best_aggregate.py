@@ -39,7 +39,7 @@ def get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_
 
 # Get volumes using REST API
 def get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath):
-    url = f"https://{cluster_mgmt_ip}/api/storage/volumes?fields=space.size,svm.name,aggregates"
+    url = f"https://{cluster_mgmt_ip}/api/storage/volumes?fields=space.size,svm.name,aggregates&svm.name=!*-mc"
     log(f"GET {url}")
     if(username and password):
         response = requests.get(url, auth=(username, password), verify=False)
@@ -110,11 +110,12 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
     log(f"Get aggregate data from rest")
     aggregates = get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
     volumes = get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
-    
+    log(f"IIIIIIIIIIIIIIIIIIIIIII {volumes}")
     # check for only aggregates available for SVM
     #aggregates_svm = []
     if svm_name != "":
         aggregates_svm = get_aggregates_svm_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, svm_name)
+        #log(f"RESPONSE_AGGRs: {aggregates_svm[0]}")
         aggregates_svm_names = [
             a["name"] 
             for a in aggregates_svm[0]['aggregates']
@@ -141,7 +142,7 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
                 for volume in volumes
                 if volume["aggregates"][0]["name"] == name
             ]
-
+            #log(f"IIIIIIIIIIIIIIIIIIIIIII")
             volume_count = len(volumes_for_aggregate)
 
             # log(f"Correcting space info")

@@ -19,13 +19,6 @@ vars_local:
       junction_path: "/{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       snaplock:
         type:                           "{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
-        # retention: 
-        #   default:                      "{{ volume.snaplock.retention.default | default(omit) }}"
-        #   maximum:                      "{{ volume.snaplock.retention.maximum | default(omit) }}"
-        #   minimum:                      "{{ volume.snaplock.retention.minimum | default(omit) }}"
-        # autocommit_period:              "{{ volume.snaplock.autocommit_period | default(omit) }}"
-        # privileged_delete:              "{{ volume.snaplock.privileged_delete | default(omit) }}"
-        # append_mode_enabled:            "{{ volume.snaplock.append_mode_enabled | default(omit) }}"
     qtree:
       name: "Q_{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     export_policy:
