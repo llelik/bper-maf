@@ -27,14 +27,14 @@
       - (inventory_svms_vault is defined) and (inventory_svms_vault.keys() | length > 0)
     msg: "Inventory data isn't correct. Cannot continue: inventory_svms_mcc, inventory_svms_vault are mandatory"
 
-- name: Validate input control parameters
+- name: Validate input environment control parameters
   ansible.builtin.fail:
     msg:
       - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env }}"
   when:
-    - ((input_env is not defined) or (input_env not in storage_env)) and (input_env[:3] not in ['FUS'])
+    - ((input_env is not defined) or (input_env | upper not in storage_env)) and (input_env[:3] | upper not in ['FUS'])
 
-- name: Validate input control parameters cont
+- name: Validate input control parameters
   ansible.builtin.fail:
     msg:
       - "Input data isn't correct. Cannot continue: input_dryrun not in ['true', 'false', 'yes', 'no']. input value: {{ input_dryrun }}"
@@ -55,7 +55,7 @@
   when:
     - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false'])
 
-- name: Validate input Export policy Clientmatch parameters
+- name: Validate input Export policy clientmatch parameters
   ansible.builtin.fail:
     msg:
       - "Input data isn't correct. Cannot continue: input_clientmatch not given or incorrect value. Input value: {{ input_clientmatch }}"
@@ -65,8 +65,8 @@
 - name: Validate input procedure parameters
   ansible.builtin.fail:
     msg:
-      - "Input data isn't correct. Cannot continue: input_proc not given or incorrect length (3). Input value: {{ input_proc }}"
+      - "Input data isn't correct. Cannot continue: input_proc not given or incorrect length (5). Input value: {{ input_proc }}"
   when:
-    - input_proc | length != 3
+    - input_proc | length != 5
 
 ...

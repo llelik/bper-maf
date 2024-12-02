@@ -18,11 +18,11 @@ vars_local:
       aggregate_include_name_regex: "{{ include_name_regex | default(omit) }}"
       junction_path: "/{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       snaplock:
-        type:                           "{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
+        type:                       "{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
     qtree:
-      name: "Q_{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
+      name: "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     export_policy:
-      name: "Q_{{ input_proc }}{{ storage_env[input_env_fact]  |default(input_env_fact) }}01"
+      name: "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact]  |default(input_env_fact) }}01"
       rules:
         - client_match: "{{ input_clientmatch | default('0.0.0.0/0') }}"
           rule_index: 1
@@ -32,7 +32,7 @@ vars_local:
           super_user_security: sys
   destination:
     volume:
-      name: "{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+      name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
       type: dp
   snapmirror:
     source:
@@ -40,7 +40,7 @@ vars_local:
         name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     destination:
       volume:
-        name: "{{ input_proc }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+        name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
 vars_templates:
 vars_overrides:
 ...
