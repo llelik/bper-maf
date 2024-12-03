@@ -52,17 +52,29 @@ vars_defaults:
     policy:                   DPDefault
 
   # BPER storage environments. Used for naming convention.
+# storage_env:
+#   "PROD":     PR
+#   "PRE PROD": PP
+#   "CERT":     CT
+#   "SVIL EVO": SE 
+#   "COLL EVO": CE
+#   "SVIL RUN": SR
+#   "COLL RUN": CR
+#   "SVIL":     SV
+#   "COLL":     CO
+#   "FUS":      xxx        # kept for the record, FUS-n is checked in 
+
 storage_env:
-  "PROD":     PR
-  "PRE PROD": PP
-  "CERT":     CT
-  "SVIL EVO": SE 
-  "COLL EVO": CE
-  "SVIL RUN": SR
-  "COLL RUN": CR
-  "SVIL":     SV
-  "COLL":     CO
-  "FUS":      xxx        # kept for the record, FUS-n is checked in 
+  - PR
+  - PP
+  - CT
+  - SE 
+  - CE
+  - SR
+  - CR
+  - SV
+  - CO
+#  "FUS":      xxx        # kept for the record, FUS-n is checked in 
 
 # Volumes sizes defined in GB. Must be integers
 volume_sizes:
