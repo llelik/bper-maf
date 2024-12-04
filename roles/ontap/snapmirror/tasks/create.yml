@@ -16,9 +16,6 @@
   - set_fact:
       l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/create','snapmirror',qlogname) }}"
 
-  - debug: var=auth_rest.hostname 
-  - debug: var=snapmirror
-
   - name: "Create Snapmirror [{{ snapmirror.source.svm.name }}:{{ snapmirror.source.volume.name | default('') }}] -> [{{ snapmirror.destination.svm.name }}:{{ snapmirror.destination.volume.name | default('') }}]"  
     netapp.ontap.na_ontap_snapmirror:
       state                       : present
