@@ -19,6 +19,6 @@
 
   # here we set the authentication object (can be logic/pw or certificate)
 - name: Set naming facts - authentication
-  set_fact:
+  ansible.builtin.set_fact:
     auth_rest: "{{ netapp_hostname | auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"
 

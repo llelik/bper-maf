@@ -58,12 +58,10 @@
     register: svm_aggregates
     when: target_vault_svm is defined
   
-  - debug: var=svm_aggregates
-
-  - assert:
+  - ansible.builtin.assert:
       that: svm_aggregates.ontap_info.svm_svms.num_records > 0
       msg: "SVM {{ target_vault_svm }} not found on cluster {{ target_vault_cluster }}. Please check the inventory file."
-  - assert:
+  - ansible.builtin.assert:
       that: svm_aggregates.ontap_info.svm_svms.records[0].aggregates | length > 0
       msg: "No aggregates found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
      

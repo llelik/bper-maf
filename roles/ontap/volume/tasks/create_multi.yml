@@ -3,8 +3,6 @@
 # so we have a local tasks "create_one" which includes facts & create of the volume role
 # hence we can create multiple volumes in a loop
 
-# - debug: var=qtask_child
-
 - name: Create multiple volumes
   include_tasks: "create_one.yml" 
   loop_control:

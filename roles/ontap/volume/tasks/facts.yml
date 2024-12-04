@@ -1,6 +1,4 @@
 ---
-# - debug: var=vars_local
-
 - name: Merge Extravars
   ansible.builtin.set_fact:
     # note in volume, l = volume_item => the volume role implements multiple => volume_item is the loop item, which is merged too.

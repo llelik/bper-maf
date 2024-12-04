@@ -3,9 +3,8 @@
 #    dir: 'vars'
 #    extensions: ['yml','yaml']
 
-- include_tasks: "{{ qtask }}.yml"
+- ansible.builtin.include_tasks: "{{ qtask }}.yml"
   vars:
-
     qtask_suffix: "{{ qsuffix | default('') }}"
     qtask_child: "{{ qchild | default('') }}"
     logic_item:     

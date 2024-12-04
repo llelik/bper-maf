@@ -22,11 +22,11 @@
    # BPER PROD:
    # - "vars/customers/bper/inventory.yml"
    # NetApp lab:
-   # - "vars/customers/bper/inventory_lab_test.yml"
+    - "vars/customers/bper/inventory_lab_test.yml"
    # BPER lab:
-    - "vars/customers/bper/inventory_bper_lab.yml"
+   # - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
-    qlogname: "test_create_v_q_ep.bper"
+    qlogname: "create_vol_qtree_export.bper"
 
   tasks:
     # Setup credentials
@@ -47,8 +47,6 @@
       vars:
         qtask: prepare_facts
     
-    - debug: var=vars_local
-
     # Check inventory SVMs svailability
     - include_role:
         name: bper/logic
@@ -60,16 +58,12 @@
         name: bper/logic
       vars:
         qtask: 01_preflight_setup
-    
-    - debug: var=vars_local
-    
+ 
     # Find suitable source SVM
     - include_role:
         name: bper/logic
       vars:
         qtask: 02_source_setup
-
-    - debug: var=vars_local
     
     # Find suitable destination vault SVM
     - include_role:
@@ -91,11 +85,10 @@
         qtask: facts
 
 ########## debug + dryrun
-    - debug: var=vars_local
-    - name: Dryrun exit
+    - name: Dryrun block
       when: input_dryrun | bool
       block:
-        #- debug: var=vars_local
+        - debug: var=vars_local
         - debug:
             msg: "Data collection completed. Dryrun exit."
         - meta: end_play
@@ -175,7 +168,6 @@
         vars:
           qtask: facts
           qchild: destination
-
       - include_role:
           name: ontap/volume
         vars:
@@ -283,5 +275,4 @@
           qchild: destination
       
       - meta: end_play
-
 ...
