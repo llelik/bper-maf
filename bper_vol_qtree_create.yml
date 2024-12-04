@@ -14,7 +14,8 @@
   become: false
   gather_facts: false
   environment:
-    no_proxy: "localhost,127.0.0.1"
+    http_proxy: ""
+    https_proxy: ""
     
   vars_files:
     - "vars/customers/bper/defaults.yml"
