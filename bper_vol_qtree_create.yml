@@ -239,7 +239,7 @@
       - include_role:
           name: ontap/snapmirror
         vars:
-          qtask: create
+          qtask: create123
       rescue:
       - debug:
           msg: "Snapmirror create task failed. Created objects will be deleted."
