@@ -16,7 +16,6 @@
   environment:
     http_proxy: ""
     https_proxy: ""
-    
   vars_files:
     - "vars/customers/bper/defaults.yml"
     - "vars/customers/bper/local.yml"
@@ -241,7 +240,7 @@
       - include_role:
           name: ontap/snapmirror
         vars:
-          qtask: create123
+          qtask: create
       rescue:
       - debug:
           msg: "Snapmirror create task failed. Created objects will be deleted."
