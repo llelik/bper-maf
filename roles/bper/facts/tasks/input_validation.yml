@@ -32,7 +32,7 @@
     msg:
       - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env }}"
   when:
-    - ((input_env is not defined) or (input_env | upper not in storage_env)) and (input_env[:3] | upper not in ['FUS'])
+    - ((input_env is not defined) or (input_env | upper not in storage_env)) and (input_env[:1] | upper not in ['F'])
 
 - name: Validate input control parameters
   ansible.builtin.fail:
