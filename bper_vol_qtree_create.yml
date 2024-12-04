@@ -13,8 +13,8 @@
   hosts: localhost
   become: false
   gather_facts: false
-  #environment:
-  #  no_proxy: 127.0.0.1, localhost
+  environment:
+    no_proxy: 127.0.0.1,localhost
   vars_files:
     - "vars/customers/bper/defaults.yml"
     - "vars/customers/bper/local.yml"
