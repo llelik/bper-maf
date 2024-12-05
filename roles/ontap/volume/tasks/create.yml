@@ -1,7 +1,8 @@
 ---
 - name : "Role ontap/volume/create"
   block:
-  - set_fact:
+  - name: Setting up credentials details
+    ansible.builtin.set_fact:
       auth: &auth
         hostname: "{{ auth_rest.hostname | default(omit) }}"
         username: "{{ auth_rest.username | default(omit) }}"
@@ -13,11 +14,17 @@
     no_log: true
 
   # logging
-  - set_fact:
+  - name: Setting up logging facility
+    ansible.builtin.set_fact:
       l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/volume/create','cluster',qlogname) }}"
       l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
       l_volume:  "{{ volume  | to_nice_yaml(2) | indent(2,true) | do_log('','volume',qlogname) }}"
 
+  - debug: var=l_cluster
+  - debug: var=l_svm
+  - debug: var=l_volume
+  - fail: msg=STOP
+     
   # get best aggregate
   - name: "Find best aggregate [{{ volume.name }}]" 
     get_best_aggregate:
