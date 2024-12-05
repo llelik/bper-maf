@@ -23,7 +23,7 @@
   - debug: var=l_cluster
   - debug: var=l_svm
   - debug: var=l_volume
-  - fail: msg=STOP
+  
      
   # get best aggregate
   - name: "Find best aggregate [{{ volume.name }}]" 

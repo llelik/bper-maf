@@ -21,9 +21,11 @@ class FilterModule(object):
       if logname:
           if not logname.endswith('.log'):
             fp = 'logs/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "_" + logname + '.log'
+            print(f"fp with log extension added: {fp}")
           else:
             fp = logname
-          with open(fp, 'a') as f:
+            print(f"fp: {fp}")
+          with open(fp, 'a', encoding='utf-8') as f:
               # write title with dashed line underlined
               if title:
                 f.write('\n\n' + title + '\n')

@@ -110,7 +110,7 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
     log(f"Get aggregate data from rest")
     aggregates = get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
     volumes = get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
-    log(f"IIIIIIIIIIIIIIIIIIIIIII {volumes}")
+    #log(f"IIIIIIIIIIIIIIIIIIIIIII {volumes}")
     # check for only aggregates available for SVM
     #aggregates_svm = []
     if svm_name != "":

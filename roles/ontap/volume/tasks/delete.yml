@@ -26,6 +26,7 @@
       junction_path:           ""
       <<: *auth
     delegate_to: localhost
+    when: 1 == 0
 
   - name: "Delete volume [{{ volume.name }}]"
     netapp.ontap.na_ontap_volume:
