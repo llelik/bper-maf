@@ -27,7 +27,7 @@
     - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
     qlogname: "create_vol_qtree_export.bper"
-    qlogdir: "{{ vars['playbook_dir'] }}/logs"
+    qlogdir:  "{{ vars['playbook_dir'] }}/logs"
 
   tasks:
     # Setup credentials
@@ -96,7 +96,8 @@
 ########## debug end
     
 ########### CREATE STEP 1
-# no block/rescue when creating source volume since if it wasn't created - there is nothing to rollback
+# here is no block/rescue when creating source volume 
+# since if it wasn't created - there is nothing to rollback
     - block: 
       - include_role:
           name: ontap/volume

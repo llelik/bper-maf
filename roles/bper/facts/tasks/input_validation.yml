@@ -76,6 +76,4 @@
     that:
       - qlogdir is defined
 
-- debug: var=qlogdir
-
 ...
