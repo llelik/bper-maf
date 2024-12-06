@@ -9,7 +9,7 @@
     qlogname : "{{ qlogname | default('',true) }}"    
 
 - set_fact:
-    qlogname: "{{ vars_external | to_nice_yaml(2) | indent(2,true) | do_log('Running logic svm_dr','vars_external',qlogname) }}"
+    qlogname: "{{ vars_external | to_nice_yaml(2) | indent(2,true) | do_log('Running logic svm_dr','vars_external',qlogdir,qlogname) }}"
 
 - set_fact:
-    qlogname: "{{ vars_local | to_nice_yaml(2) | indent(2,true) | do_log('After logic svm_dr','vars_local',qlogname) }}"
+    qlogname: "{{ vars_local | to_nice_yaml(2) | indent(2,true) | do_log('After logic svm_dr','vars_local',qlogdir,qlogname) }}"

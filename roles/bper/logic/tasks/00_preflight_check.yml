@@ -77,6 +77,6 @@
 
 - name: Check logs folder exists
   ansible.builtin.file:
-    path: ./logs
+    path: "{{ qlogdir }}"
     state: directory
 ...

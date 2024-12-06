@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/export_policy/create','cluster',qlogname) }}"
-      l_svm: "{{ svm | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_export_policy: "{{ export_policy | to_nice_yaml(2) | indent(2,true) | do_log('','export_policy',qlogname) }}"
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/export_policy/create','cluster',qlogdir,qlogdir,qlogname) }}"
+      l_svm: "{{ svm | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogdir,qlogdir,qlogname) }}"
+      l_export_policy: "{{ export_policy | to_nice_yaml(2) | indent(2,true) | do_log('','export_policy',qlogdir,qlogname) }}"
 
   #- debug: var=export_policy
 

@@ -14,7 +14,7 @@
 
   # logging
   - set_fact:
-      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/set_retention','snapmirror',qlogname) }}"
+      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/set_retention','snapmirror',qlogdir,qlogname) }}"
 
   - name: Get snapshot info
     netapp.ontap.na_ontap_rest_info:

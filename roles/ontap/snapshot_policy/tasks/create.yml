@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster:          "{{ cluster         | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapshot_policy/create','cluster',qlogname) }}"
-      l_svm:              "{{ svm             | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_snapshot_policy:  "{{ snapshot_policy | to_nice_yaml(2) | indent(2,true) | do_log('','snapshot_policy',qlogname) }}"
+      l_cluster:          "{{ cluster         | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapshot_policy/create','cluster',qlogdir,qlogname) }}"
+      l_svm:              "{{ svm             | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogdir,qlogname) }}"
+      l_snapshot_policy:  "{{ snapshot_policy | to_nice_yaml(2) | indent(2,true) | do_log('','snapshot_policy',qlogdir,qlogname) }}"
 
     ## Create Snapshot Policy
   - name: "Create Snapshot Policy [{{ snapshot_policy.name | default('None') }}]"          

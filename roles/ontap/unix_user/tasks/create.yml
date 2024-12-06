@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster:   "{{ cluster   | to_nice_yaml(2) | indent(2,true) | do_log('ontap/unix_user/create','cluster',qlogname) }}"
-      l_svm:       "{{ svm       | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_unix_user: "{{ unix_user | to_nice_yaml(2) | indent(2,true) | do_log('','unix_user',qlogname) }}" 
+      l_cluster:   "{{ cluster   | to_nice_yaml(2) | indent(2,true) | do_log('ontap/unix_user/create','cluster',qlogdir,qlogname) }}"
+      l_svm:       "{{ svm       | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogdir,qlogname) }}"
+      l_unix_user: "{{ unix_user | to_nice_yaml(2) | indent(2,true) | do_log('','unix_user',qlogdir,qlogname) }}" 
 
   # Create Unix User
   - name: "Create Unix User [{{ unix_user.name }}]"       

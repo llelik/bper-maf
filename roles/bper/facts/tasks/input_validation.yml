@@ -30,7 +30,7 @@
 - name: Validate input environment control parameters
   ansible.builtin.fail:
     msg:
-      - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env }}"
+      - "Input data isn't correct. Cannot continue: input_env not given or not in the list. input value: {{ input_env | default('') }}"
   when:
     - ((input_env is not defined) or (input_env | upper not in storage_env)) and (input_env[:1] | upper not in ['F'])
 
@@ -44,7 +44,7 @@
 - name: Validate input size parameters
   ansible.builtin.fail:
     msg:
-      - "Input data isn't correct. Cannot continue: input_size not given or incorrect size. Input value: {{ input_size }}"
+      - "Input data isn't correct. Cannot continue: input_size not given or incorrect size. Input value: {{ input_size | default('') }}"
   when:
     - (input_size is not defined) or (input_size | int not in volume_sizes)
 
@@ -58,15 +58,24 @@
 - name: Validate input Export policy clientmatch parameters
   ansible.builtin.fail:
     msg:
-      - "Input data isn't correct. Cannot continue: input_clientmatch not given or incorrect value. Input value: {{ input_clientmatch }}"
+      - "Input data isn't correct. Cannot continue: input_clientmatch not given or incorrect value. Input value: {{ input_clientmatch | default('') }}"
   when:
     - input_clientmatch is not ansible.utils.ipv4
 
 - name: Validate input procedure parameters
   ansible.builtin.fail:
     msg:
-      - "Input data isn't correct. Cannot continue: input_proc not given or incorrect length (5). Input value: {{ input_proc }}"
+      - "Input data isn't correct. Cannot continue: input_proc not given or incorrect length (5). Input value: {{ input_proc | default('') }}"
   when:
     - input_proc | length != 5
+
+- name: Validate logging parameters
+  ansible.builtin.assert:
+    msg:
+      - "Log folder is not set! qlogdir: {{ qlogdir | default('') }}"
+    that:
+      - qlogdir is defined
+
+- debug: var=qlogdir
 
 ...

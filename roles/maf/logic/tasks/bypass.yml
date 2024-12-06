@@ -16,9 +16,9 @@
     qlogname : "{{ qlogname | default('',true) }}"
 
 - set_fact:
-    qlogname: "{{ vars_external | to_nice_yaml(2) | indent(2,true) | do_log('Running logic bypass','vars_external',qlogname) }}"
+    qlogname: "{{ vars_external | to_nice_yaml(2) | indent(2,true) | do_log('Running logic bypass','vars_external',qlogdir,qlogname) }}"
 
 # => bypassing the logic, just passing the data through, so no need to log the outcome
 
 # - set_fact:
-#     qlogname: "{{ vars_local | to_nice_yaml(2) | indent(2,true) | do_log('After logic bypass','vars_local',qlogname) }}"
+#     qlogname: "{{ vars_local | to_nice_yaml(2) | indent(2,true) | do_log('After logic bypass','vars_local',qlogdir,qlogname) }}"

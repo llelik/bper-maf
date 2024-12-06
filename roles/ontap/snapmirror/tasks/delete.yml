@@ -14,7 +14,7 @@
     
   # logging
   - set_fact:
-      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/delete','snapmirror',qlogname) }}"
+      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/delete','snapmirror',qlogdir,qlogname) }}"
 
   - name: Pre-flight availability check - primary storage inventory
     netapp.ontap.na_ontap_rest_info:

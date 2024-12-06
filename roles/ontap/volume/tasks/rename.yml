@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/volume/rename','cluster',qlogname) }}"
-      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_volume:  "{{ volume  | to_nice_yaml(2) | indent(2,true) | do_log('','volume',qlogname) }}"  
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/volume/rename','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogdir,qlogname) }}"
+      l_volume:  "{{ volume  | to_nice_yaml(2) | indent(2,true) | do_log('','volume',qlogdir,qlogname) }}"  
 
   - name: "Rename volume [{{ volume.name }}]"
     netapp.ontap.na_ontap_volume:

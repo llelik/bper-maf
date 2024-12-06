@@ -10,7 +10,7 @@ class FilterModule(object):
       'do_log':self.logToFile
     }
 
-  def logToFile(self, msg, title, name, logname):
+  def logToFile(self, msg, title, name, logdir, logname):
 
       import yaml
       import datetime
@@ -20,10 +20,10 @@ class FilterModule(object):
       # and prepend logs/ + timestamp to it
       if logname:
           if not logname.endswith('.log'):
-            fp = 'logs/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "_" + logname + '.log'
+            fp = logdir + '/' +datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "_" + logname + '.log'
             print(f"fp with log extension added: {fp}")
           else:
-            fp = logname
+            fp = logdir + '/' + logname
             print(f"fp: {fp}")
           with open(fp, 'a', encoding='utf-8') as f:
               # write title with dashed line underlined

@@ -15,9 +15,9 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/nfs/create','cluster',qlogname) }}"
-      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_nfs:     "{{ nfs     | to_nice_yaml(2) | indent(2,true) | do_log('','nfs',qlogname) }}"
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/nfs/create','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogdir,qlogname) }}"
+      l_nfs:     "{{ nfs     | to_nice_yaml(2) | indent(2,true) | do_log('','nfs',qlogdir,qlogname) }}"
 
   - name: "Enable nfs"      
     netapp.ontap.na_ontap_nfs:
