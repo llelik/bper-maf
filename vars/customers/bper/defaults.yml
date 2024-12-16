@@ -30,7 +30,7 @@ vars_defaults:
       volume_efficiency:
           enable_inline_compression: true
           enable_compression:        true
-          #compression_type:          secondary
+          compression_type:          secondary
           volume_efficiency:         start
           policy:                    default
     qtree:
