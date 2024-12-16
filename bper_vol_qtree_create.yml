@@ -31,66 +31,53 @@
 
   tasks:
     # Setup credentials
-    - include_role:
+    - ansible.builtin.include_role:
         name: bper/facts
       vars:
         qtask: credentials
 
     # Validate input variables
-    - include_role:
+    - ansible.builtin.include_role:
         name: bper/facts
       vars:
         qtask: input_validation
 
     # Prepare facts (Ex.: FUSn)
-    - include_role:
+    - ansible.builtin.include_role:
         name: bper/facts
       vars:
         qtask: prepare_facts
     
-    # Check inventory SVMs svailability
-    - include_role:
+    # Check inventory SVMs availability
+    - ansible.builtin.include_role:
         name: bper/logic
       vars:
         qtask: 00_preflight_check
 
     # Check if volume already exists and set new volume name incerementing by 1
-    - include_role:
+    - ansible.builtin.include_role:
         name: bper/logic
       vars:
         qtask: 01_preflight_setup
  
     # Find suitable source SVM
-    - include_role:
+    - ansible.builtin.include_role:
         name: bper/logic
       vars:
         qtask: 02_source_setup
     
     # Find suitable destination vault SVM
-    - include_role:
+    - ansible.builtin.include_role:
         name: bper/logic
       vars:
         qtask: 03_vault_setup
-
-    # Collect export policy facts variables
-    - include_role:
-        name: ontap/export_policy
-      vars:
-        qtask: facts
-        qchild: source
-
-    # Collect snapmirror facts variables
-    - include_role:
-        name: ontap/snapmirror
-      vars:
-        qtask: facts
 
 ########## debug + dryrun
     - name: Dryrun block
       when: input_dryrun | bool
       block:
-        - debug: var=vars_local
-        - debug:
+        - ansible.builtin.debug: var=vars_local
+        - ansible.builtin.debug:
             msg: "Data collection completed. Dryrun exit."
         - meta: end_play
 ########## debug end
@@ -98,183 +85,262 @@
 ########### CREATE STEP 1
 # here is no block/rescue when creating source volume 
 # since if it wasn't created - there is nothing to rollback
-    - block: 
-      - include_role:
+    # CREATE
+    - name: "Create source volume block"
+      block: 
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: source
-
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: create
           qchild: source
+      # RESCUE if something has fone wrong on create
       rescue:
-      - debug:
-          msg: "Source volume create task failed. Created objects will be deleted."
-      
-      - include_role:
+      - ansible.builtin.debug:
+          msg: "Source volume Create task failed. Created objects will be deleted." 
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: source
-
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      - ansible.builtin.debug:
+          msg: "Source volume Create task failed. All previously created objects were deleted."
       
       - meta: end_play
 
 ########### CREATE STEP 2
 # collect source volume qtree facts and trying to create
 # otherwise we rollback source volume creation
-    - block:      
-      - include_role:
+    # CREATE
+    - name: "Create source qtree block"
+      block:      
+      - ansible.builtin.include_role:
           name: ontap/qtree
         vars:
           qtask: facts
           qchild: source
-
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/qtree
         vars:
           qtask: create
           qchild: source
+      # RESCUE if something has fone wrong on create
       rescue:
-      - debug:
+      - ansible.builtin.debug:
           msg: "Qtree Create task failed. Created objects will be deleted."
-
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: source
-
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      - ansible.builtin.debug:
+          msg: "Qtree Create task failed. All previously created objects were deleted."
       
       - meta: end_play
 
 ########### CREATE STEP 3
 # collect destination volume facts and trying to create
 # otherwise we rollback source volume and qtree creation
-    - block:
-      - include_role:
+    # CREATE
+    - name: "Create destination volume block"
+      block:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: destination
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: create
           qchild: destination
+      # RESCUE if something has fone wrong on create
       rescue:
-      - debug:
+      - ansible.builtin.debug:
           msg: "Vault volume create task failed. Created objects will be deleted."
-      - include_role:
+      - ansible.builtin.include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: destination
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: destination
-      - include_role:
-          name: ontap/qtree
+      - ansible.builtin.include_role:
+          name: ontap/volume
         vars:
           qtask: facts
           qchild: source
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      - ansible.builtin.debug:
+          msg: "Vault Volume Create task failed. All previously created objects were deleted."
       
       - meta: end_play
 
 ########### CREATE STEP 4
 # create export policy and rules
 # otherwise we rollback source volume, qtree and destination volume creation
-    - block:
-      - include_role: 
+    # CREATE
+    - name: "Create export policy block"
+      block:
+          # Collect export policy facts variables
+      - ansible.builtin.include_role:
+          name: ontap/export_policy
+        vars:
+          qtask: facts
+          qchild: source
+      - ansible.builtin.include_role: 
           name: ontap/export_policy
         vars:
           qtask: create
           qchild: source
+      # RESCUE if something has fone wrong on create
       rescue:
-      - debug:
+      - ansible.builtin.debug:
           msg: "Export policy Create task failed. Created objects will be deleted."
-      - include_role:
+      - ansible.builtin.include_role:
+          name: ontap/qtree
+        vars:
+          qtask: facts
+          qchild: source
+      - ansible.builtin.include_role:
           name: ontap/qtree
         vars:
           qtask: delete
           qchild: source
       # re-collecting facts to setup values for active svm/volume values       
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: source
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
+      - ansible.builtin.include_role:
+          name: ontap/volume
+        vars:
+          qtask: facts
+          qchild: destination
+      - ansible.builtin.include_role:
+          name: ontap/volume
+        vars:
+          qtask: delete
+          qchild: destination
+      - ansible.builtin.debug:
+          msg: "Export policy Create task failed. All previously created objects were deleted."
 
       - meta: end_play
 
 ########### CREATE STEP 5
 # create snapmirror relationship
 # otherwise we rollback source volume, qtree, destination volume and export policy creation
-    - block:
-      - include_role:
+    # CREATE
+    - name: "Create Snapmirror block"
+      block:
+      # CREATE
+      # Collect snapmirror facts variables
+      - ansible.builtin.include_role:
+          name: ontap/snapmirror
+        vars:
+          qtask: facts
+      - ansible.builtin.include_role:
           name: ontap/snapmirror
         vars:
           qtask: create
+      # RESCUE if something has fone wrong on create
       rescue:
-      - debug:
+      - ansible.builtin.debug:
           msg: "Snapmirror create task failed. Created objects will be deleted."
-      - include_role:
+      - ansible.builtin.include_role:
+          name: ontap/snapmirror
+        vars:
+          qtask: facts
+      - ansible.builtin.include_role:
           name: ontap/snapmirror
         vars:
           qtask: delete
           qchild: source
-      - include_role:
+      - ansible.builtin.include_role:
+          name: ontap/qtree
+        vars:
+          qtask: facts
+          qchild: source
+      - ansible.builtin.include_role:
           name: ontap/qtree
         vars:
           qtask: delete
           qchild: source
-      - include_role: 
+      - ansible.builtin.include_role:
+          name: ontap/export_policy
+        vars:
+          qtask: facts
+          qchild: source
+      - ansible.builtin.include_role: 
           name: ontap/export_policy
         vars:
           qtask: delete
           qchild: source
       # re-collecting facts to setup values for active svm/volume values       
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: source
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: source
       # re-collecting facts to setup values for active svm/volume values  
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: facts
           qchild: destination
-      - include_role:
+      - ansible.builtin.include_role:
           name: ontap/volume
         vars:
           qtask: delete
           qchild: destination
+      - ansible.builtin.debug:
+          msg: "Snapmirror Create task failed. All previously created objects were deleted."
       
+      - meta: end_play
+    
+    - name: Reporting block
+      block:
+      - name: Post-create validation
+        ansible.builtin.include_role: 
+          name: maf/tests
+        vars:
+          qtask: integration-test
+
+      - ansible.builtin.include_role:
+          name: bper/logic
+        vars:
+          qtask: 99_reporting
       - meta: end_play
 ...

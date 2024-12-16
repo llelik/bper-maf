@@ -77,3 +77,4 @@ nolog: false
 input_dryrun: false
 # set precheck_inventory to false to skip inventory check (SVM check on ONTAP clusters)
 precheck_inventory: true
+playbook_dir: '/root'

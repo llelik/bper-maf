@@ -8,6 +8,7 @@
 ### Create destination volume
 ### Setup Snapmirror
 ### Rollback created objects if any failed
+<img src=docs/netapp-footer-logo.png>
 
 ## 
 

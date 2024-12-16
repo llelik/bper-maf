@@ -21,7 +21,6 @@ class FilterModule(object):
       if logname:
           if not logname.endswith('.log'):
             fp = logdir + '/' +datetime.datetime.now().strftime('%Y%m%d%H%M%S') + "_" + logname + '.log'
-            print(f"fp with log extension added: {fp}")
           else:
             fp = logdir + '/' + logname
             print(f"fp: {fp}")

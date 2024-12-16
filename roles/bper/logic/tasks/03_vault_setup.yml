@@ -57,6 +57,7 @@
       hostname: "{{ target_vault_cluster_ip }}"
     register: svm_aggregates
     when: target_vault_svm is defined
+    no_log: "{{ nolog }}"
   
   - ansible.builtin.assert:
       that: svm_aggregates.ontap_info.svm_svms.num_records > 0

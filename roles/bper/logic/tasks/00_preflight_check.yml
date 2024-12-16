@@ -46,6 +46,7 @@
       loop: "{{ svm_check.results }}"
       loop_control:
         loop_var: inventory_item
+      no_log: "{{ nolog }}"
     
     - name: Pre-flight availability check - secondary storage inventory
       netapp.ontap.na_ontap_rest_info:
@@ -72,6 +73,7 @@
       loop: "{{ svm_check.results }}"
       loop_control:
         loop_var: inventory_item
+      no_log: "{{ nolog }}"
   when: 
     - precheck_inventory | bool
 

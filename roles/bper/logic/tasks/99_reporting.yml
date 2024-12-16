@@ -1,0 +1,31 @@
+##########################################################################
+#
+# - report on success
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2024
+##########################################################################
+---
+- name: Summary report 
+  ansible.builtin.debug:
+    msg:
+      - "*********** REPORT START ***************************"
+      - "*********** SOURCE *********************************"
+      - "Source Cluster:       {{ vars_local.source.cluster.name | default('UNKNOWN') }}"
+      - "Source Volume:        {{ vars_local.source.volume.name | default('UNKNOWN') }}"
+      - "Source SVM:           {{ vars_local.source.svm.name | default('UNKNOWN') }}"
+      - "Source Qtree:         {{ vars_local.source.qtree.name | default('UNKNOWN') }}"
+      - "*********** DESTINATION ****************************"
+      - "Dest Vault Cluster:   {{ vars_local.destination.cluster.name | default('UNKNOWN') }}"
+      - "Dest Vault Volume:    {{ vars_local.destination.volume.name | default('UNKNOWN') }}"
+      - "Dest Vault SVM:       {{ vars_local.destination.svm.name | default('UNKNOWN') }}"
+      - "Snamirror:            [{{ vars_local.snapmirror.source.cluster.name | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.source.svm.name | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.source.volume.name | default('UNKNOWN') }}]  --->   
+                               [{{ vars_local.snapmirror.destination.cluster.name | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.destination.svm.name | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.destination.volume.name | default('UNKNOWN') }}]"
+      - "*********** REPORT END ***************************"

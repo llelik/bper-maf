@@ -21,11 +21,15 @@
           use_rest:        always
           use_python_keys: true
       no_log: true
-
+    
     - name: Reducing inventory for volume lookup 
       ansible.builtin.set_fact:
-        reduced_inventory: "{{ reduced_hosts | default([]) + [{'cluster_mgmt': item.cluster_mgmt}] }}"
+        reduced_inventory: "{{ reduced_inventory | default([]) + [item.cluster_mgmt] }}"
       loop: "{{ inventory_svms_mcc.hosts }}"
+
+    - name: Volume lookup cluster inventory
+      ansible.builtin.debug:
+        msg: "{{ reduced_inventory | unique}}"
 
 ######### Incrementing volume name by 1
 # We retrieve existing volumes with generated name pattern without last 2 digits
@@ -41,13 +45,13 @@
           name: "{{ vars_local.source.volume.name[:-2] }}*"
         fields:
           - name
-        hostname: "{{ svm.cluster_mgmt }}"
+        hostname: "{{ cluster_ip }}"
       register: existing_vols
-      loop: "{{ reduced_inventory | unique}}"
+      loop: "{{ reduced_inventory | unique }}"
       loop_control:
-        loop_var: svm
+        loop_var: cluster_ip
       no_log: "{{ nolog }}"
-
+    
 ######### Incrementing volume name by 1 cont.
 # We build a list of volumes if received
 # sort them and take the last one
