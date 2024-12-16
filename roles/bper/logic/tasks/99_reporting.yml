@@ -18,6 +18,7 @@
       - "Source Volume:        {{ vars_local.source.volume.name | default('UNKNOWN') }}"
       - "Source SVM:           {{ vars_local.source.svm.name | default('UNKNOWN') }}"
       - "Source Qtree:         {{ vars_local.source.qtree.name | default('UNKNOWN') }}"
+      - "Export Policy:        {{ vars_local.source.export_policy.name | default('UNKNOWN') }}"
       - "*********** DESTINATION ****************************"
       - "Dest Vault Cluster:   {{ vars_local.destination.cluster.name | default('UNKNOWN') }}"
       - "Dest Vault Volume:    {{ vars_local.destination.volume.name | default('UNKNOWN') }}"
