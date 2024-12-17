@@ -87,7 +87,7 @@
   - name: Merging logic found facts with vars_local
     ansible.builtin.set_fact:
       vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
-    
+  
   when: 
     - inventory_svms_mcc.keys() | length > 0
     - target_svm is defined

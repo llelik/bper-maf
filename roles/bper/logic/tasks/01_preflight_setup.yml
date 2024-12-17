@@ -1,9 +1,10 @@
 ##########################################################################
 #
 # - check for existing volumes and generate new volume name incremented by 1
-# 
-#
-# 
+# - setting other naming dependencies for:
+#   - qtree
+#   - export policy
+#   - source and vault volumes
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
 # Professional Services 2024
@@ -83,10 +84,13 @@
             volume:
               name:          "{{ new_volume_name | default(vars_local.source.volume.name) }}"
               junction_path: "/{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              export_policy:
+                name:        "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
             export_policy:
-              name:          "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+                name:        "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
             qtree:
               name:          "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              export_policy: "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
           snapmirror:
             destination:
               volume:

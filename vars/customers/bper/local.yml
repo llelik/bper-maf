@@ -18,11 +18,14 @@ vars_local:
       aggregate_include_name_regex: "{{ include_name_regex | default(omit) }}"
       junction_path: "/{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       snaplock:
-        type:                       "{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
+        type:        "{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
+      export_policy:
+        name:        "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     qtree:
-      name: "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
+      name:          "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
+      export_policy: "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     export_policy:
-      name: "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact]  |default(input_env_fact) }}01"
+      name:          "Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       rules:
         - client_match: "{{ input_clientmatch | default('0.0.0.0/0') }}"
           rule_index: 1
