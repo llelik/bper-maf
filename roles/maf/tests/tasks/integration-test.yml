@@ -119,7 +119,7 @@
       - efficiency.policy.name
     hostname: "{{ src_cluster.management_ip }}"
   register: src_vol_info
-  no_log: false #"{{ nolog }}"
+  no_log: "{{ nolog }}"
 
 - name: "Tests: Collect source cluster info - Export policy"
   netapp.ontap.na_ontap_rest_info:
