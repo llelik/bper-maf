@@ -171,17 +171,17 @@
       - sm_info.ontap_info.snapmirror_relationships.records[0].state     in ['snapmirrored', 'initializing', 'transferring']
     msg: "One or more of the required objects not found on the source or destination cluster. Please check the configuration."
 
-- debug:
-    msg:
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent}}"
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name}}"
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].language         }}"             
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style   }}"        
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].type                   }}"      
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type            }}"   
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy             }}" 
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode }}" 
-      - "{{src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name }}"        
+# - debug:
+#     msg:
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent}}"
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name}}"
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].language         }}"             
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style   }}"        
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].type                   }}"      
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type            }}"   
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy             }}" 
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode }}" 
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name }}"        
 
 - name: "Tests: Assert source volume has default parameters set up"
   ansible.builtin.assert:
