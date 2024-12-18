@@ -152,6 +152,7 @@
       shrink_threshold_percent: "{{ volume.volume_autosize.shrink_threshold_percent | default(omit) }}"
       <<: *auth
     delegate_to: localhost
+    register: vol_autosize_result
     when:
     - volume.volume_autosize | default(false)
 

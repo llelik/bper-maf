@@ -1,8 +1,11 @@
 ##########################################################################
 #
-# - Main playbook for creating a volume, qtree and volume protection SnapMirror
-# 
-#
+# - Main playbook for creating
+#   - Export policy
+#   - source volume
+#   - source qtree
+#   - destination vault volume
+#   - snapmirror relationship
 # 
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
@@ -127,6 +130,16 @@
         - ansible.builtin.debug:
             msg: "Source volume create task failed. Created objects will be deleted."
         - ansible.builtin.include_role:
+            name: ontap/volume
+          vars:
+            qtask: facts
+            qchild: source
+        - ansible.builtin.include_role:
+            name: ontap/volume
+          vars:
+            qtask: delete
+            qchild: source
+        - ansible.builtin.include_role:
             name: ontap/export_policy
           vars:
             qtask: facts
@@ -136,16 +149,7 @@
           vars:
             qtask: delete
             qchild: source
-        - ansible.builtin.include_role:
-            name: ontap/volume
-          vars:
-            qtask: facts
-            qchild: source
-        - ansible.builtin.include_role:
-            name: ontap/volume
-          vars:
-            qtask: delete
-            qchild: source
+        
         - ansible.builtin.debug:
             msg: "Source volume Create task failed. All previously created objects were deleted."
         

@@ -27,6 +27,7 @@
       ansible.builtin.set_fact:
         reduced_inventory: "{{ reduced_inventory | default([]) + [item.cluster_mgmt] }}"
       loop: "{{ inventory_svms_mcc.hosts }}"
+      no_log: "{{ nolog }}"
 
     - name: Volume lookup cluster inventory
       ansible.builtin.debug:

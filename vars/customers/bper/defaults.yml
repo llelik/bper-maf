@@ -13,20 +13,22 @@ vars_defaults:
     volume:
       wait_for_completion: true
       percent_snapshot_space: 5                   #ONTAP default
-      space_guarantee:        none
-      read_realloc:           off                 #ONTAP default
+      space_guarantee:        'none'
+      read_realloc:           'off'                 #ONTAP default
       language:               c.utf_8
       type:                   rw
       size_unit:              gb
-      snapshot_policy:        Prod_snapshot_3_3
+      snapshot_policy:
+        name:                 'Prod_snapshot_3_3'
+        #name:                 default            # lab setup
       fractional_reserve:     100                 #ONTAP default
       security_style:         unix
       snaplock:
         type:                 non_snaplock        #??? options: compliance, enterprise, non_snaplock
       tiering_policy:
-        name:                 none
+        name:                 'none'
       volume_autosize:
-        mode:                 off                 #ONTAP default
+        mode:                 'off'                 #ONTAP default 
       volume_efficiency:
           enable_inline_compression: true
           enable_compression:        true
