@@ -1,6 +1,6 @@
 ##########################################################################
 #
-# - Main playbook for creating
+# Main playbook for creating
 #   - Export policy
 #   - source volume
 #   - source qtree
@@ -17,8 +17,8 @@
   become: false
   gather_facts: false
   environment:
-    http_proxy: ""
-    https_proxy: ""
+    http_proxy: ""       # disable proxy
+    https_proxy: ""      
   vars_files:
     - "vars/customers/bper/defaults.yml"
     - "vars/customers/bper/local.yml"
@@ -29,11 +29,11 @@
    # BPER lab:
     - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
-    qlogname: "create_vol_qtree_export.bper"
-    qlogdir:  "{{ vars['playbook_dir'] }}/logs"
+    qlogname: "create_vol_qtree_export.bper"       # log file name prefix
+    qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
 
   tasks:
-    # Setup credentials
+    # Setup credential facts
     - ansible.builtin.include_role:
         name: bper/facts
       vars:
@@ -333,17 +333,26 @@
         
         - meta: end_play
     
+    # Reporting block
     - name: Reporting block
       block:
-      - name: Post-create validation
-        ansible.builtin.include_role: 
-          name: maf/tests
-        vars:
-          qtask: integration-test
+        - name: Post-create validation
+          ansible.builtin.include_role: 
+            name: maf/tests
+          vars:
+            qtask: integration-test
 
-      - ansible.builtin.include_role:
-          name: bper/logic
-        vars:
-          qtask: 99_reporting
-      - meta: end_play
+        - ansible.builtin.include_role:
+            name: bper/logic
+          vars:
+            qtask: 99_reporting
+        - meta: end_play
+      rescue:
+        - ansible.builtin.debug:
+            msg: "Post-create validation failed. Please check the logs. Resource details will be printed."
+        - ansible.builtin.include_role:
+            name: bper/logic
+          vars:
+            qtask: 99_reporting
+
 ...
