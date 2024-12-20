@@ -1,12 +1,17 @@
 # DOCUMENTATION
 ## MAF implementation for BPER Services ScpA
 
-## Contents:
-- ### MAF
-- ### Execution environment
-* Requirements
-* Authors and contacts
-+ Ansible playbook workflow 
+## *Contents:*
+1. ### MAF
+2. ### Automation task
+3. ### Execution environment
+4. ### Requirements
+5. ### Authors and contacts
+6. ### Ansible playbook
+   6.1 #### Input values
+   6.2 #### Data structure
+   6.3 #### Default values
+   6.4 #### Name generation
 ### 
 
 
