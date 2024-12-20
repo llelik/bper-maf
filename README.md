@@ -2,11 +2,11 @@
 ## MAF implementation for BPER Services ScpA
 
 ## Contents:
-### MAF
-### Execution environment
-### Requirements
-### Authors and contacts
-### Ansible playbook workflow 
+### - MAF
+### - Execution environment
+### * Requirements
+### * Authors and contacts
+### + Ansible playbook workflow 
 ### 
 
 
