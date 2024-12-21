@@ -83,6 +83,68 @@ netapp-ontap >= 9.13
 ### *Operating System:*
 Linux, no distribution dependencies
 
-### *ONTAP:*
+### *NetApp ONTAP:*
 Minimal tested version: 9.13.1
 
+### *NetApp ONTAP SVM:*
+SnapMirror:
+- SVM must have network interface
+- Source primary SVM and vault secondary SVM must be peered
+- ONTAP cluster must have snapshot policy pre-configured
+
+### *Network:*
+Ansible control station must have direct connection to port 443 on ONTAP cluster management interface
+
+### *ONTAP user:*
+User under which operations are performed on primary and secondary ONTAP clusters must have the following access rights:
+Applications:
+- http
+
+User role must have write(all) access to the following REST API endpoints:
+/api/protocols/nfs/export-policies     all
+/api/snapmirror         all
+/api/storage/qtrees     all
+/api/storage/volumes     all
+
+
+4. # Execution environment
+To execute the playbook all folders that are the part of MAF must reside in write accessible folder for the linux user that runs ansible-playbook command.
+There are 2 supported execution environments:
+- Linux shell with extra variables passed in command line
+- VMWare Aria launching remote shell via SSH with extra variables passed as input
+
+5. # Ansible playbook operations
+
+  5.1 ### Roles
+  Roles that are the part of the solution:
+  - ontap/export_policy
+    Purpose:
+      * prepare role facts values
+      * create export policy on primary ONTAP cluster
+      * delete export policy in a rollback scenario
+  - ontap/volume
+    Purpose:
+      * prepare role facts values
+      * create volume on primary or secondary ONTAP cluster and mount to a junction
+      * configure volume extended parameters: efficiency, autosize, compression, etc
+      * delete volume in a rollback scenario
+  - ontap/qtree
+    Purpose:
+      * prepare role facts values
+      * create qtree in a given volume
+      * delete qtree in a rollback scenario
+  - ontap/snapmirror
+    Purpose:
+      * prepare role facts values
+      * create Snapmirror relationship
+      * initialize Snapmirror relationship
+
+
+
+
+* 5.5 ### Data structure
+  The variables that required for the workflow design and execution have to be stored and represented in a structure that represents ONTAP REST, inculding:
+- flat variables
+- lists, lists of dictionaries
+- dictionaries
+- names and structures of those variables
