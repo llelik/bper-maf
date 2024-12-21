@@ -190,7 +190,7 @@ Validation: Credentials are validated before main tasks execition. If they do no
 
 ### 5.4 Input values
 The follwoing input values are supported:  
-input_env:
+#### input_env:
 * is defined  
 * is in 
   - PR
@@ -203,7 +203,7 @@ input_env:
   - SV
   - CO  
   
-input_size:
+#### input_size:
 * is defined  
 * is one of the following values (defined in GB):
   - 5
@@ -211,17 +211,19 @@ input_size:
   - 25
   - 50
   
-input_snaplock:
+#### input_snaplock:
 * is defined
 * is in ['true', 'false']
   
-input_clientmatch:  
+#### input_clientmatch:  
 * is defined
-* is given in valid network notation (IP, network)
-input_proc:  
+* is given in valid network notation (IP, network)  
+  
+#### input_proc:  
 * is defined  
-* is 5 characters long
-input_dryrun:  
+* is 5 characters long  
+  
+#### input_dryrun:  
 * is in ['true', 'false', 'yes', 'no'] if defined
 
 
