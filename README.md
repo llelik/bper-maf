@@ -1,6 +1,9 @@
-<img src=docs/netapp-footer-logo.png>
-# DOCUMENTATION
-## MAF implementation for BPER Services ScpA
+<img src=docs/netapp-footer-logo.png>  
+
+# DOCUMENTATION  
+## MAF implementation for BPER Services ScpA  
+
+<div style="page-break-after: always;"></div>
 
 ## *Contents:*
 1. ### MAF
@@ -28,8 +31,8 @@
 7. ### Execution
 8. ### Authors and contacts
  
+<div style="page-break-after: always;"></div>
 
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 1. MAF
 ## MAF is a collection of Ansible roles, modules, filters.
 
@@ -56,6 +59,8 @@ Custom modules allow to fine tune the behavior to the task requiremnts.
 Ex.: custom module for identifying best aggregate candidate for the new volume basing on multiple values and exceptions.
 
 Custom filters allow data manipulation and are useful with naming convention, logging and data manupulation.
+
+<div style="page-break-after: always;"></div>
 
 # 2. Automation task
 Playbook name: bper_vol_qtree_create.yml
@@ -106,6 +111,7 @@ User role must have write(all) access to the following REST API endpoints:
 /api/storage/qtrees     all  
 /api/storage/volumes     all  
 
+<div style="page-break-after: always;"></div>
 
 # 4. Execution environment
 To execute the playbook all folders that are the part of MAF must reside in write accessible folder for the linux user that runs ansible-playbook command.
@@ -144,6 +150,7 @@ Playbook is not using Ansible inventories due to:
       * create Snapmirror relationship
       * initialize Snapmirror relationship
 
+<div style="page-break-after: always;"></div>
 
 ### 5.2 Inventory
 Inventory is designed to be loaded as variables of a spcific design.  
@@ -188,6 +195,8 @@ The solution is configured to use username/password pair.
 
 Validation: Credentials are validated before main tasks execition. If they do not satisfy the requirements - play exits.
 
+<div style="page-break-after: always;"></div>
+
 ### 5.4 Input values
 The follwoing input values are supported:  
 #### input_env:
@@ -228,6 +237,8 @@ The follwoing input values are supported:
 
 
 Validation: input values are validated before main tasks execition. If they do not satisfy the requirements - play exits.
+
+<div style="page-break-after: always;"></div>
 
 ### 5.5 Data structure
   The variables that required for the workflow design and execution have to be stored and represented in a structure that represents ONTAP REST, inculding:
