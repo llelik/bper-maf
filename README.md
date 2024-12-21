@@ -97,14 +97,13 @@ Ansible control station must have direct connection to port 443 on ONTAP cluster
 
 ### *ONTAP user:*
 User under which operations are performed on primary and secondary ONTAP clusters must have the following access rights:
-Applications:
-- http
+Applications - http
 
 User role must have write(all) access to the following REST API endpoints:
-/api/protocols/nfs/export-policies     all
-/api/snapmirror         all
-/api/storage/qtrees     all
-/api/storage/volumes     all
++ /api/protocols/nfs/export-policies     all
++ /api/snapmirror         all
++ /api/storage/qtrees     all
++ /api/storage/volumes     all
 
 
 4. # Execution environment
@@ -115,7 +114,7 @@ There are 2 supported execution environments:
 
 5. # Ansible playbook operations
 
-  5.1 ### Roles
+  ### 5.1 Roles
   Roles that are the part of the solution:
   - ontap/export_policy
     Purpose:
@@ -142,7 +141,7 @@ There are 2 supported execution environments:
 
 
 
-* 5.5 ### Data structure
+### 5.5 Data structure
   The variables that required for the workflow design and execution have to be stored and represented in a structure that represents ONTAP REST, inculding:
 - flat variables
 - lists, lists of dictionaries
