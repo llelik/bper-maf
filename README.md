@@ -112,7 +112,7 @@ There are 2 supported execution environments:
 - Linux shell with extra variables passed in command line
 - VMWare Aria launching remote shell via SSH with extra variables passed as input
 
-5. # Ansible playbook operations
+# 5. Ansible playbook operations
 
   ### 5.1 Roles
   Roles that are the part of the solution:
