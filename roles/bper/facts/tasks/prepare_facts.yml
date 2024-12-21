@@ -10,6 +10,10 @@
 ##########################################################################
 ---
 # shorten name for FUS environment
+# NOTE: this is a special case for FUS environment
+# *** DISABLED ***
+#
+# it is now executed in bypass mode
 - name: Prepare special case environment FUS-n
   ansible.builtin.set_fact:
     input_env_fact: "{{ input_env | shorten_fus }}"

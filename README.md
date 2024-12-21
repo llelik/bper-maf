@@ -92,6 +92,12 @@ Linux, no distribution dependencies
 
 ### *NetApp ONTAP:*
 Minimal tested version: 9.13.1
+All tasks addressed to ONTAP preresume operations via REST API only. ONTAP ZAPI calls are excluded from all roles.
+
+````
+## NOTE: ZAPI is diabled on ONTAP from 9.15.1 release (but can be enabled manually).
+## is to be completely decommissioned starting ONTAP 9.17.1 release (as of December 2024).    
+````  
 
 ### *NetApp ONTAP SVM:*
 SnapMirror:
@@ -267,7 +273,7 @@ playbook_dir: '/root'
 ONTAP variables are designed per object instance as a flat variable, dictionary, list or list of dictionaries.
 This solution includes default parameters specified in global variable vars_defaults.  
 Other parameters collected from ONTAP clusters and generated vales based on ONTAP facts in are added or modified in the play. See details in section 5.7.  
-Statics major varsiables are: 
+Static major varsiables are: 
 * source: contains variables to be used when creating instancies on primary ONTAP cluster
 * destination: contains variables to be used when creating instancies on secondary ONTAP cluster
 * snapmirror: contains Snapmirror only variables to be used when creating Snapmirror relationship on secondary ONTAP cluster
@@ -276,23 +282,88 @@ Default values do not include values that are being generated.
 Variables provided to the play has the following structure:
 ````
 vars_defaults:
-    source: # definition of source instancies
-        volume: # parameters for source volume
-            type: *default_value*
-            language: *default_value*
+    source:                   # definition of source instancies
+        volume:               # parameters for source volume
+            type:           *default_value*
+            language:       *default_value*
             volume_autosize:
-                mode: *default_value*
+                mode:       *default_value*
         etc...
         qtree:
             security_style: *default_value*
-            oplocks: *default_value*
-    destination: # definition of destination instancies
-        volume: # parameters for source volume
-                type: *default_value*
-    snapmirror: # definition of destination instancies
-        policy: *default_value*
+            oplocks:        *default_value*
+    destination:              # definition of destination instancies
+        volume:               # parameters for source volume
+                type:       *default_value*
+    snapmirror:               # definition of destination instancies
+        policy:             *default_value*
 ````
 
 ### 5.7 Name generation and variable merge
+Volume name is required to be generated basing on the following:
+- must be unique across MCC clusters
+- must follow naming convention (see separate document)
+- new volume index digits (*****NN) must be incremented by 1
+- qtree, export policy and destination vault volume name are inherited fro the first part of the volume name
+- SVM selection for the new volume must consider volume count attached to the SVM 
+
+Variables values are being collected and generated in the following tasks:
+- bper/facts/prepare_facts.yml
+- bper/logic/01_preflight_setup.yml
+- bper/logic/02_source_setup.yml
+- bper/logic/03_vault_setup.yml
+
+There are 2 global variables involved in the process of values generation:
+1. Defualts (var/defaults.yml: vars_defaults)
+2. Local vars (var/local.yml: vars_local)
+
+vars_local is the global variable, values for what are being collected throughout roles execution above.
+When local variables collection and generation is completed - they are having the same structure as vars_defaults but contain non-default values.  
+These values based on the play execution and valid only for this execution.
+
+Every execution of any instance create or delete role preceeds variables merge procedure.
+
+Variables collection and generation workflow:
+1. Loading vars_local: first version of variables set is generated
+2. Prepare facts role task: generates name for special case of FUS-n environment (NOTE: is currently disabled as this environment name is being passed to playbook already prepared)
+3. Prepare facts role task: adds aggregate inclusion or exclusion for aggregate Snaplock functionality 
+4. 01_preflight setup role task: collects existing volume names from all ONTAP clusters in the inventory and sets new volume name incremented by 1
+5. 01_preflight setup role task: using new volume name the following values are being generated:
+   1. qtree name
+   2. export policy name
+   3. destination volume name
+   4. snapmirror source values
+   5. snapmirror destination values
+6. 01_preflight setup role task: values are being added to vars_local variable
+7. 02_source_setup role task: selects source SVM basing on volume count and retrieves avaliable aggregates for this SVM
+8. 02_source_setup role task: values are being added to vars_local variable
+9. 03_vailt_setup role task: identifying destination vault SVM, sets and adds variables for Snapmirror
+
+Once vars_local variables are generated they are merged with vars_defauls before every create or delete operation.  
+
 ### 5.8 Logging
+Every operation is being logged in a separate file with the follwoing format: {qlogdir}/date_time{qlogname}.
+qlogdir and qlogname are defined in the playbook and can be modified as necessary.
+
+Logfile contains values passed to the create/delete role for the future review.  
+
 ### 5.9 Dryrun
+Dryrun {true, false} is instructing the playbook to print extra debug information.
+If enabled the final global variables will be printed and playbook ends without creating any instance.
+input_dryrun is set to false by default in vars/defaults.yml - it can be overwritten by extra varsiable passed to the playbook on execution.  
+
+6. # Play workflow
+
+### 6.1 Pre-flight checks and values setup
+The playbook is built on fail-fast design - it tries to identify issues before any instance is created and exit as soon as possible.
+
+Pre-flight includes:
+- input variables validation and exit if they do not comply
+- informa
+### 6.2 Create export policy
+### 6.3 Create source volume
+### 6.4 Create qtree
+### 6.5 Create destination volume
+### 6.6 Create Snapmirror
+### 6.7 Rollback
+
