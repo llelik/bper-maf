@@ -30,7 +30,7 @@
  
 
 
-1. # MAF
+# 1. MAF
 ## MAF is a collection of Ansible roles, modules, filters.
 
 Roles can be defined by function they serve:
@@ -57,7 +57,7 @@ Ex.: custom module for identifying best aggregate candidate for the new volume b
 
 Custom filters allow data manipulation and are useful with naming convention, logging and data manupulation.
 
-2. # Automation task
+# 2. Automation task
 Playbook name: bper_vol_qtree_create.yml
 
 Task:
@@ -68,7 +68,7 @@ Task:
 5. SnapMirror relationship must be established
 6. Playbook must support integration with VMWare Aria solution (via remote ssh exec)
 
-3. # Requirements
+# 3. Requirements
 
 ### *Ansible:*
 Ansible-core min. version: 2.11
@@ -106,7 +106,7 @@ User role must have write(all) access to the following REST API endpoints:
 + /api/storage/volumes     all
 
 
-4. # Execution environment
+# 4. Execution environment
 To execute the playbook all folders that are the part of MAF must reside in write accessible folder for the linux user that runs ansible-playbook command.
 There are 2 supported execution environments:
 - Linux shell with extra variables passed in command line
