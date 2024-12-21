@@ -6,4 +6,4 @@ This role is used to gather and validate facts.
 
 - credentials : gather credentials
 - input_validation: validate input values for comformance
-- prepare_facts: modifications on some input values given (FUSn)
+- prepare_facts: modifications on some input values given (FUSn) or skipping

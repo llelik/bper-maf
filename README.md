@@ -18,7 +18,7 @@
    8. #### Logging
    9. #### Dryrun
 6. ### Play workflow
-   1. #### Collect data
+   1. #### Pre-flight checks and values setup
    2. #### Create export policy
    3. #### Create source volume
    4. #### Create qtree
@@ -88,6 +88,7 @@ Minimal tested version: 9.13.1
 
 ### *NetApp ONTAP SVM:*
 SnapMirror:
+- SVM must exist and be online
 - SVM must have network interface
 - Source primary SVM and vault secondary SVM must be peered
 - ONTAP cluster must have snapshot policy pre-configured
@@ -148,15 +149,83 @@ Playbook is not using Ansible inventories due to:
 Inventory is designed to be loaded as variables of a spcific design.  
 Location: ./vars/inventrory_bper_prod.yml
 
-Inventory is SVM based and contains the following variables for each SVM:
+Inventory is SVM based and contains variables for each Primary SVM. Inventory is a list of hosts:
 ````
-name: _PRI_SVM_NAME_
-cluster_mgmt: _SVM_CLUSTER_IP_
-cluster_name: _CLUSTER_NAME_
-vault_svm: _PRI_SVM_VAULT_PARTNER_SVM_NAME_
+hosts:
+  - name: _PRI_SVM_NAME_
+    cluster_mgmt: _SVM_CLUSTER_IP_
+    cluster_name: _CLUSTER_NAME_
+    vault_svm: _PRI_SVM_VAULT_PARTNER_SVM_NAME_
+````  
+Example:  
 ````
-Having vault_svm with the name of peer SVM allows to specify a pair Primary SVM <--> Vault SVM.
+- name: svm_cse_01
+  cluster_mgmt: 192.168.78.22
+  cluster_name: fas8200-cse
+  vault_svm: svm_cse_new_vault
+````
 
+Having vault_svm with the name of peer SVM allows to specify a pair Primary SVM <--> Vault SVM.  
+
+Secondary SVM records:  
+````
+hosts:
+    - name: svm_cse_new_vault
+      cluster_mgmt: 192.168.65.207
+      cluster_name: fas2820-moc
+````
+
+The selector code in playbook is finding the right primary SVM peer using vault_svm value for selection in Secondary SVM list.  
+
+Validation: Inventory structure and consistency is validated before main tasks execition.
+
+### 5.3 Credentials
+The solution is designed to use the same creadentials for both Primary and Secondary vault ONTAP clusters.
+User msut have identical access rights on all clusters in the inventory.
+
+MAF supports both username/password pair and certificate authenticaton.
+The solution is configured to use username/password pair.
+
+Validation: Credentials are validated before main tasks execition. If they do not satisfy the requirements - play exits.
+
+### 5.4 Input values
+The follwoing input values are supported:  
+input_env:
+* is defined  
+* is in 
+  - PR
+  - PP
+  - CT
+  - SE 
+  - CE
+  - SR
+  - CR
+  - SV
+  - CO  
+  
+input_size:
+* is defined  
+* is one of the following values (defined in GB):
+  - 5
+  - 10
+  - 25
+  - 50
+  
+input_snaplock:
+* is defined
+* is in ['true', 'false']
+  
+input_clientmatch:  
+* is defined
+* is given in valid network notation (IP, network)
+input_proc:  
+* is defined  
+* is 5 characters long
+input_dryrun:  
+* is in ['true', 'false', 'yes', 'no'] if defined
+
+
+Validation: input values are validated before main tasks execition. If they do not satisfy the requirements - play exits.
 
 ### 5.5 Data structure
   The variables that required for the workflow design and execution have to be stored and represented in a structure that represents ONTAP REST, inculding:
