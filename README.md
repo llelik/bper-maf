@@ -29,7 +29,7 @@
 8. ### Authors and contacts
  
 
-
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 1. MAF
 ## MAF is a collection of Ansible roles, modules, filters.
 
@@ -112,6 +112,11 @@ There are 2 supported execution environments:
 - Linux shell with extra variables passed in command line
 - VMWare Aria launching remote shell via SSH with extra variables passed as input
 
+Playbook is not using Ansible inventories due to:
+- Ansible to ONTAP communication is performed over HTTPS, not default SSH
+- Task execution is not targeting a group or all the clusters
+- Variables design and SVM selection logic are not well suited for Ansible Inventory 
+
 # 5. Ansible playbook operations
 
   ### 5.1 Roles
@@ -139,6 +144,18 @@ There are 2 supported execution environments:
       * initialize Snapmirror relationship
 
 
+### 5.2 Inventory
+Inventory is designed to be loaded as variables of a spcific design.
+Location: ./vars/inventrory_bper_prod.yml
+
+Inventory is SVM based and contains the following variables for each SVM:
+
+name: _PRI_SVM_NAME_
+cluster_mgmt: _SVM_CLUSTER_IP_
+cluster_name: _CLUSTER_NAME_
+vault_svm: _PRI_SVM_VAULT_PARTNER_SVM_NAME_
+
+Having vault_svm with the name of peer SVM allows to specify a pair Primary SVM <--> Vault SVM.
 
 
 ### 5.5 Data structure
