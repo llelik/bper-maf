@@ -6,8 +6,8 @@
 <div style="page-break-after: always;"></div>
 
 ## *Contents:*
-1. ### MAF
-2. ### Terminology
+1. #### MAF
+2. #### Terminology
 3. ### Automation task
 4. ### Requirements
 5. ### Execution environment
