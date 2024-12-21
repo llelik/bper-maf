@@ -16,6 +16,8 @@
   hosts: localhost
   become: false
   gather_facts: false
+  collections:
+    - netapp.ontap
   environment:
     http_proxy: ""       # disable proxy
     https_proxy: ""      

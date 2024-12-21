@@ -65,6 +65,7 @@ Custom filters allow data manipulation and are useful with naming convention, lo
 <div style="page-break-after: always;"></div>
 
 # 2. Terminology
+Ansible, Ansible control station - Linux or unix host with Ansible installed.  
 
 # 3. Automation task
 Playbook name: bper_vol_qtree_create.yml
@@ -384,19 +385,20 @@ Values setup includes:
 ### 7.3 Create source volume
 1. Merges vars_local with vars_default variables
 2. Selects most suitable aggregate to place the volume
-3. Creates source volume on primary ONTAP cluster
+3. Creates source volume on primary ONTAP cluster with specified parameters in merged variables
   
 ### 7.4 Create qtree
 1. Merges vars_local with vars_default variables
-2. Creates qtree on source volume
+2. Creates qtree on source volume with specified parameters in merged variables
   
 ### 7.5 Create destination volume
 1. Merges vars_local with vars_default variables
-2. Creates vault volume on seconary ONTAP cluster
+2. Selects most suitable aggregate to place the volume
+3. Creates vault volume on seconary ONTAP cluster with specified parameters in merged variables
   
 ### 7.6 Create Snapmirror
 1. Merges vars_local with vars_default variables
-2. Creates Snapmirror relationship from primary SVM:volume to secondary SVM:volume 
+2. Creates Snapmirror relationship from primary SVM:volume to secondary SVM:volume with specified parameters in merged variables
   
 ### 7.7 Rollback
 On every step of creating ONTAP instances create operation may fail for some reason.
@@ -405,5 +407,18 @@ Every next step includes 1 more instance that needs to be deleted in a spcific o
 Each create task includes rescue section to delete all previously created instances.
 
 ### 8. Installation
+Unzip tarball with code package.  
+````
+>cd bper-ontap-maf-vXXXX  
+>pip install -r requirements-python.txt  
+>ansible-galaxy collection install -r requirements-ansible.yml -f  
+````
+Playbook is ready.  
+
 ### 9. Execution
+````
+Example:
+>ansible-playbook bper_vol_qtree_create.yml -e "input_password=SECRET_PASS input_username=USERNAME input_env=PR input_size=5 input_proc=ABCDE input_clientmatch=0.0.0.0/0 input_snaplock=false"
+````
+The playbook can be triggered by any external automation orchestrator with given input extra variables.
 ### 10. Authors and contacts
