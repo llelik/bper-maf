@@ -99,11 +99,11 @@ Ansible control station must have direct connection to port 443 on ONTAP cluster
 User under which operations are performed on primary and secondary ONTAP clusters must have the following access rights:
 Applications - http
 
-User role must have write(all) access to the following REST API endpoints:
-+ /api/protocols/nfs/export-policies     all
-+ /api/snapmirror         all
-+ /api/storage/qtrees     all
-+ /api/storage/volumes     all
+User role must have write(all) access to the following REST API endpoints:  
+/api/protocols/nfs/export-policies     all  
+/api/snapmirror         all  
+/api/storage/qtrees     all  
+/api/storage/volumes     all  
 
 
 # 4. Execution environment
@@ -121,23 +121,23 @@ Playbook is not using Ansible inventories due to:
 
   ### 5.1 Roles
   Roles that are the part of the solution:
-  - ontap/export_policy
+  - ontap/export_policy  
     Purpose:
       * prepare role facts values
       * create export policy on primary ONTAP cluster
       * delete export policy in a rollback scenario
-  - ontap/volume
+  - ontap/volume  
     Purpose:
       * prepare role facts values
       * create volume on primary or secondary ONTAP cluster and mount to a junction
       * configure volume extended parameters: efficiency, autosize, compression, etc
       * delete volume in a rollback scenario
-  - ontap/qtree
+  - ontap/qtree  
     Purpose:
       * prepare role facts values
       * create qtree in a given volume
       * delete qtree in a rollback scenario
-  - ontap/snapmirror
+  - ontap/snapmirror  
     Purpose:
       * prepare role facts values
       * create Snapmirror relationship
@@ -145,16 +145,16 @@ Playbook is not using Ansible inventories due to:
 
 
 ### 5.2 Inventory
-Inventory is designed to be loaded as variables of a spcific design.
+Inventory is designed to be loaded as variables of a spcific design.  
 Location: ./vars/inventrory_bper_prod.yml
 
 Inventory is SVM based and contains the following variables for each SVM:
-
+````
 name: _PRI_SVM_NAME_
 cluster_mgmt: _SVM_CLUSTER_IP_
 cluster_name: _CLUSTER_NAME_
 vault_svm: _PRI_SVM_VAULT_PARTNER_SVM_NAME_
-
+````
 Having vault_svm with the name of peer SVM allows to specify a pair Primary SVM <--> Vault SVM.
 
 
