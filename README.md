@@ -7,11 +7,10 @@
 
 ## *Contents:*
 1. #### MAF
-2. #### Terminology
-3. #### Automation task
-4. #### Requirements
-5. #### Execution environment
-6. #### Ansible playbook operations
+2. #### Automation task
+3. #### Requirements
+4. #### Execution environment
+5. #### Ansible playbook operations
    1. ##### Roles
    2. ##### Inventory
    3. ##### Credentials
@@ -21,7 +20,7 @@
    7. ##### Name generation and variable merge
    8. ##### Logging
    9. ##### Dryrun
-7. #### Play workflow
+6. #### Play workflow
    1. ##### Pre-flight checks and values setup
    2. ##### Create export policy
    3. ##### Create source volume
@@ -29,14 +28,14 @@
    5. ##### Create destination volume
    6. ##### Create Snapmirror
    7. ##### Rollback
-8. #### Installation
-9. #### Execution
-10. #### Authors and contacts
+7. #### Installation
+8. #### Execution
+9. #### Authors and contacts
  
 <div style="page-break-after: always;"></div>
 
 # 1. MAF
-## MAF is a collection of Ansible roles, modules, filters.
+## MAF is a collection of Ansible roles, custom Ansible modules and filters.
 
 Roles can be defined by function they serve:
 - Manipulate with ONTAP resources
@@ -64,13 +63,10 @@ Custom filters allow data manipulation and are useful with naming convention, lo
 
 <div style="page-break-after: always;"></div>
 
-# 2. Terminology
-Ansible, Ansible control station - Linux or unix host with Ansible installed.  
-
-# 3. Automation task
+# 2. Automation task and purpose
 Playbook name: bper_vol_qtree_create.yml
 
-Task:
+Requested operation:
 1. Create a single volume with 1 qtree on primary Metrocluster (MCC) ONTAP system 
 2. Volume name must be unique across MCC environment
 3. Qtree must be exported via NFS to the given network
@@ -78,7 +74,7 @@ Task:
 5. SnapMirror relationship must be established
 6. Playbook must support integration with VMWare Aria solution (via remote ssh exec)
 
-# 4. Requirements
+# 3. Requirements
 
 ### *Ansible:*
 Ansible-core min. version: 2.11
@@ -126,7 +122,7 @@ User role must have write(all) access to the following REST API endpoints:
 
 <div style="page-break-after: always;"></div>
 
-# 5. Execution environment
+# 4. Execution environment
 To execute the playbook all folders that are the part of MAF must reside in write accessible folder for the linux user that runs ansible-playbook command.
 There are 2 supported execution environments:
 - Linux shell with extra variables passed in command line
@@ -140,9 +136,9 @@ Playbook is not using Ansible inventories due to:
 All operations are performed against any ONTAP cluster are made to cluster management interface with cluster scope.
 No SVM scope operations are performed.
 
-# 6. Ansible playbook operations
+# 5. Ansible playbook operations
 
-### 6.1 Roles
+### 5.1 Roles
   Roles that are the part of the solution:
   - ontap/export_policy  
     Purpose:
@@ -168,7 +164,7 @@ No SVM scope operations are performed.
 
 <div style="page-break-after: always;"></div>
 
-### 6.2 Inventory
+### 5.2 Inventory
 Inventory is designed to be loaded as variables of a spcific design.  
 Location: ./vars/inventrory_bper_prod.yml
 
@@ -202,7 +198,7 @@ The selector code in playbook is finding the right primary SVM peer using vault_
 
 Validation: Inventory structure and consistency is validated before main tasks execition.
 
-### 6.3 Credentials
+### 5.3 Credentials
 The solution is designed to use the same creadentials for both Primary and Secondary vault ONTAP clusters.
 User msut have identical access rights on all clusters in the inventory.
 
@@ -213,7 +209,7 @@ Validation: Credentials are validated before main tasks execition. If they do no
 
 <div style="page-break-after: always;"></div>
 
-### 6.4 Input values
+### 5.4 Input values
 The follwoing input values are supported:  
 #### input_env (mandatory):
 * is defined  
@@ -256,14 +252,14 @@ Validation: input values are validated before main tasks execition. If they do n
 
 <div style="page-break-after: always;"></div>
 
-### 6.5 Data structure
+### 5.5 Data structure
   The variables that required for the workflow design and execution have to be stored and represented in a structure that represents ONTAP REST, inculding:
 - flat variables
 - lists, lists of dictionaries
 - dictionaries
 - names and structures of those variables
 
-### 6.6 Default values
+### 5.6 Default values
 Default values are devided into 2 categories: ONTAP instancies related and playbook control related.  
 Default values are loaded in the play as variables in vars section of the play.  
 Location: ./vars/default.yml  
@@ -307,7 +303,7 @@ vars_defaults:
         policy:             *default_value*
 ````
 
-### 6.7 Name generation and variable merge
+### 5.7 Name generation and variable merge
 Volume name is required to be generated basing on the following:
 - must be unique across MCC clusters
 - must follow naming convention (see separate document)
@@ -349,23 +345,23 @@ Variables collection and generation workflow:
 
 Once vars_local variables are generated they are merged with vars_defauls before every create or delete operation.  
 
-### 6.8 Logging
+### 5.8 Logging
 Every operation is being logged in a separate file with the follwoing format: {qlogdir}/date_time{qlogname}.
 qlogdir and qlogname are defined in the playbook and can be modified as necessary.
 
 Logfile contains values passed to the create/delete role for the future review.  
 
-### 6.9 Dryrun
+### 5.9 Dryrun
 Dryrun {true, false} is instructing the playbook to print extra debug information.
 If enabled the final global variables will be printed and playbook ends without creating any instance.
 input_dryrun is set to false by default in vars/defaults.yml - it can be overwritten by extra varsiable passed to the playbook on execution.  
 
-# 7. Play workflow
+# 6. Play workflow
   
 Every instance create operation includes rescue section for the case when create operation has failed.  
 Rescue section implements rollback scenario.
 
-### 7.1 Pre-flight checks and values setup
+### 6.1 Pre-flight checks and values setup
 The playbook is built on fail-fast design - it tries to identify issues before any instance is created and exit as soon as possible.
 
 Pre-flight includes:
@@ -378,35 +374,35 @@ Values setup includes:
 - selection of SVM on secondary cluster by predefined mapping 
 - variables merge into vars_local global variable  
   
-### 7.2 Create export policy
+### 6.2 Create export policy
 1. Merges vars_local with vars_default variables
 2. Creates export policy on primary SVM basing on merged variables
   
-### 7.3 Create source volume
+### 6.3 Create source volume
 1. Merges vars_local with vars_default variables
 2. Selects most suitable aggregate to place the volume
 3. Creates source volume on primary ONTAP cluster with specified parameters in merged variables
   
-### 7.4 Create qtree
+### 6.4 Create qtree
 1. Merges vars_local with vars_default variables
 2. Creates qtree on source volume with specified parameters in merged variables
   
-### 7.5 Create destination volume
+### 6.5 Create destination volume
 1. Merges vars_local with vars_default variables
 2. Selects most suitable aggregate to place the volume
 3. Creates vault volume on seconary ONTAP cluster with specified parameters in merged variables
   
-### 7.6 Create Snapmirror
+### 6.6 Create Snapmirror
 1. Merges vars_local with vars_default variables
 2. Creates Snapmirror relationship from primary SVM:volume to secondary SVM:volume with specified parameters in merged variables
   
-### 7.7 Rollback
+### 6.7 Rollback
 On every step of creating ONTAP instances create operation may fail for some reason.
 As per requirements already created instances must be deleted.
 Every next step includes 1 more instance that needs to be deleted in a spcific order.
 Each create task includes rescue section to delete all previously created instances.
 
-### 8. Installation
+### 7. Installation
 Unzip tarball with code package.  
 ````
 >cd bper-ontap-maf-vXXXX  
@@ -415,10 +411,10 @@ Unzip tarball with code package.
 ````
 Playbook is ready.  
 
-### 9. Execution
+### 8. Execution
 ````
 Example:
 >ansible-playbook bper_vol_qtree_create.yml -e "input_password=SECRET_PASS input_username=USERNAME input_env=PR input_size=5 input_proc=ABCDE input_clientmatch=0.0.0.0/0 input_snaplock=false"
 ````
 The playbook can be triggered by any external automation orchestrator with given input extra variables.
-### 10. Authors and contacts
+### 9. Authors and contacts
