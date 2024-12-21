@@ -8,10 +8,10 @@
 4. ### Requirements
 5. ### Authors and contacts
 6. ### Ansible playbook
-   6.1 #### Input values
-   6.2 #### Data structure
-   6.3 #### Default values
-   6.4 #### Name generation
+   1. #### Input values
+   2. #### Data structure
+   3. #### Default values
+   4. #### Name generation
 ### 
 
 
