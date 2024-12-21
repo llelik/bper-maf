@@ -256,17 +256,17 @@ Validation: input values are validated before main tasks execition. If they do n
 - names and structures of those variables
 
 ### 5.6 Default values
-Default values are devided into 2 categories: ONTAP instancies related and playbook control related.
-Default values are loaded in the play as variables in vars section of the play.
-Location: ./vars/default.yml
+Default values are devided into 2 categories: ONTAP instancies related and playbook control related.  
+Default values are loaded in the play as variables in vars section of the play.  
+Location: ./vars/default.yml  
 #### Playbook control:
-* to reduce console output on large collections
+* to reduce console output on large collections  
 nolog: true
 * set dryrun to true to see what parameters will be used for ONTAP instancies creation. No changes on any ONTAP clusters will be applied. Play will end after printing the variables.
 input_dryrun: false
-* set precheck_inventory to false to skip inventory check (SVM check on ONTAP clusters)
+* set precheck_inventory to false to skip inventory check (SVM check on ONTAP clusters)  
 precheck_inventory: true
-* playbook dummy folder, actual value for this variable will be taken from Ansible magic variables while in the play
+* playbook dummy folder, actual value for this variable will be taken from Ansible magic variables while in the play  
 playbook_dir: '/root'
 
 #### ONTAP variables
