@@ -8,30 +8,30 @@
 ## *Contents:*
 1. #### MAF
 2. #### Terminology
-3. ### Automation task
-4. ### Requirements
-5. ### Execution environment
-6. ### Ansible playbook operations
-   1. #### Roles
-   2. #### Inventory
-   3. #### Credentials
-   4. #### Input values
-   5. #### Data structure
-   6. #### Default values
-   7. #### Name generation and variable merge
-   8. #### Logging
-   9. #### Dryrun
-7. ### Play workflow
-   1. #### Pre-flight checks and values setup
-   2. #### Create export policy
-   3. #### Create source volume
-   4. #### Create qtree
-   5. #### Create destination volume
-   6. #### Create Snapmirror
-   7. #### Rollback
-8. ### Installation
-9. ### Execution
-10. ### Authors and contacts
+3. #### Automation task
+4. #### Requirements
+5. #### Execution environment
+6. #### Ansible playbook operations
+   1. ##### Roles
+   2. ##### Inventory
+   3. ##### Credentials
+   4. ##### Input values
+   5. ##### Data structure
+   6. ##### Default values
+   7. ##### Name generation and variable merge
+   8. ##### Logging
+   9. ##### Dryrun
+7. #### Play workflow
+   1. ##### Pre-flight checks and values setup
+   2. ##### Create export policy
+   3. ##### Create source volume
+   4. ##### Create qtree
+   5. ##### Create destination volume
+   6. ##### Create Snapmirror
+   7. ##### Rollback
+8. #### Installation
+9. #### Execution
+10. #### Authors and contacts
  
 <div style="page-break-after: always;"></div>
 
