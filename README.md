@@ -25,7 +25,8 @@
    5. #### Create destination volume
    6. #### Create Snapmirror
    7. #### Rollback
-7. ### Authors and contacts
+7. ### Execution
+8. ### Authors and contacts
  
 
 
@@ -65,5 +66,23 @@ Task:
 3. Qtree must be exported via NFS to the given network
 4. Once primary volume is created - secondary volume must be created as SnapMirror destination for vaulting purposes
 5. SnapMirror relationship must be established
+6. Playbook must support integration with VMWare Aria solution (via remote ssh exec)
 
-  
+3. # Requirements
+
+### *Ansible:*
+Ansible-core min. version: 2.11
+Ansible min version: 8.7.0
+
+### *Python:*
+minimal version: 3.7
+
+### *Python modules:*
+netapp-ontap >= 9.13
+
+### *Operating System:*
+Linux, no distribution dependencies
+
+### *ONTAP:*
+Minimal tested version: 9.13.1
+
