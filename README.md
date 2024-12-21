@@ -7,10 +7,11 @@
 
 ## *Contents:*
 1. ### MAF
-2. ### Automation task
-3. ### Requirements
-4. ### Execution environment
-5. ### Ansible playbook operations
+2. ### Terminology
+3. ### Automation task
+4. ### Requirements
+5. ### Execution environment
+6. ### Ansible playbook operations
    1. #### Roles
    2. #### Inventory
    3. #### Credentials
@@ -20,7 +21,7 @@
    7. #### Name generation and variable merge
    8. #### Logging
    9. #### Dryrun
-6. ### Play workflow
+7. ### Play workflow
    1. #### Pre-flight checks and values setup
    2. #### Create export policy
    3. #### Create source volume
@@ -28,9 +29,9 @@
    5. #### Create destination volume
    6. #### Create Snapmirror
    7. #### Rollback
-7. ### Installation
-8. ### Execution
-9. ### Authors and contacts
+8. ### Installation
+9. ### Execution
+10. ### Authors and contacts
  
 <div style="page-break-after: always;"></div>
 
@@ -63,7 +64,9 @@ Custom filters allow data manipulation and are useful with naming convention, lo
 
 <div style="page-break-after: always;"></div>
 
-# 2. Automation task
+# 2. Terminology
+
+# 3. Automation task
 Playbook name: bper_vol_qtree_create.yml
 
 Task:
@@ -74,7 +77,7 @@ Task:
 5. SnapMirror relationship must be established
 6. Playbook must support integration with VMWare Aria solution (via remote ssh exec)
 
-# 3. Requirements
+# 4. Requirements
 
 ### *Ansible:*
 Ansible-core min. version: 2.11
@@ -112,6 +115,7 @@ Ansible control station must have direct connection to port 443 on ONTAP cluster
 ### *ONTAP user:*
 User under which operations are performed on primary and secondary ONTAP clusters must have the following access rights:
 Applications - http
+Scope - cluster
 
 User role must have write(all) access to the following REST API endpoints:  
 /api/protocols/nfs/export-policies     all  
@@ -121,7 +125,7 @@ User role must have write(all) access to the following REST API endpoints:
 
 <div style="page-break-after: always;"></div>
 
-# 4. Execution environment
+# 5. Execution environment
 To execute the playbook all folders that are the part of MAF must reside in write accessible folder for the linux user that runs ansible-playbook command.
 There are 2 supported execution environments:
 - Linux shell with extra variables passed in command line
@@ -132,9 +136,12 @@ Playbook is not using Ansible inventories due to:
 - Task execution is not targeting a group or all the clusters
 - Variables design and SVM selection logic are not well suited for Ansible Inventory 
 
-# 5. Ansible playbook operations
+All operations are performed against any ONTAP cluster are made to cluster management interface with cluster scope.
+No SVM scope operations are performed.
 
-  ### 5.1 Roles
+# 6. Ansible playbook operations
+
+### 6.1 Roles
   Roles that are the part of the solution:
   - ontap/export_policy  
     Purpose:
@@ -160,7 +167,7 @@ Playbook is not using Ansible inventories due to:
 
 <div style="page-break-after: always;"></div>
 
-### 5.2 Inventory
+### 6.2 Inventory
 Inventory is designed to be loaded as variables of a spcific design.  
 Location: ./vars/inventrory_bper_prod.yml
 
@@ -194,7 +201,7 @@ The selector code in playbook is finding the right primary SVM peer using vault_
 
 Validation: Inventory structure and consistency is validated before main tasks execition.
 
-### 5.3 Credentials
+### 6.3 Credentials
 The solution is designed to use the same creadentials for both Primary and Secondary vault ONTAP clusters.
 User msut have identical access rights on all clusters in the inventory.
 
@@ -205,9 +212,9 @@ Validation: Credentials are validated before main tasks execition. If they do no
 
 <div style="page-break-after: always;"></div>
 
-### 5.4 Input values
+### 6.4 Input values
 The follwoing input values are supported:  
-#### input_env:
+#### input_env (mandatory):
 * is defined  
 * is in 
   - PR
@@ -220,7 +227,7 @@ The follwoing input values are supported:
   - SV
   - CO  
   
-#### input_size:
+#### input_size (mandatory):
 * is defined  
 * is one of the following values (defined in GB):
   - 5
@@ -228,19 +235,19 @@ The follwoing input values are supported:
   - 25
   - 50
   
-#### input_snaplock:
+#### input_snaplock (mandatory):
 * is defined
 * is in ['true', 'false']
   
-#### input_clientmatch:  
+#### input_clientmatch (mandatory):  
 * is defined
 * is given in valid network notation (IP, network)  
   
-#### input_proc:  
+#### input_proc (mandatory):  
 * is defined  
 * is 5 characters long  
   
-#### input_dryrun:  
+#### input_dryrun (optional):  
 * is in ['true', 'false', 'yes', 'no'] if defined
 
 
@@ -248,21 +255,21 @@ Validation: input values are validated before main tasks execition. If they do n
 
 <div style="page-break-after: always;"></div>
 
-### 5.5 Data structure
+### 6.5 Data structure
   The variables that required for the workflow design and execution have to be stored and represented in a structure that represents ONTAP REST, inculding:
 - flat variables
 - lists, lists of dictionaries
 - dictionaries
 - names and structures of those variables
 
-### 5.6 Default values
+### 6.6 Default values
 Default values are devided into 2 categories: ONTAP instancies related and playbook control related.  
 Default values are loaded in the play as variables in vars section of the play.  
 Location: ./vars/default.yml  
 #### Playbook control:
 * to reduce console output on large collections  
 nolog: true
-* set dryrun to true to see what parameters will be used for ONTAP instancies creation. No changes on any ONTAP clusters will be applied. Play will end after printing the variables.
+* set dryrun to true to see what parameters will be used for ONTAP instancies creation. No changes on any ONTAP clusters will be applied. Play will end after printing the variables.  
 input_dryrun: false
 * set precheck_inventory to false to skip inventory check (SVM check on ONTAP clusters)  
 precheck_inventory: true
@@ -299,7 +306,7 @@ vars_defaults:
         policy:             *default_value*
 ````
 
-### 5.7 Name generation and variable merge
+### 6.7 Name generation and variable merge
 Volume name is required to be generated basing on the following:
 - must be unique across MCC clusters
 - must follow naming convention (see separate document)
@@ -324,7 +331,7 @@ These values based on the play execution and valid only for this execution.
 Every execution of any instance create or delete role preceeds variables merge procedure.
 
 Variables collection and generation workflow:
-1. Loading vars_local: first version of variables set is generated
+1. Loading vars_local: first version of variables set is generated - based on input extra variables
 2. Prepare facts role task: generates name for special case of FUS-n environment (NOTE: is currently disabled as this environment name is being passed to playbook already prepared)
 3. Prepare facts role task: adds aggregate inclusion or exclusion for aggregate Snaplock functionality 
 4. 01_preflight setup role task: collects existing volume names from all ONTAP clusters in the inventory and sets new volume name incremented by 1
@@ -341,29 +348,62 @@ Variables collection and generation workflow:
 
 Once vars_local variables are generated they are merged with vars_defauls before every create or delete operation.  
 
-### 5.8 Logging
+### 6.8 Logging
 Every operation is being logged in a separate file with the follwoing format: {qlogdir}/date_time{qlogname}.
 qlogdir and qlogname are defined in the playbook and can be modified as necessary.
 
 Logfile contains values passed to the create/delete role for the future review.  
 
-### 5.9 Dryrun
+### 6.9 Dryrun
 Dryrun {true, false} is instructing the playbook to print extra debug information.
 If enabled the final global variables will be printed and playbook ends without creating any instance.
 input_dryrun is set to false by default in vars/defaults.yml - it can be overwritten by extra varsiable passed to the playbook on execution.  
 
-6. # Play workflow
+# 7. Play workflow
+  
+Every instance create operation includes rescue section for the case when create operation has failed.  
+Rescue section implements rollback scenario.
 
-### 6.1 Pre-flight checks and values setup
+### 7.1 Pre-flight checks and values setup
 The playbook is built on fail-fast design - it tries to identify issues before any instance is created and exit as soon as possible.
 
 Pre-flight includes:
 - input variables validation and exit if they do not comply
-- informa
-### 6.2 Create export policy
-### 6.3 Create source volume
-### 6.4 Create qtree
-### 6.5 Create destination volume
-### 6.6 Create Snapmirror
-### 6.7 Rollback
+- objects details collection from all primary ONTAP clusters
+  
+Values setup includes:
+- values setup based on decision made on information retrieved from ONTAP clusters
+- selection of SVM on primary ONTAP cluster by volume count criteria
+- selection of SVM on secondary cluster by predefined mapping 
+- variables merge into vars_local global variable  
+  
+### 7.2 Create export policy
+1. Merges vars_local with vars_default variables
+2. Creates export policy on primary SVM basing on merged variables
+  
+### 7.3 Create source volume
+1. Merges vars_local with vars_default variables
+2. Selects most suitable aggregate to place the volume
+3. Creates source volume on primary ONTAP cluster
+  
+### 7.4 Create qtree
+1. Merges vars_local with vars_default variables
+2. Creates qtree on source volume
+  
+### 7.5 Create destination volume
+1. Merges vars_local with vars_default variables
+2. Creates vault volume on seconary ONTAP cluster
+  
+### 7.6 Create Snapmirror
+1. Merges vars_local with vars_default variables
+2. Creates Snapmirror relationship from primary SVM:volume to secondary SVM:volume 
+  
+### 7.7 Rollback
+On every step of creating ONTAP instances create operation may fail for some reason.
+As per requirements already created instances must be deleted.
+Every next step includes 1 more instance that needs to be deleted in a spcific order.
+Each create task includes rescue section to delete all previously created instances.
 
+### 8. Installation
+### 9. Execution
+### 10. Authors and contacts
