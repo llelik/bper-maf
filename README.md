@@ -17,7 +17,7 @@
    4. #### Input values
    5. #### Data structure
    6. #### Default values
-   7. #### Name generation
+   7. #### Name generation and variable merge
    8. #### Logging
    9. #### Dryrun
 6. ### Play workflow
@@ -28,8 +28,9 @@
    5. #### Create destination volume
    6. #### Create Snapmirror
    7. #### Rollback
-7. ### Execution
-8. ### Authors and contacts
+7. ### Installation
+8. ### Execution
+9. ### Authors and contacts
  
 <div style="page-break-after: always;"></div>
 
@@ -78,6 +79,7 @@ Task:
 ### *Ansible:*
 Ansible-core min. version: 2.11
 Ansible min version: 8.7.0
+Ansible Collection netapp.ontap min version: 22.11.0
 
 ### *Python:*
 minimal version: 3.7
@@ -246,3 +248,51 @@ Validation: input values are validated before main tasks execition. If they do n
 - lists, lists of dictionaries
 - dictionaries
 - names and structures of those variables
+
+### 5.6 Default values
+Default values are devided into 2 categories: ONTAP instancies related and playbook control related.
+Default values are loaded in the play as variables in vars section of the play.
+Location: ./vars/default.yml
+#### Playbook control:
+* to reduce console output on large collections
+nolog: true
+* set dryrun to true to see what parameters will be used for ONTAP instancies creation. No changes on any ONTAP clusters will be applied. Play will end after printing the variables.
+input_dryrun: false
+* set precheck_inventory to false to skip inventory check (SVM check on ONTAP clusters)
+precheck_inventory: true
+* playbook dummy folder, actual value for this variable will be taken from Ansible magic variables while in the play
+playbook_dir: '/root'
+
+#### ONTAP variables
+ONTAP variables are designed per object instance as a flat variable, dictionary, list or list of dictionaries.
+This solution includes default parameters specified in global variable vars_defaults.  
+Other parameters collected from ONTAP clusters and generated vales based on ONTAP facts in are added or modified in the play. See details in section 5.7.  
+Statics major varsiables are: 
+* source: contains variables to be used when creating instancies on primary ONTAP cluster
+* destination: contains variables to be used when creating instancies on secondary ONTAP cluster
+* snapmirror: contains Snapmirror only variables to be used when creating Snapmirror relationship on secondary ONTAP cluster
+
+Default values do not include values that are being generated.  
+Variables provided to the play has the following structure:
+````
+vars_defaults:
+    source: # definition of source instancies
+        volume: # parameters for source volume
+            type: *default_value*
+            language: *default_value*
+            volume_autosize:
+                mode: *default_value*
+        etc...
+        qtree:
+            security_style: *default_value*
+            oplocks: *default_value*
+    destination: # definition of destination instancies
+        volume: # parameters for source volume
+                type: *default_value*
+    snapmirror: # definition of destination instancies
+        policy: *default_value*
+````
+
+### 5.7 Name generation and variable merge
+### 5.8 Logging
+### 5.9 Dryrun
