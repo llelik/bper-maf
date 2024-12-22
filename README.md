@@ -20,6 +20,7 @@
    7. ##### Name generation and variable merge
    8. ##### Logging
    9. ##### Dryrun
+  <div style="page-break-after: always;"></div>
 6. #### Play workflow
    1. ##### Pre-flight checks and values setup
    2. ##### Create export policy
@@ -98,6 +99,7 @@ All tasks addressed to ONTAP preresume operations via REST API only. ONTAP ZAPI 
 ## NOTE: ZAPI is diabled on ONTAP from 9.15.1 release (but can be enabled manually).
 ## is to be completely decommissioned starting ONTAP 9.17.1 release (as of December 2024).    
 ````  
+<div style="page-break-after: always;"></div>
 
 ### *NetApp ONTAP SVM:*
 SnapMirror:
@@ -273,6 +275,8 @@ precheck_inventory: true
 * playbook dummy folder, actual value for this variable will be taken from Ansible magic variables while in the play  
 playbook_dir: '/root'
 
+<div style="page-break-after: always;"></div>
+
 #### ONTAP variables
 ONTAP variables are designed per object instance as a flat variable, dictionary, list or list of dictionaries.
 This solution includes default parameters specified in global variable vars_defaults.  
@@ -302,6 +306,7 @@ vars_defaults:
     snapmirror:               # definition of destination instancies
         policy:             *default_value*
 ````
+<div style="page-break-after: always;"></div>
 
 ### 5.7 Name generation and variable merge
 Volume name is required to be generated basing on the following:
@@ -327,6 +332,8 @@ These values based on the play execution and valid only for this execution.
 
 Every execution of any instance create or delete role preceeds variables merge procedure.
 
+<div style="page-break-after: always;"></div>
+
 Variables collection and generation workflow:
 1. Loading vars_local: first version of variables set is generated - based on input extra variables
 2. Prepare facts role task: generates name for special case of FUS-n environment (NOTE: is currently disabled as this environment name is being passed to playbook already prepared)
@@ -345,6 +352,7 @@ Variables collection and generation workflow:
 
 Once vars_local variables are generated they are merged with vars_defauls before every create or delete operation.  
 
+
 ### 5.8 Logging
 Every operation is being logged in a separate file with the follwoing format: {qlogdir}/date_time{qlogname}.
 qlogdir and qlogname are defined in the playbook and can be modified as necessary.
@@ -355,6 +363,8 @@ Logfile contains values passed to the create/delete role for the future review.
 Dryrun {true, false} is instructing the playbook to print extra debug information.
 If enabled the final global variables will be printed and playbook ends without creating any instance.
 input_dryrun is set to false by default in vars/defaults.yml - it can be overwritten by extra varsiable passed to the playbook on execution.  
+
+<div style="page-break-after: always;"></div>
 
 # 6. Play workflow
   
@@ -401,6 +411,8 @@ On every step of creating ONTAP instances create operation may fail for some rea
 As per requirements already created instances must be deleted.
 Every next step includes 1 more instance that needs to be deleted in a spcific order.
 Each create task includes rescue section to delete all previously created instances.
+
+<div style="page-break-after: always;"></div>
 
 ### 7. Installation
 Unzip tarball with code package.  
