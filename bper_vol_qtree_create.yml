@@ -351,7 +351,7 @@
         - meta: end_play
       rescue:
         - ansible.builtin.debug:
-            msg: "Post-create validation failed. Please check the logs. Resource details will be printed."
+            msg: "Post-create validation failed. Please check the logs. Created resource details will be printed."
         - ansible.builtin.include_role:
             name: bper/logic
           vars:

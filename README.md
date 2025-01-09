@@ -1,7 +1,8 @@
 <img src=docs/netapp-footer-logo.png>  
 
 # DOCUMENTATION  
-## MAF implementation for BPER Services ScpA  
+## MAF automation implementation for BPER Services ScpA
+### Ansilble playbook: create volumes, qtree and setup Snapmirror relationship
 
 <div style="page-break-after: always;"></div>
 
@@ -20,7 +21,6 @@
    7. ##### Name generation and variable merge
    8. ##### Logging
    9. ##### Dryrun
-  <div style="page-break-after: always;"></div>
 6. #### Play workflow
    1. ##### Pre-flight checks and values setup
    2. ##### Create export policy

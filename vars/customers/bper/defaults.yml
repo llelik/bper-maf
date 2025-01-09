@@ -21,8 +21,9 @@ vars_defaults:
       snapshot_policy:
         name:                 'Prod_snapshot_3_3'
         #name:                 default            # lab setup
-      fractional_reserve:     100                 #ONTAP default
+      fractional_reserve:     0                 #ONTAP default
       security_style:         unix
+      encrypt:                false
       snaplock:
         type:                 non_snaplock        #??? options: compliance, enterprise, non_snaplock
       tiering_policy:
@@ -46,6 +47,7 @@ vars_defaults:
       type:                   dp
       language:               c.utf_8
       size_unit:              gb
+      encrypt:                false
       volume_efficiency:
           enable_inline_compression: true
           enable_compression:        true

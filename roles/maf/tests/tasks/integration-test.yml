@@ -8,9 +8,10 @@
 #          language:               c.utf_8
 #          type:                   rw
 #          size_unit:              gb
+#          encrypt:                false
 #          snapshot_policy:
 #            name:                 Prod_snapshot_3_3
-#          fractional_reserve:     100                 #ONTAP default
+#          fractional_reserve:     0                 #ONTAP default
 #          security_style:         unix
 #          snaplock:
 #            type:                 non_snaplock        #??? options: compliance, enterprise, non_snaplock
@@ -67,20 +68,6 @@
     dst_cluster: "{{ 'cluster'  | merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c='destination') }}"
   no_log: "{{ nolog }}"
 
-# - debug:
-#     msg: 
-#       - "SRC cls:   {{ src_cluster.name }}"
-#       - "SRC svm:   {{ src_svm.name }}"
-#       - "SRC vol:   {{ src_volume.name }}"
-#       - "SRC qtree: {{ src_qtree.name }}"
-#       - "SRC e-pol: {{ src_e_policy.name }}"
-#       - ""
-#       - "DST cls:   {{ dst_cluster.name }}"
-#       - "DST svm:   {{ dst_svm.name }}"
-#       - "DST vol:   {{ dst_volume.name }}"
-#   when: 1 == 0
-      
-
 - name: "Tests: Collect source cluster info - qtree"
   netapp.ontap.na_ontap_rest_info:
     <<: *auth
@@ -117,6 +104,7 @@
       - nas.security_style
       - autosize.mode
       - efficiency.policy.name
+      - encryption
     hostname: "{{ src_cluster.management_ip }}"
   register: src_vol_info
   no_log: "{{ nolog }}"
@@ -128,8 +116,9 @@
     gather_subset:
       - export_policy_info
     parameters:
-      name: "{{ src_e_policy.name }}"
-    hostname: "{{ src_cluster.management_ip }}"
+      name:     "{{ src_e_policy.name }}"
+      svm.name: "{{ src_svm.name }}"
+    hostname:   "{{ src_cluster.management_ip }}"
   register: src_ep_info
   no_log: "{{ nolog }}"
 
@@ -160,6 +149,20 @@
   register: sm_info
   no_log: "{{ nolog }}"
 
+# - debug:
+#     msg:
+#       - "{{ src_ep_info.ontap_info.protocols_nfs_export_policies }}"
+#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].encryption }}"
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent}}"
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name}}"
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].language         }}"             
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style   }}"        
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].type                   }}"      
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type            }}"   
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy             }}" 
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode }}" 
+#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name }}"    
+
 - name: "Tests: Assert required objects are present"
   ansible.builtin.assert:
     that:
@@ -171,31 +174,21 @@
       - sm_info.ontap_info.snapmirror_relationships.records[0].state     in ['snapmirrored', 'initializing', 'transferring']
     msg: "One or more of the required objects not found on the source or destination cluster. Please check the configuration."
 
-# - debug:
-#     msg:
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent}}"
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name}}"
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].language         }}"             
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style   }}"        
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].type                   }}"      
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type            }}"   
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy             }}" 
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode }}" 
-#       - "{{src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name }}"        
+    
 
 - name: "Tests: Assert source volume has default parameters set up"
   ansible.builtin.assert:
     that:
-      - src_vol_info.ontap_info.storage_volumes.records[0].guarantee.type                  | lower == vars_defaults.source.volume.space_guarantee          #'none'
+      - src_vol_info.ontap_info.storage_volumes.records[0].guarantee.type                  | lower == vars_defaults.source.volume.space_guarantee               # 'none'
       - src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent  | int == vars_defaults.source.volume.percent_snapshot_space | int    # 5
-      - src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name            == vars_defaults.source.volume.snapshot_policy.name     #'Prod_snapshot_3_3'
-      #- src_vol_info.ontap_info.storage_volumes.records[0].read_realloc                   | lower == 'off'                                                # no REST API implementation
-      - src_vol_info.ontap_info.storage_volumes.records[0].language                        | lower == vars_defaults.source.volume.language                 #'c.utf_8'
-      - src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style              | lower == vars_defaults.source.volume.security_style           # 'unix'
-      - src_vol_info.ontap_info.storage_volumes.records[0].type                            | lower == vars_defaults.source.volume.type                     #  'rw'
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type                   | lower == vars_defaults.source.volume.snaplock.type            #'non_snaplock'
-      - src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy                  == vars_defaults.source.volume.tiering_policy.name      #'none'
-      - src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode                   | lower == vars_defaults.source.volume.volume_autosize.mode     #'off'
-      - src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name          == vars_defaults.source.volume.volume_efficiency.policy # default
+      - src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name            == vars_defaults.source.volume.snapshot_policy.name                  # 'Prod_snapshot_3_3'
+      - src_vol_info.ontap_info.storage_volumes.records[0].language                        | lower == vars_defaults.source.volume.language                      # 'c.utf_8'
+      - src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style              | lower == vars_defaults.source.volume.security_style                # 'unix'
+      - src_vol_info.ontap_info.storage_volumes.records[0].type                            | lower == vars_defaults.source.volume.type                          # 'rw'
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type                   | lower == vars_defaults.source.volume.snaplock.type                 # 'non_snaplock'
+      - src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy                  == vars_defaults.source.volume.tiering_policy.name                   # 'none'
+      - src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode                   | lower == vars_defaults.source.volume.volume_autosize.mode          # 'off'
+      - src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name          == vars_defaults.source.volume.volume_efficiency.policy              # default
+      - src_vol_info.ontap_info.storage_volumes.records[0].encryption.enabled              == vars_defaults.source.volume.encrypt | bool
     msg: "One or more of the default volume parameters are not set on the source volume. Please check the configuration."
 
