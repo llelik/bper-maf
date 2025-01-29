@@ -12,24 +12,23 @@ vars_defaults:
   source:
     volume:
       wait_for_completion: true
-      percent_snapshot_space: 5                   #ONTAP default
+      percent_snapshot_space: 5                     # ONTAP default
       space_guarantee:        'none'
-      read_realloc:           'off'                 #ONTAP default
+      read_realloc:           'off'                 # ONTAP default
       language:               c.utf_8
       type:                   rw
       size_unit:              gb
       snapshot_policy:
         name:                 'Prod_snapshot_3_3'
-        #name:                 default            # lab setup
-      fractional_reserve:     0                 #ONTAP default
+      fractional_reserve:     0                     # ONTAP default
       security_style:         unix
       encrypt:                false
       snaplock:
-        type:                 non_snaplock        #??? options: compliance, enterprise, non_snaplock
+        type:                 non_snaplock          # options: compliance, enterprise, non_snaplock
       tiering_policy:
         name:                 'none'
       volume_autosize:
-        mode:                 'off'                 #ONTAP default 
+        mode:                 'off'                 # ONTAP default 
       volume_efficiency:
           enable_inline_compression: true
           enable_compression:        true
@@ -79,6 +78,6 @@ volume_sizes:
 nolog: true
 # set dryrun to true to see what would be applied (before creating any instance)
 input_dryrun: false
-# set precheck_inventory to false to skip inventory check (SVM check on ONTAP clusters)
+# set precheck_inventory to false to skip inventory clusters availability check (SVM check on ONTAP clusters)
 precheck_inventory: true
 playbook_dir: '/root'
