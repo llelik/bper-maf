@@ -22,16 +22,6 @@
           use_rest:        always
           use_python_keys: true
       no_log: true
-    
-    - name: Reducing inventory for volume lookup 
-      ansible.builtin.set_fact:
-        reduced_inventory: "{{ reduced_inventory | default([]) + [item.cluster_mgmt] }}"
-      loop: "{{ inventory_svms_mcc.hosts }}"
-      no_log: "{{ nolog }}"
-
-    - name: Volume lookup cluster inventory
-      ansible.builtin.debug:
-        msg: "{{ reduced_inventory | unique}}"
 
 ######### Incrementing volume name by 1
 # We retrieve existing volumes with generated name pattern without last 2 digits
@@ -49,7 +39,7 @@
           - name
         hostname: "{{ cluster_ip }}"
       register: existing_vols
-      loop: "{{ reduced_inventory | unique }}"
+      loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
       loop_control:
         loop_var: cluster_ip
       no_log: "{{ nolog }}"
@@ -72,6 +62,39 @@
     - name: Set new volume name
       ansible.builtin.set_fact:
         new_volume_name: "{{ existing_volumes_list | increment_names(1) }}"
+
+#######################################
+# ???????????
+#######################################
+
+    - name: Get available aggregates of given type
+      netapp.ontap.na_ontap_rest_info:
+        <<: *auth
+        gather_subset:
+          - aggregate_info
+        fields:
+          - name
+        parameters:
+          snaplock_type:   "{{ vars_local.source.volume.snaplock.type }}"
+        hostname: "{{ cluster_ip }}"
+      no_log: "{{ nolog }}"
+      loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
+      loop_control:
+        loop_var: cluster_ip
+      register: aggregates_supported
+
+    - debug: var=aggregates_supported
+
+    # - name: Reducing inventory for for SVM lookup 
+    #   ansible.builtin.set_fact:
+    #     reduced_supported_inventory: "{{ reduced_supported_inventory | default([]) + [item.cluster_ip] }}"
+    #   loop: "{{ aggregates_supported.results }}"
+    #   no_log: false
+    #   when: item.ontap_info.storage_aggregates.num_records > 0
+    
+    - name: Define cluster list with supported aggregate type
+      set_fact:
+        aggr_supported_inventory: "{{ aggregates_supported.results | selectattr('ontap_info.storage_aggregates.num_records', '>', 0) | map(attribute='cluster_ip') | list }}"
 
 ######### Incrementing volume name by 1 cont.
 # if list was empty - new_volume_name is set to None 

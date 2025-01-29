@@ -1,0 +1,8 @@
+
+
+ontap/volume/create
+-------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+

@@ -1,0 +1,45 @@
+
+
+ontap/volume/create
+-------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  aggregates:
+  - aggr1_trinidad_01
+  - aggr1_trinidad_02
+  name: svm_alexeym90_moa_01
+
+volume:
+  aggregate_include_name_regex: lock
+  encrypt: false
+  export_policy:
+    name: Q_BBBBBPR06
+  fractional_reserve: 0
+  junction_path: /BBBBBPR06
+  language: c.utf_8
+  name: BBBBBPR06
+  percent_snapshot_space: 5
+  read_realloc: 'off'
+  security_style: unix
+  size: '5'
+  size_unit: gb
+  snaplock:
+    type: enterprise
+  snapshot_policy:
+    name: Prod_snapshot_3_3
+  space_guarantee: none
+  tiering_policy:
+    name: none
+  type: rw
+  volume_autosize:
+    mode: 'off'
+  volume_efficiency:
+    enable_compression: true
+    enable_inline_compression: true
+    policy: default
+    volume_efficiency: start
+  wait_for_completion: true
+

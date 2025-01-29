@@ -22,29 +22,32 @@
 
   # get best aggregate
   - name: "Find best aggregate [{{ volume.name }}]" 
-    get_best_aggregate:
-        <<: *auth
-        volume_name              : "{{ volume.name }}"
-        svm_name                 : "{{ svm.name }}"
-        debug                    : True
-        size_mb                  : "{{ volume.size | default(0) }}"
-        weight_volume_count      : 0
-        weight_used_pct          : 0
-        weight_provisioned_pct   : 0
-        weight_available_space   : 1
-        # threshold_volume_count   : 
-        # threshold_used_pct       : 
-        # threshold_provisioned_pct: 10000000
-        # threshold_available_space: 
-        exclude_name_regex       : "{{ volume.aggregate_exclude_name_regex | default(omit) }}"
-        include_name_regex       : "{{ volume.aggregate_include_name_regex | default(omit) }}"
-        # exclude_node_regex       : 
-        #include_node_regex         : "{{ volume.aggregate_include_node_regex | default('.*') }}"
-        # names_to_exclude         :
-        # nodes_to_exclude         : 
+    #####get_best_aggregate:
+    get_best_aggr_selective:
+      <<: *auth
+      svm_name                 : "{{ svm.name }}"
+      debug                    : True
+      size_mb                  : "{{ volume.size | default(0) }}"
+      aggr_names_list          : "{{ svm.supported_aggregates | default([]) }}"
+      weight_volume_count      : 0
+      weight_used_pct          : 0
+      weight_provisioned_pct   : 0
+      weight_available_space   : 1
+      # threshold_volume_count   : 
+      # threshold_used_pct       : 
+      # threshold_provisioned_pct: 10000000
+      # threshold_available_space: 
+      ####exclude_name_regex       : "{{ volume.aggregate_exclude_name_regex | default(omit) }}"
+      ####include_name_regex       : "{{ volume.aggregate_include_name_regex | default(omit) }}"
+      # exclude_node_regex       : 
+      #include_node_regex         : "{{ volume.aggregate_include_node_regex | default('.*') }}"
+      # names_to_exclude         :
+      # nodes_to_exclude         : 
     register: aggr_lookup
     delegate_to: localhost
     
+  - fail: msg=STOP
+
   # create the volume
   - name: "Create volume [{{ volume.name }}]"
     netapp.ontap.na_ontap_volume:
