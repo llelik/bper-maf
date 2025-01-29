@@ -10,6 +10,7 @@
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
 # Professional Services 2024
+# version: 1.0.0
 ##########################################################################
 ---
 - name: "Create: volume, qtree, export_policy, destination volume, snapmirror"
@@ -25,11 +26,11 @@
     - "vars/customers/bper/defaults.yml"
     - "vars/customers/bper/local.yml"
    # BPER PROD:
-   # - "vars/customers/bper/inventory.yml"
+    - "vars/customers/bper/inventory.yml"
    # NetApp lab:
    # - "vars/customers/bper/inventory_lab_test.yml"
    # BPER lab:
-    - "vars/customers/bper/inventory_bper_lab.yml"
+   # - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
     qlogname: "create_vol_qtree_export.bper"       # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory

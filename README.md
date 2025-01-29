@@ -1,8 +1,12 @@
-<img src=docs/netapp-footer-logo.png>  
+<img src=docs/netapp-footer-logo-blue.png>  
 
 # DOCUMENTATION  
 ## MAF automation implementation for BPER Services ScpA
 ### Ansilble playbook: create volumes, qtree and setup Snapmirror relationship
+
+### Document version: 1.0.0
+### Alexey Mikhaylov, NetApp
+### January 2025
 
 <div style="page-break-after: always;"></div>
 
