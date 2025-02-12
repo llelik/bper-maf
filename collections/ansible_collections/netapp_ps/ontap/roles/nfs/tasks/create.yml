@@ -1,0 +1,40 @@
+
+---
+- name: "Role - ontap/nfs/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/nfs/create','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_nfs:     "{{ nfs     | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','nfs',qlogdir,qlogname) }}"
+
+  - name: "Enable nfs"      
+    netapp.ontap.na_ontap_nfs:
+      state            : present
+      vserver          : "{{ svm.name }}"
+      showmount        : "{{ nfs.showmount          | default(omit) }}"
+      nfsv3            : "{{ nfs.nfsv3              | default(omit) }}"
+      nfsv3_fsid_change: "{{ nfs.nfsv3_fsid_change  | default(omit) }}"
+      nfsv4            : "{{ nfs.nfsv4              | default(omit) }}"
+      nfsv41           : "{{ nfs.nfsv41             | default(omit) }}"
+      nfsv41_acl       : "{{ nfs.nfsv41_acl         | default(omit) }}"
+      nfsv41_pnfs      : "{{ nfs.nfsv41_pnfs        | default(omit) }}"
+      tcp_max_xfer_size: "{{ nfs.tcp_max_xfer_size  | default(omit) }}"
+      nfsv4_id_domain  : "{{ nfs.nfsv4_id_domain    | default(omit) }}"
+      vstorage_state   : "{{ nfs.vstorage_state     | default(omit) }}"
+      service_state    : "started"
+      <<: *auth
+    delegate_to: localhost
+  when: 
+  - svm.name | default(false)

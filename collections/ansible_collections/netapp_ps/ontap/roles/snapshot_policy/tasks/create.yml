@@ -1,0 +1,35 @@
+---
+- name: "Role - ontap/snapshot_policy/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:          "{{ cluster         | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/snapshot_policy/create','cluster',qlogdir,qlogname) }}"
+      l_svm:              "{{ svm             | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_snapshot_policy:  "{{ snapshot_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','snapshot_policy',qlogdir,qlogname) }}"
+
+    ## Create Snapshot Policy
+  - name: "Create Snapshot Policy [{{ snapshot_policy.name | default('None') }}]"          
+    netapp.ontap.na_ontap_snapshot_policy:
+      state           : present
+      vserver         : "{{ svm.name }}"
+      name            : "{{ snapshot_policy.name               | default(omit)   }}"
+      schedule        : "{{ snapshot_policy.schedule           | default(omit)   }}"
+      snapmirror_label: "{{ snapshot_policy.snapmirror_label   | default(omit)   }}"
+      prefix          : "{{ snapshot_policy.prefix             | default(omit)   }}"
+      count           : "{{ snapshot_policy.count              | default(omit)   }}"
+      enabled         : "{{ snapshot_policy.enabled            | default(omit)   }}"
+      <<: *auth
+    delegate_to: localhost
+  when: 
+  - snapshot_policy.name | default(false)

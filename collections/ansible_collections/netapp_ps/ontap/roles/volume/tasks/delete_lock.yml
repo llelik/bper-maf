@@ -1,0 +1,44 @@
+---
+- name: "Role - ontap/volume/delete_lock"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true      
+
+  # logging
+  - set_fact:
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/volume/delete_lock','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogdir,qlogname) }}"
+      l_volume:  "{{ volume  | to_nice_yaml(2) | indent(2,true) | do_log('','volume',qlogdir,qlogname) }}"
+
+  - name: "Get locks on volume [{{ volume.name }}]"     
+    netapp.ontap.na_ontap_restit:
+      api: protocols/locks
+      method: GET
+      query:
+        volume.name: "{{ volume.name}}"
+        svm.name: "{{ svm.name }}"    
+      <<: *auth
+    delegate_to: localhost
+    register: locks_info
+
+  - name: "Delete locks on volume [{{ volume.name }}]"
+    netapp.ontap.na_ontap_restit:
+      api: /protocols/locks/{{ lock.uuid }}
+      method: DELETE
+      <<: *auth
+    loop_control:
+      index_var: lock
+      label: "{{ lock.client_address }}"
+    loop: "{{ locks_info.response.records }}"
+    delegate_to: localhost
+  when:
+  - volume.name | default(false)
+  - svm.name | default(false)    

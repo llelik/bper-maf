@@ -1,0 +1,34 @@
+---
+- name: "Role - ontap/unix_user/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:   "{{ cluster   | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/unix_user/create','cluster',qlogdir,qlogname) }}"
+      l_svm:       "{{ svm       | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_unix_user: "{{ unix_user | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','unix_user',qlogdir,qlogname) }}" 
+
+  # Create Unix User
+  - name: "Create Unix User [{{ unix_user.name }}]"       
+    netapp.ontap.na_ontap_unix_user:
+      state    : present
+      vserver  : "{{ svm.name }}"
+      name     : "{{ unix_user.name       | default(omit) }}"
+      full_name: "{{ unix_user.full_name  | default(omit)}}"
+      group_id : "{{ unix_user.group_id   | default(omit)}}"
+      id       : "{{ unix_user.id         | default(omit)}}"
+      <<: *auth
+    delegate_to: localhost
+  when: 
+  - svm.name | default(false)
+  - unix_user.name | default(false)

@@ -1,0 +1,31 @@
+---
+- name: "Role - ontap/snapmirror_policy/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:           "{{ cluster           | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/snapmirror_policy/create','cluster',qlogdir,qlogname) }}"
+      l_svm:               "{{ svm               | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_snapmirror_policy: "{{ snapmirror_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','snapmirror_policy',qlogdir,qlogname) }}"
+
+    ## Create Snapmirror Policy
+  - name: "Create Snapmirror Policy [{{ snapmirror.policy_name | default('None') }}]"          
+    netapp.ontap.na_ontap_snapmirror_policy:
+      state            : present
+      vserver          : "{{ svm.name }}"
+      name             : "{{ snapmirror.policy_name               | default(omit)   }}"
+      snapmirror_label : "{{ snapmirror.policy_snapmirror_label   | default([])   }}"
+      keep             : "{{ snapmirror.policy_keep               | default([])   }}"
+      <<: *auth
+    delegate_to: localhost
+  when: snapmirror.policy_name | default(false)

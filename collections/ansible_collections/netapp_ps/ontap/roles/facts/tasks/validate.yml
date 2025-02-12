@@ -1,0 +1,8 @@
+- name: check ontap credentials
+  assert: 
+    that:
+      - ontap_username is defined
+      - ontap_password is defined
+      - ontap_username != ""
+      - ontap_password != ""
+    fail_msg: "ontap_username and ontap_password must be defined"

@@ -19,7 +19,7 @@ vars_defaults:
       type:                   rw
       size_unit:              gb
       snapshot_policy:
-        name:                 'Prod_snapshot_3_3'
+        name:                 'none' #'Prod_snapshot_3_3'
       fractional_reserve:     0                     # ONTAP default
       security_style:         unix
       encrypt:                false
@@ -32,7 +32,7 @@ vars_defaults:
       volume_efficiency:
           enable_inline_compression: true
           enable_compression:        true
-          compression_type:          secondary
+          #compression_type:          secondary
           volume_efficiency:         start
           policy:                    default
     qtree:
@@ -79,5 +79,5 @@ nolog: true
 # set dryrun to true to see what would be applied (before creating any instance)
 input_dryrun: false
 # set precheck_inventory to false to skip inventory clusters availability check (SVM check on ONTAP clusters)
-precheck_inventory: true
+precheck_inventory: false
 playbook_dir: '/root'

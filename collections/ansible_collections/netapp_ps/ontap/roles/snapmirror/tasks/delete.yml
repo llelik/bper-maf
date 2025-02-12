@@ -1,0 +1,61 @@
+---
+- name: "Role - ontap/snapmirror/delete"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+    
+  # logging
+  - set_fact:
+      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/snapmirror/delete','snapmirror',qlogdir,qlogname) }}"
+
+  - name: Pre-flight availability check - primary storage inventory
+    netapp.ontap.na_ontap_rest_info:
+      <<: *auth
+      use_python_keys: true
+      gather_subset:
+        - snapmirror_info
+      parameters:
+        source.path:       "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name }}"
+        destination.path:  "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name }}"
+    register: sm_exists
+    no_log: "{{ nolog }}"
+
+  - name: Modify policy SnapMirror (bug fix) - to allow snapmirror break
+    netapp.ontap.na_ontap_snapmirror:
+      state: present
+      policy                      : "MirrorAllSnapshots"
+      source_endpoint             : 
+        #cluster                   : "{{ snapmirror.source.cluster.name }}"
+        path                      : "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name }}"
+      destination_endpoint        : 
+        #cluster                   : "{{ snapmirror.destination.cluster.name }}"
+        path                      : "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name }}"
+      <<: *auth
+    delegate_to: localhost
+    when:
+      - snapmirror.destination.volume.name | default(false)
+      - snapmirror.source.volume.name | default(false)
+      - sm_exists.ontap_info.snapmirror_relationships.num_records > 0
+
+  - name: "Removing snapmirror {{ snapmirror.source.volume.name }} -/-> {{ snapmirror.destination.volume.name }}"  
+    netapp.ontap.na_ontap_snapmirror:
+      use_rest                    : always
+      state                       : absent
+      source_endpoint             : 
+        #cluster                   : "{{ snapmirror.source.cluster.name }}"
+        path                      : "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name | default('') }}"
+      destination_endpoint        : 
+        #cluster                   : "{{ snapmirror.destination.cluster.name }}"
+        path                      : "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name | default('') }}"
+      <<: *auth
+    delegate_to: localhost
+  when:
+  - snapmirror | default(false)

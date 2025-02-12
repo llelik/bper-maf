@@ -1,0 +1,24 @@
+######################################################################################
+# logic bypass / this module is applying no logic and just passing the data through
+# copy this as a template
+# Step 1 : apply the logic, call custom module to handle the logic, pass what is needed
+# Step 2 : register the result in vars_local ; define qlogname if not defined
+# Step 3 : log the vars_external
+# Step 4 : log the vars_local
+######################################################################################
+- bypass:
+    vars_external : "{{ vars_external }}"
+  delegate_to: localhost
+  register: logic_result
+
+- set_fact:
+    vars_local : "{{ logic_result.vars }}"
+    qlogname : "{{ qlogname | default('',true) }}"
+
+- set_fact:
+    qlogname: "{{ vars_external | to_nice_yaml(2) | indent(2,true) | do_log('Running logic bypass','vars_external',qlogdir,qlogname) }}"
+
+# => bypassing the logic, just passing the data through, so no need to log the outcome
+
+# - set_fact:
+#     qlogname: "{{ vars_local | to_nice_yaml(2) | indent(2,true) | do_log('After logic bypass','vars_local',qlogdir,qlogname) }}"

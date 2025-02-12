@@ -1,0 +1,7 @@
+---
+
+## Naming facts
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    volumes : "{{ 'volumes' | merge_lists(v=vars_local,required_keys=['name'],c=qtask_child) }}"
+    delete_date: "{{ vars_local.delete_date | default('') }}"
