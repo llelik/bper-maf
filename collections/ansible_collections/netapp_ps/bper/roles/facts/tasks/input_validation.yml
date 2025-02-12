@@ -48,13 +48,6 @@
   when:
     - (input_size is not defined) or (input_size | int not in volume_sizes)
 
-- name: Validate input aggregate Snaplock parameters
-  ansible.builtin.fail:
-    msg:
-      - "Input data isn't correct. Cannot continue: input_snaplock not given or incorrect value. Input value: {{ input_snaplock|default('') }}"
-  when:
-    - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false'])
-
 - name: Validate input Export policy clientmatch parameters
   ansible.builtin.fail:
     msg:
@@ -75,5 +68,35 @@
       - "Log folder is not set! qlogdir: {{ qlogdir | default('') }}"
     that:
       - qlogdir is defined
+
+#####################
+# Snaplock related checks
+#####################
+- name: Validate input aggregate Snaplock parameters
+  ansible.builtin.fail:
+    msg:
+      - "Input data isn't correct. Cannot continue: input_snaplock not given or incorrect value. Input value: {{ input_snaplock | default('') }}"
+  when:
+    - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false'])
+
+- name: Validate Snaplock input parameters
+  ansible.builtin.assert:
+    that:
+      - input_sl_params is defined
+      - input_sl_params | type_debug == 'dict'
+      - input_sl_params.autocommit_period | netapp_ps.ontap.is_duration
+      - input_sl_params.retention is defined
+      - input_sl_params.retention | type_debug == 'dict'
+      - input_sl_params.retention.minimum is defined
+      - input_sl_params.retention.maximum is defined
+      - input_sl_params.retention.default is defined
+      - input_sl_params.retention.minimum | netapp_ps.ontap.is_duration
+      - input_sl_params.retention.maximum | netapp_ps.ontap.is_duration
+      - input_sl_params.retention.default | netapp_ps.ontap.is_duration
+    msg:
+      - "Input Snaplock data isn't correct. Cannot continue: input_sl_params not given or incorrect value. Input value: {{ input_sl_params | default('') }}"
+  when:
+    - input_snaplock is defined
+    - input_snaplock | lower == 'true'
 
 ...
