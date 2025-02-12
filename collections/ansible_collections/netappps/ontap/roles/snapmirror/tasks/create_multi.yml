@@ -1,0 +1,9 @@
+---
+- name: Create multiple snapmirrors
+  # debug:
+  #   msg: "{{ volume.name }}"
+  include_tasks: "create_one.yml" 
+  loop_control:
+    loop_var: snapmirror_item
+    label: "Create snapmirror [{{ snapmirror_item.source.cluster.name }}][{{ snapmirror_item.source.svm.name }}]{{ snapmirror_item.source.volume.name }} -> {{ snapmirror_item.destination.volume.name}}"
+  loop: "{{ snapmirrors }}"

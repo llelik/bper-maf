@@ -1,0 +1,67 @@
+---
+- name: "Role - ontap/snapmirror/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/create','snapmirror',qlogdir,qlogname) }}"
+
+  - name: "Create Snapmirror [{{ snapmirror.source.svm.name }}:{{ snapmirror.source.volume.name | default('') }}] -> [{{ snapmirror.destination.svm.name }}:{{ snapmirror.destination.volume.name | default('') }}]"  
+    netapp.ontap.na_ontap_snapmirror:
+      state                       : present
+      source_endpoint             : 
+        cluster                   : "{{ snapmirror.source.cluster.name }}"
+        path                      : "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name | default('') }}"
+      destination_endpoint        : 
+        cluster                   : "{{ snapmirror.destination.cluster.name }}"
+        path                      : "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name | default('') }}"
+      schedule                    : "{{ snapmirror.schedule              | default(omit) }}"
+      policy                      : "{{ snapmirror.policy                | default(omit) }}"
+      # identity_preserve           : "{{ snapmirror.identity_preserve     | default(omit) }}" # no rest api support
+      identity_preservation       : "{{ snapmirror.identity_preservation | default(omit) }}"
+      max_transfer_rate           : "{{ snapmirror.max_transfer_rate     | default(omit) }}"
+      create_destination:
+        enabled                   : true
+      initialize: False
+      <<: *auth
+    delegate_to: localhost
+    register: snapmirror_result
+    failed_when:
+      - snapmirror_result.failed 
+
+  - name: "Initialize Snapmirror [{{ snapmirror.source.svm.name }}:{{ snapmirror.source.volume.name | default('') }}] -> [{{ snapmirror.destination.svm.name }}:{{ snapmirror.destination.volume.name | default('') }}]"  
+    netapp.ontap.na_ontap_snapmirror:
+      state                       : present
+      source_endpoint             : 
+        cluster                   : "{{ snapmirror.source.cluster.name }}"
+        path                      : "{{ snapmirror.source.svm.name + ':' + snapmirror.source.volume.name | default('') }}"
+      destination_endpoint        : 
+        cluster                   : "{{ snapmirror.destination.cluster.name }}"
+        path                      : "{{ snapmirror.destination.svm.name + ':' + snapmirror.destination.volume.name | default('') }}"
+      schedule                    : "{{ snapmirror.schedule              | default(omit) }}"
+      policy                      : "{{ snapmirror.policy                | default(omit) }}"
+      # identity_preserve           : "{{ snapmirror.identity_preserve     | default(omit) }}" # no rest api support
+      identity_preservation       : "{{ snapmirror.identity_preservation | default(omit) }}"
+      max_transfer_rate           : "{{ snapmirror.max_transfer_rate     | default(omit) }}"
+      create_destination:
+        enabled                   : true
+      initialize: True
+      <<: *auth
+    delegate_to: localhost
+    register: snapmirror_result
+    failed_when:
+      - snapmirror_result.failed 
+      - "'Another transfer is in progress.' not in snapmirror_result.msg"
+  when:
+  - snapmirror | default(false)
+  

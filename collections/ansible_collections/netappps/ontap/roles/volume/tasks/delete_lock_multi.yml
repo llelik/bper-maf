@@ -1,0 +1,9 @@
+---
+- name: Delete multiple volumes locks
+  # debug:
+  #   msg: "{{ volume.name }}"
+  include_tasks: "delete_lock_one.yml" 
+  loop_control:
+    loop_var: volume_item
+    label: "Delete locks on volume {{ volume_item.name }}"
+  loop: "{{ volumes }}"

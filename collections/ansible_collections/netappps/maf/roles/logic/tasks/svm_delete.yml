@@ -1,0 +1,20 @@
+## Naming facts
+- svm_delete:
+    vars_external : "{{ vars_external }}"
+    aiqum_host    : "{{ aiqum_host }}"
+    aiqum_username: "{{ aiqum_username }}"
+    aiqum_password: "{{ aiqum_password }}"
+  delegate_to: localhost
+  register: logic_result
+
+# - debug: var=logic_result
+
+- set_fact:
+    vars_local : "{{ logic_result.vars }}"
+    qlogname : "{{ qlogname | default('',true) }}"    
+
+- set_fact:
+    qlogname: "{{ vars_external | to_nice_yaml(2) | indent(2,true) | do_log('Running logic svm_delete','vars_external',qlogdir,qlogname) }}"
+
+- set_fact:
+    qlogname: "{{ vars_local | to_nice_yaml(2) | indent(2,true) | do_log('After logic svm_delete','vars_local',qlogdir,qlogname) }}"
