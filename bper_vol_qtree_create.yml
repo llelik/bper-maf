@@ -38,43 +38,43 @@
   tasks:
     # Setup credential facts
     - ansible.builtin.include_role:
-        name: bper/facts
+        name: netapp_ps.bper.facts
       vars:
         qtask: credentials
 
     # Validate input variables
     - ansible.builtin.include_role:
-        name: bper/facts
+        name: netapp_ps.bper.facts
       vars:
         qtask: input_validation
 
     # Prepare facts (Ex.: FUSn)
     - ansible.builtin.include_role:
-        name: bper/facts
+        name: netapp_ps.bper.facts
       vars:
         qtask: prepare_facts
     
     # Check inventory SVMs availability
     - ansible.builtin.include_role:
-        name: bper/logic
+        name: netapp_ps.bper.logic
       vars:
         qtask: 00_preflight_check
 
     # Check if volume already exists and set new volume name incerementing by 1
     - ansible.builtin.include_role:
-        name: bper/logic
+        name: netapp_ps.bper.logic
       vars:
         qtask: 01_preflight_setup
  
     # Find suitable source SVM
     - ansible.builtin.include_role:
-        name: bper/logic
+        name: netapp_ps.bper.logic
       vars:
         qtask: 02_source_setup
     
     # Find suitable destination vault SVM
     - ansible.builtin.include_role:
-        name: bper/logic
+        name: netapp_ps.bper.logic
       vars:
         qtask: 03_vault_setup
 
@@ -96,12 +96,12 @@
       block:
         # Collect export policy facts variables
         - ansible.builtin.include_role:
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role: 
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: create
             qchild: source
@@ -119,12 +119,12 @@
     - name: "Create source volume block"
       block: 
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: create
             qchild: source
@@ -133,22 +133,22 @@
         - ansible.builtin.debug:
             msg: "Source volume create task failed. Created objects will be deleted."
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: delete
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role: 
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: delete
             qchild: source
@@ -165,12 +165,12 @@
     - name: "Create source qtree block"
       block:  
         - ansible.builtin.include_role:
-            name: ontap/qtree
+            name: netapp_ps.ontap.qtree
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/qtree
+            name: netapp_ps.ontap.qtree
           vars:
             qtask: create
             qchild: source
@@ -179,22 +179,22 @@
         - ansible.builtin.debug:
             msg: "Qtree Create task failed. Created objects will be deleted."
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: delete
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role: 
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: delete
             qchild: source
@@ -210,12 +210,12 @@
     - name: "Create destination volume block"
       block:
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: destination
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: create
             qchild: destination
@@ -224,32 +224,32 @@
         - ansible.builtin.debug:
             msg: "Vault volume create task failed. Created objects will be deleted."
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: destination
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: delete
             qchild: destination
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: delete
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role: 
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: delete
             qchild: source
@@ -268,11 +268,11 @@
         # CREATE
         # Collect snapmirror facts variables
         - ansible.builtin.include_role:
-            name: ontap/snapmirror
+            name: netapp_ps.ontap.snapmirror
           vars:
             qtask: facts
         - ansible.builtin.include_role:
-            name: ontap/snapmirror
+            name: netapp_ps.ontap.snapmirror
           vars:
             qtask: create
       # RESCUE if something has fone wrong on create
@@ -280,54 +280,54 @@
         - ansible.builtin.debug:
             msg: "Snapmirror create task failed. Created objects will be deleted."
         - ansible.builtin.include_role:
-            name: ontap/snapmirror
+            name: netapp_ps.ontap.snapmirror
           vars:
             qtask: facts
         - ansible.builtin.include_role:
-            name: ontap/snapmirror
+            name: netapp_ps.ontap.snapmirror
           vars:
             qtask: delete
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/qtree
+            name: netapp_ps.ontap.qtree
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/qtree
+            name: netapp_ps.ontap.qtree
           vars:
             qtask: delete
             qchild: source
         
         # re-collecting facts to setup values for active svm/volume values       
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: delete
             qchild: source
         - ansible.builtin.include_role:
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: facts
             qchild: source
         - ansible.builtin.include_role: 
-            name: ontap/export_policy
+            name: netapp_ps.ontap.export_policy
           vars:
             qtask: delete
             qchild: source
         # re-collecting facts to setup values for active svm/volume values  
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: facts
             qchild: destination
         - ansible.builtin.include_role:
-            name: ontap/volume
+            name: netapp_ps.ontap.volume
           vars:
             qtask: delete
             qchild: destination
@@ -341,12 +341,12 @@
       block:
         - name: Post-create validation
           ansible.builtin.include_role: 
-            name: maf/tests
+            name: netapp_ps.bper.tests
           vars:
             qtask: integration-test
 
         - ansible.builtin.include_role:
-            name: bper/logic
+            name: netapp_ps.bper.logic
           vars:
             qtask: 99_reporting
         - meta: end_play
@@ -354,7 +354,7 @@
         - ansible.builtin.debug:
             msg: "Post-create validation failed. Please check the logs. Created resource details will be printed."
         - ansible.builtin.include_role:
-            name: bper/logic
+            name: netapp_ps.bper.logic
           vars:
             qtask: 99_reporting
 
