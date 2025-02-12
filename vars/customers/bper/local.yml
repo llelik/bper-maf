@@ -35,17 +35,17 @@ vars_local:
           super_user_security: sys
   destination:
     volume:
-      name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
-      type: dp
+      name:          "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+      type:          dp
       snaplock:
-        type:        enterprise #"{{ 'non_snaplock' if input_snaplock | lower == 'false'}}"
+        type:        "{{ 'non_snaplock' if input_snaplock | lower == 'false' else 'enterprise' }}"
   snapmirror:
     source:
       volume:
-        name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
+        name:       "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
     destination:
       volume:
-        name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
+        name:       "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01_vault"
 vars_templates:
 vars_overrides:
 ...

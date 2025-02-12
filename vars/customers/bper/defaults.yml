@@ -19,7 +19,7 @@ vars_defaults:
       type:                   rw
       size_unit:              gb
       snapshot_policy:
-        name:                 'Prod_snapshot_3_3'
+        name:                 'none' #'Prod_snapshot_3_3'
       fractional_reserve:     0                     # ONTAP default
       security_style:         unix
       encrypt:                false

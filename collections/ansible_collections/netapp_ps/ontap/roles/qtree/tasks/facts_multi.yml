@@ -1,0 +1,7 @@
+---
+
+## Naming facts
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    users : "{{ 'users' | merge_lists(v=vars_local,required_keys=['name'],c=qtask_child) }}"
+

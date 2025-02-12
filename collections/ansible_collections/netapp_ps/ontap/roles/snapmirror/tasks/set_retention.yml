@@ -1,0 +1,66 @@
+---
+- name: "Role - ontap/snapmirror/set_retention"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_snapmirror: "{{ snapmirror | to_nice_yaml(2) | indent(2,true) | do_log('ontap/snapmirror/set_retention','snapmirror',qlogdir,qlogname) }}"
+
+  - name: Get snapshot info
+    netapp.ontap.na_ontap_rest_info:
+      gather_subset: 
+      - storage/volumes/snapshots
+      owning_resource:
+        volume_name: "{{ snapmirror.destination.volume.name }}"
+        svm_name: "{{ snapmirror.destination.svm.name }}"
+      fields:
+      - "create_time"
+      <<: *auth
+    delegate_to: localhost
+    register: ss_info
+
+  - name: Extract oldest create_date
+    set_fact:
+      oldest_create_date: "{{ ss_info.ontap_info['storage/volumes/snapshots'].records | map(attribute='create_time') | min | default('') | regex_replace('(\\+|\\-)[0-9]{2}:[0-9]{2}$', '') | reformat_datetime(input_format='%Y-%m-%dT%H:%M:%S') }}"
+
+  - name: diff date
+    set_fact:
+      diff_with_now: "{{ oldest_create_date | diff_datetime() }}"
+
+  - name: Calculate keep_days
+    set_fact:
+      keep_days: "{{ 30 if (diff_with_now|int) < 30 else (diff_with_now|int) + 1 }}"
+
+  - name: Calculate expiration_date
+    set_fact:
+      expiration_date: "{{ oldest_create_date | add_time_to_datetime(add_time=keep_days,add_type='days') | reformat_datetime(output_format='%Y-%m-%d') }}"
+
+  - name: "Changing comment with expiration date"
+    netapp.ontap.na_ontap_volume:
+      state: present
+      vserver:                 "{{ snapmirror.destination.svm.name }}"    
+      name:                    "{{ snapmirror.destination.volume.name }}"
+      comment:                 "delete {{ expiration_date }}"
+      <<: *auth
+    delegate_to: localhost
+
+  - name: "Renaming volume {{ snapmirror.destination.volume.name}} -> del_{{ snapmirror.destination.volume.name }}"
+    netapp.ontap.na_ontap_volume:
+      state: present
+      vserver:                 "{{ snapmirror.destination.svm.name }}"    
+      from_name:               "{{ snapmirror.destination.volume.name }}"
+      name:                    "del_{{ snapmirror.destination.volume.name }}"
+      <<: *auth
+    delegate_to: localhost
+  when:
+  - snapmirror | default(false)
