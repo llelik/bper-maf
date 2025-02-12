@@ -1,0 +1,45 @@
+---
+- name: "Role - ontap/export_policy/delete"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/export_policy/create','cluster',qlogdir,qlogname) }}"
+      l_svm: "{{ svm | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_export_policy: "{{ export_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','export_policy',qlogdir,qlogname) }}"
+
+    ## Delete rules labeled as deleted
+  - name: "Delete rules"
+    netapp.ontap.na_ontap_export_policy_rule:
+      state: absent
+      name: "{{ export_policy.name }}"
+      rule_index: "{{ item.rule_index }}"
+      vserver: "{{ svm.name }}"
+      <<: *auth
+    loop: "{{ export_policy.rules | default([]) | selectattr('is_deleted_item', 'defined') | selectattr('is_deleted_item','equalto',True) | selectattr('rule_index','defined') | list }}"
+    loop_control:
+      label: "{{ (item.rule_index | string) + ' -> ' + item.client_match  }}"
+    delegate_to: localhost
+
+    ## Delete Export Policy
+  - name: "Delete Export Policy {{ export_policy.name }}"          
+    netapp.ontap.na_ontap_export_policy:
+      state: absent
+      vserver: "{{ svm.name }}"
+      name: "{{ export_policy.name }}"
+      <<: *auth
+    delegate_to: localhost
+
+  when: 
+  - svm.name | default(false)
+  - export_policy.name | default(false) 

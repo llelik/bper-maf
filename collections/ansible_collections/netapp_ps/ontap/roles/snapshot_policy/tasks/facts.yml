@@ -1,0 +1,23 @@
+---
+## Naming facts
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    snapshot_policy : "{{ 'snapshot_policy' | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
+    cluster         : "{{ 'cluster'         | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
+
+- name: Set naming facts
+  no_log: true
+  ansible.builtin.set_fact:
+    # the next 2 lines are for the certificate based authentication
+    # we assume the certificate is in the format of clustername___username (with .key and .ctr extensions)
+    netapp_api_certificate_base: "{{ playbook_dir }}/{{ vars_defaults.config.api_certificate_folder | default('api_certificates') }}/{{ cluster.name | default('') }}___{{ vars_defaults.config.api_username | default('api_user') }}"
+    netapp_api_use_certificate : "{{ vars_defaults.config.api_use_certificate           | default(false) }}"
+    netapp_hostname            : "{{ cluster.management_ip  | default(ansible_host)                                   }}"
+    netapp_username            : "{{ ontap_username                                          }}"
+    netapp_password            : "{{ ontap_password                                          }}"
+
+  # here we set the authentication object (can be user/pw or certificate)
+- name: Set naming facts - authentication
+  no_log: true
+  set_fact:
+    auth_rest: "{{ netapp_hostname | auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"

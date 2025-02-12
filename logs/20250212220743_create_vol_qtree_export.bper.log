@@ -1,0 +1,10 @@
+export_policy:
+  name: Q_BBBBBPR06
+  rules:
+  - client_match: 172.30.233.0/24
+    protocol: nfs
+    ro_rule: any
+    rule_index: 1
+    rw_rule: any
+    super_user_security: sys
+

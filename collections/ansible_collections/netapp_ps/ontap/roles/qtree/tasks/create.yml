@@ -1,0 +1,52 @@
+
+---
+- name: "Role - ontap/qtree/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:               "{{ cluster              | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/qtree/create','cluster',qlogdir,qlogname) }}"
+      l_svm:                   "{{ svm                  | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_volume:                "{{ volume               | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','volume',qlogdir,qlogname) }}"
+      l_qtree:                 "{{ qtree                | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','qtree',qlogdir,qlogname) }}"
+
+  - name: "create qtree [{{ qtree.name | default('None') }}]"               
+    netapp.ontap.na_ontap_qtree:
+      state              : present
+      vserver            : "{{ svm.name | default(omit) }}"
+      flexvol_name       : "{{ volume.name }}"
+      name               : "{{ qtree.name }}"
+      export_policy      : "{{ qtree.export_policy       | default(omit) }}"
+      # oplocks            : "{{ qtree.oplocks             | default(omit) }}"
+      security_style     : "{{ qtree.security_style      | default(omit) }}"
+      unix_permissions   : "{{ qtree.unix_permissions    | default(omit) }}"
+      unix_group         : "{{ qtree.unix_group          | default(omit) }}"
+      unix_user          : "{{ qtree.unix_user           | default(omit) }}"
+      wait_for_completion: "{{ qtree.wait_for_completion | default(omit) }}"
+      <<: *auth
+    delegate_to: localhost
+
+  - name: "Set qtree oplocks [{{ qtree.name | default('None') }}]"
+    netapp.ontap.na_ontap_rest_cli:
+      command: 'volume/qtree/oplocks'
+      verb   : 'PATCH'
+      params : {'qtree': '{{ qtree.name }}','volume': '{{ volume.name }}','vserver': '{{ svm.name }}'}
+      body   : {'oplock_mode': '{{ qtree.oplocks }}'}
+      <<: *auth
+    delegate_to: localhost
+    when: qtree.oplocks | default(false) 
+
+  when:
+  - svm.name | default(false)
+  - volume.name | default(false)
+  - qtree.name | default(false)

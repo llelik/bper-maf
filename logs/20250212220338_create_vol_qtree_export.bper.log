@@ -1,0 +1,24 @@
+
+
+ontap/export_policy/create
+--------------------------
+cluster:
+  management_ip: 10.65.59.180
+  name: antigua
+
+svm:
+  name: svm_alexeym101
+  supported_aggregates:
+  - antigua_01_SSD_1
+  - antigua_02_SSD_1
+
+export_policy:
+  name: Q_BBBBBPR06
+  rules:
+  - client_match: 172.30.233.0/24
+    protocol: nfs
+    ro_rule: any
+    rule_index: 1
+    rw_rule: any
+    super_user_security: sys
+

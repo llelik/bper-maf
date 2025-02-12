@@ -1,0 +1,28 @@
+
+
+ontap/volume/delete
+-------------------
+cluster:
+  management_ip: 10.65.59.210
+  name: jamaica
+
+svm:
+  aggregates:
+  - jamaica_01_SSD_1
+  - jamaica_02_SSD_1
+  name: svm_alexeym20
+
+volume:
+  encrypt: false
+  language: c.utf_8
+  name: BBBBBPR06_vault
+  size_unit: gb
+  snaplock:
+    type: enterprise
+  type: dp
+  volume_efficiency:
+    enable_compression: true
+    enable_inline_compression: true
+    policy: '-'
+  wait_for_completion: true
+
