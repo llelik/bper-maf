@@ -85,7 +85,7 @@
         - ansible.builtin.debug: var=vars_local
         - ansible.builtin.debug:
             msg: "Data collection completed. Dryrun exit."
-        #- meta: end_play
+        - meta: end_play
 ########## debug end
     
 ########### CREATE STEP 1   ##### EXPORT POLICY CREATE
