@@ -46,7 +46,7 @@
     register: aggr_lookup
     delegate_to: localhost
     
-  - fail: msg=STOP
+  #- fail: msg=STOP
 
   # create the volume
   - name: "Create volume [{{ volume.name }}]"

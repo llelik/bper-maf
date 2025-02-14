@@ -102,26 +102,31 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
     log(f"Get aggregate data from rest")
     #aggregates = get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
     aggregates = get_selected_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, aggr_names_list)
-    log(f"RESPONSE {aggregates}")
+    log(f"RESPONSE given aggregates: \n {aggregates}")
     # get volumes for vol count parameter filter
     volumes = get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
+    
+    
     # check for only aggregates available for SVM
-
-    svm_name = ""
+    #svm_name = ""
     if svm_name != "":
         aggregates_svm = get_aggregates_svm_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, svm_name)
         aggregates_svm_names = [
             a["name"] 
             for a in aggregates_svm[0]['aggregates']
         ]
-        log(f"Filtering aggregates for SVM '{svm_name}', aggregates available: {aggregates_svm_names}")
+        log(f"Filtering aggregates for SVM '{svm_name}', aggregates assigned to SVM: {aggregates_svm_names}")
+    else:
+        aggregates_svm_names = []
+        log(f"No SVM name provided, no filtering on aggregates")
+
 
 
         
     if aggregates:
         for aggregate in aggregates:
-            #if aggregate["name"] not in aggregates_svm_names:
-            #    continue
+            if aggregate["name"] not in aggregates_svm_names:
+                continue
 
             # Extract required fields from aggregate
             name = aggregate["name"]
