@@ -1,3 +1,0 @@
----
-- include_tasks: "{{ playbook_dir}}/roles/ontap/qtree/tasks/facts.yml"
-- include_tasks: "{{ playbook_dir}}/roles/ontap/qtree/tasks/create.yml"

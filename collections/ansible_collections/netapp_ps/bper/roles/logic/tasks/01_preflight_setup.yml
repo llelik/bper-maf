@@ -5,17 +5,17 @@
 #   - qtree
 #   - export policy
 #   - source and vault volumes
+#   - volume type (snaplock)
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
-# Professional Services 2024
+# Professional Services 2024-2025
 ##########################################################################
 ---
-- name: Volume existance check
+- name: Pre-flight setup
   block:
     - name: Set cluster credentials 
       ansible.builtin.set_fact:
         auth: &auth
-          #hostname:        "{{ svm.cluster_mgmt | default(omit) }}"
           username:        "{{ ontap_username | default(omit) }}"
           password:        "{{ ontap_password | default(omit) }}"
           validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
@@ -31,13 +31,13 @@
     - name: Collecting existing volumes on all clusters against default volume name "{{ vars_local.source.volume.name | default('None') }}"
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
+        hostname: "{{ cluster_ip }}"
         gather_subset:
           - volume_info
         parameters:
           name: "{{ vars_local.source.volume.name[:-2] }}*"
         fields:
           - name
-        hostname: "{{ cluster_ip }}"
       register: existing_vols
       loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
       loop_control:
@@ -63,20 +63,21 @@
       ansible.builtin.set_fact:
         new_volume_name: "{{ existing_volumes_list | netapp_ps.bper.increment_names(1) }}"
 
-#######################################
-# ???????????
+######## Setting source volume destination aggreate
+# Collecting aggrgates available 
+# of the given Snaplock type across the inventory
 #######################################
 
-    - name: Get available aggregates of given type
+    - name: Get available aggregates of given type 
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
+        hostname: "{{ cluster_ip }}"
         gather_subset:
           - aggregate_info
         fields:
           - name
         parameters:
-          snaplock_type:   "{{ vars_local.source.volume.snaplock.type }}"
-        hostname: "{{ cluster_ip }}"
+          snaplock_type:   "{{ '!non_snaplock' if input_snaplock | lower == 'true' else vars_local.destination.volume.snaplock.type }}"
       no_log: "{{ nolog }}"
       loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
       loop_control:
@@ -85,13 +86,9 @@
 
     - debug: var=aggregates_supported
 
-    # - name: Reducing inventory for for SVM lookup 
-    #   ansible.builtin.set_fact:
-    #     reduced_supported_inventory: "{{ reduced_supported_inventory | default([]) + [item.cluster_ip] }}"
-    #   loop: "{{ aggregates_supported.results }}"
-    #   no_log: false
-    #   when: item.ontap_info.storage_aggregates.num_records > 0
-    
+    ######### Inventory of clusters with supported aggregates of requested Snaplock type 
+    # contains the list of clusters with supported aggregates 
+    # taken from the list of all clusters which have aggregates of given Snaplock type records > 0
     - name: Define cluster list with supported aggregate type
       set_fact:
         aggr_supported_inventory: "{{ aggregates_supported.results | selectattr('ontap_info.storage_aggregates.num_records', '>', 0) | map(attribute='cluster_ip') | list }}"

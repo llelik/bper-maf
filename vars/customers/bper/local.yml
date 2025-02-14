@@ -14,8 +14,6 @@ vars_local:
     volume:
       name: "{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       size: "{{ input_size }}"
-      #aggregate_exclude_name_regex: "{{ exclude_name_regex | default(omit) }}"
-      #aggregate_include_name_regex: "{{ include_name_regex | default(omit) }}"
       junction_path: "/{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01"
       snaplock:
         type:        "{{ 'non_snaplock' if input_snaplock | lower == 'false' else input_sl_params.type | lower }}"

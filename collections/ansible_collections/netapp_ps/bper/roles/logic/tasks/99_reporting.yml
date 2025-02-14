@@ -9,24 +9,54 @@
 # Professional Services 2024
 ##########################################################################
 ---
-- name: Summary report 
+- name: Summary report - some assertions failed
+  ansible.builtin.debug:
+    msg:
+      - "*********** REPORT START ***************************"
+      - "^^^^^^^^^^^ WARNING: ASSERTION FAILED ^^^^^^^^^^^^^^"
+      - "^^^^^^^^^^^   PLEASE CHECK THE LOGS   ^^^^^^^^^^^^^^"
+      - "*********** SOURCE *********************************"
+      - "Source Cluster:       {{ vars_local.source.cluster.name         | default('UNKNOWN') }}"
+      - "Source Volume:        {{ vars_local.source.volume.name          | default('UNKNOWN') }}"
+      - "Source SVM:           {{ vars_local.source.svm.name             | default('UNKNOWN') }}"
+      - "Source Qtree:         {{ vars_local.source.qtree.name           | default('UNKNOWN') }}"
+      - "Export Policy:        {{ vars_local.source.export_policy.name   | default('UNKNOWN') }}"
+      - "Source Vol Snaplock:  {{ vars_local.source.volume.snaplock      | default('UNKNOWN') }}"
+      - "*********** DESTINATION ****************************"
+      - "Dest Vault Cluster:   {{ vars_local.destination.cluster.name             | default('UNKNOWN') }}"
+      - "Dest Vault Volume:    {{ vars_local.destination.volume.name              | default('UNKNOWN') }}"
+      - "Dest Vault SVM:       {{ vars_local.destination.svm.name                 | default('UNKNOWN') }}"
+      - "Dest Vault Snaplock:  {{ vars_local.destination.volume.snaplock          | default('UNKNOWN') }}"
+      - "Snamirror:            [{{ vars_local.snapmirror.source.cluster.name      | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.source.svm.name           | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.source.volume.name        | default('UNKNOWN') }}]  --->   
+                               [{{ vars_local.snapmirror.destination.cluster.name | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.destination.svm.name      | default('UNKNOWN') }}:
+                               {{ vars_local.snapmirror.destination.volume.name   | default('UNKNOWN') }}]"
+      - "*********** REPORT END ***************************"
+  when: 
+    - assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
+
+- name: Summary report - all assertions passed
   ansible.builtin.debug:
     msg:
       - "*********** REPORT START ***************************"
       - "*********** SOURCE *********************************"
-      - "Source Cluster:       {{ vars_local.source.cluster.name | default('UNKNOWN') }}"
-      - "Source Volume:        {{ vars_local.source.volume.name | default('UNKNOWN') }}"
-      - "Source SVM:           {{ vars_local.source.svm.name | default('UNKNOWN') }}"
-      - "Source Qtree:         {{ vars_local.source.qtree.name | default('UNKNOWN') }}"
-      - "Export Policy:        {{ vars_local.source.export_policy.name | default('UNKNOWN') }}"
+      - "Source Cluster:       {{ vars_local.source.cluster.name                                       | default('UNKNOWN') }}"
+      - "Source Volume:        {{ src_vol_info.ontap_info.storage_volumes.records[0].name              | default('UNKNOWN') }}"
+      - "Source SVM:           {{ src_vol_info.ontap_info.storage_volumes.records[0].svm.name          | default('UNKNOWN') }}"
+      - "Source Qtree:         {{ src_qt_info.ontap_info.storage_qtrees.records[0].name                | default('UNKNOWN') }}"
+      - "Export Policy:        {{ src_ep_info.ontap_info.protocols_nfs_export_policies.records[0].name | default('UNKNOWN') }}"
+      - "Source Vol Snaplock:  {{ src_vol_info.ontap_info.storage_volumes.records[0].snaplock          | default('UNKNOWN') }}"
       - "*********** DESTINATION ****************************"
-      - "Dest Vault Cluster:   {{ vars_local.destination.cluster.name | default('UNKNOWN') }}"
-      - "Dest Vault Volume:    {{ vars_local.destination.volume.name | default('UNKNOWN') }}"
-      - "Dest Vault SVM:       {{ vars_local.destination.svm.name | default('UNKNOWN') }}"
-      - "Snamirror:            [{{ vars_local.snapmirror.source.cluster.name | default('UNKNOWN') }}:
-                               {{ vars_local.snapmirror.source.svm.name | default('UNKNOWN') }}:
-                               {{ vars_local.snapmirror.source.volume.name | default('UNKNOWN') }}]  --->   
-                               [{{ vars_local.snapmirror.destination.cluster.name | default('UNKNOWN') }}:
-                               {{ vars_local.snapmirror.destination.svm.name | default('UNKNOWN') }}:
-                               {{ vars_local.snapmirror.destination.volume.name | default('UNKNOWN') }}]"
+      - "Dest Vault Cluster:   {{ vars_local.destination.cluster.name                                              | default('UNKNOWN') }}"
+      - "Dest Vault Volume:    {{ dst_vol_info.ontap_info.storage_volumes.records[0].name                          | default('UNKNOWN') }}"
+      - "Dest Vault SVM:       {{ dst_vol_info.ontap_info.storage_volumes.records[0].svm.name                      | default('UNKNOWN') }}"
+      - "Dest Vol Snaplock:    {{ dst_vol_info.ontap_info.storage_volumes.records[0].snaplock                      | default('UNKNOWN') }}"
+      - "Snamirror:            [{{ sm_info.ontap_info.snapmirror_relationships.records[0].source.cluster.name      | default('UNKNOWN') }}:
+                               {{ sm_info.ontap_info.snapmirror_relationships.records[0].source.path               | default('UNKNOWN') }}]  --->   
+                               [{{ sm_info.ontap_info.snapmirror_relationships.records[0].destination.cluster.name | default('UNKNOWN') }}:
+                               {{ sm_info.ontap_info.snapmirror_relationships.records[0].destination.path          | default('UNKNOWN') }}]"
       - "*********** REPORT END ***************************"
+  when: 
+    - assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
