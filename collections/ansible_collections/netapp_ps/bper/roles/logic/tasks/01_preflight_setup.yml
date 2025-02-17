@@ -62,6 +62,9 @@
     - name: Set new volume name
       ansible.builtin.set_fact:
         new_volume_name: "{{ existing_volumes_list | netapp_ps.bper.increment_names(1) }}"
+    - debug:
+        msg: "Volume with default base name {{ vars_local.source.volume.name | default('None') }} is not found existing - this name will be used for target volume name"
+      when: existing_volumes_list | length == 0
 
 ######## Setting source volume destination aggreate
 # Collecting aggrgates available 
@@ -83,8 +86,9 @@
       loop_control:
         loop_var: cluster_ip
       register: aggregates_supported
-
-    - debug: var=aggregates_supported
+ 
+    - debug: 
+        msg: "Found {{ aggregates_supported.results | selectattr('ontap_info.storage_aggregates.num_records', '>', 0) | map(attribute='ontap_info.storage_aggregates.num_records' ) | sum }} aggregates of requested Snaplock type {{ vars_local.source.volume.snaplock.type }} on all inventory clusters"
 
     ######### Inventory of clusters with supported aggregates of requested Snaplock type 
     # contains the list of clusters with supported aggregates 

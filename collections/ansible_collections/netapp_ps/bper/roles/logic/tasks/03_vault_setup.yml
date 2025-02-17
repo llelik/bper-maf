@@ -72,7 +72,7 @@
 # of the given Snaplock type across the inventory
 #######################################
 
-  - name: Get available of cluster aggregates of given Snaplock type 
+  - name: Get available aggregates of given Snaplock type on vault cluster 
     netapp.ontap.na_ontap_rest_info:
       <<: *auth
       hostname: "{{ target_vault_cluster_ip }}"
@@ -87,15 +87,20 @@
 
   - set_fact: 
       aggregates_supported_vault_list: "{{ aggregates_supported_vault.ontap_info.storage_aggregates.records | map(attribute='name') | list }}"
-  - debug: var=aggregates_supported_vault_list
-
+  - debug: msg="Cluster supported aggregate list = {{ aggregates_supported_vault_list }}"
+  - debug: msg="SVM assigned aggregates list     = {{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list }}"
+  - set_fact:
+      vault_svm_supported_aggregates: "{{ svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | intersect(aggregates_supported_vault_list)  }}"
+  - debug: msg="SVM assigned supported aggregates list = {{ vault_svm_supported_aggregates }}"
+  
   # we make sure vault SVM has access to the aggregates of the requested Snaplock type
   - ansible.builtin.assert:
       that: 
         - aggregates_supported_vault_list | length > 0
-        - aggregates_supported_vault_list is subset(svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list)
+        - vault_svm_supported_aggregates | length > 0
+        #- aggregates_supported_vault_list is subset(svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list)
       msg: 
-        - "No aggregates found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
+        - "No aggregates of requested Snaplock type found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
 
   - name: Define destination vault SVM - vars_local facts
     ansible.builtin.set_fact:
@@ -113,7 +118,7 @@
             management_ip:   "{{ target_vault_cluster_ip }}"
           svm:
             name:            "{{ target_vault_svm }}"
-            supported_aggregates:      "{{ aggregates_supported_vault_list }}"
+            supported_aggregates:      "{{ vault_svm_supported_aggregates }}"
               
   - name: Merging logic found facts with vars_local
     ansible.builtin.set_fact:
