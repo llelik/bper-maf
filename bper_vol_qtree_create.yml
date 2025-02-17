@@ -94,6 +94,7 @@
 # here is no block/rescue when creating export policy
 # since if it wasn't created - there is nothing to rollback
     # CREATE
+    - ansible.builtin.debug: var=vars_local
     - name: "Create export policy block"
       block:
         # Collect export policy facts variables
