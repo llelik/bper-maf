@@ -77,13 +77,14 @@
     msg:
       - "Input data isn't correct. Cannot continue: input_snaplock not given or incorrect value. Input value: {{ input_snaplock | default('') }}"
   when:
-    - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false']) or (input_snaplock is not boolean)
+    #- (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false']) or (input_snaplock is not boolean)
+    - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false'])
 
 - name: Validate Snaplock input parameters
   ansible.builtin.assert:
     that:
       - input_sl_params is defined
-      - input_sl_param s| type_debug == 'dict'
+      - input_sl_params | type_debug == 'dict'
       - input_sl_params.autocommit_period | netapp_ps.ontap.is_duration
       - input_sl_params.retention is defined
       - input_sl_params.retention | type_debug == 'dict'
