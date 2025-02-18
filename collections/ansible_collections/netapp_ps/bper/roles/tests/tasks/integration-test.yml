@@ -138,6 +138,8 @@
     hostname: "{{ dst_cluster.management_ip }}"
   register: dst_vol_info
   no_log: "{{ nolog }}"
+  when: 
+    - vars_local.destination is defined
 
 - name: "Tests: Collect source cluster info - snapmirror"
   netapp.ontap.na_ontap_rest_info:
@@ -155,6 +157,8 @@
     hostname: "{{ dst_cluster.management_ip }}"
   register: sm_info
   no_log: "{{ nolog }}"
+  when: 
+    - vars_local.snapmirror is defined
 
 # - debug:
 #     msg:

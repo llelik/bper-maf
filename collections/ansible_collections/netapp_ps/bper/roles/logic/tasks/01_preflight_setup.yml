@@ -22,7 +22,7 @@
           use_rest:        always
           use_python_keys: true
       no_log: true
-
+    - debug: var=vars_local
 ######### Incrementing volume name by 1
 # We retrieve existing volumes with generated name pattern without last 2 digits
 # This should give a list of volumes named vol01,vol02,vol03 etc. (filetr=vol*)
@@ -71,7 +71,7 @@
 # of the given Snaplock type across the inventory
 #######################################
 
-    - name: Get available aggregates of given type 
+    - name: Get available aggregates of requested type 
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
         hostname: "{{ cluster_ip }}"
@@ -80,7 +80,7 @@
         fields:
           - name
         parameters:
-          snaplock_type:   "{{ '!non_snaplock' if input_snaplock | lower == 'true' else vars_local.destination.volume.snaplock.type }}"
+          snaplock_type:   "{{ '!non_snaplock' if input_snaplock | lower == 'true' else vars_local.source.volume.snaplock.type }}"
       no_log: "{{ nolog }}"
       loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
       loop_control:
@@ -116,13 +116,6 @@
             qtree:
               name:          "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
               export_policy: "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
-          snapmirror:
-            destination:
-              volume:
-                name:        "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
-          destination:
-            volume:
-              name:          "{{ new_volume_name | default(vars_local.source.volume.name) }}_vault"
       when: existing_volumes_list | length > 0
     
     - name: Merging logic found facts with vars_local

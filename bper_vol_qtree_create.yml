@@ -26,18 +26,19 @@
     https_proxy: ""      
   vars_files:
     - "vars/customers/bper/defaults.yml"
-    - "vars/customers/bper/local.yml"
+    #- "vars/customers/bper/local.yml"
    # BPER PROD:
    # - "vars/customers/bper/inventory.yml"
    # BPER lab:
-    - "vars/customers/bper/inventory_bper_lab.yml"
+   # - "vars/customers/bper/inventory_bper_lab.yml"
    # NetApp lab:
-   # - "vars/customers/bper/inventory_lab_test.yml"
+    - "vars/customers/bper/inventory_lab_test.yml"
   vars:
     qlogname: "create_vol_qtree_export.bper"       # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
 
   tasks:
+    
     # Setup credential facts
     - ansible.builtin.include_role:
         name: netapp_ps.bper.facts
@@ -55,7 +56,11 @@
         name: netapp_ps.bper.facts
       vars:
         qtask: prepare_facts
-    
+######################################################## 
+    - name: Render local vars
+      ansible.builtin.set_fact:
+        vars_local: "{{ lookup('template', 'vars/customers/bper/templates/local.j2') | from_yaml }}"
+########################################################
     # Check inventory SVMs availability
     - ansible.builtin.include_role:
         name: netapp_ps.bper.logic

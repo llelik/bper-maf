@@ -8,6 +8,8 @@
 # NetApp Deutschland GmbH
 # Professional Services 2024
 ##########################################################################
+vars_templates:
+vars_overrides:
 vars_defaults:
   source:
     volume:
@@ -31,7 +33,7 @@ vars_defaults:
         mode:                 'off'                 # ONTAP default 
       volume_efficiency:
           enable_inline_compression: true
-          enable_compression:        true
+          #enable_compression:        true
           compression_type:          secondary
           volume_efficiency:         start
           policy:                    default
@@ -40,21 +42,21 @@ vars_defaults:
       unix_group:        root
       unix_user:         root
       oplocks:           true
-  destination:
-    volume:
-      wait_for_completion:    true
-      type:                   dp
-      language:               c.utf_8
-      size_unit:              gb
-      encrypt:                false
-      snaplock:
-        type:                 non_snaplock          # options: compliance, enterprise, non_snaplock
-      volume_efficiency:
-          enable_inline_compression: true
-          enable_compression:        true
-          policy:                    '-'
-  snapmirror:
-    policy:                   DPDefault
+  # destination:
+  #   volume:
+  #     wait_for_completion:    true
+  #     type:                   dp
+  #     language:               c.utf_8
+  #     size_unit:              gb
+  #     encrypt:                false
+  #     snaplock:
+  #       type:                 non_snaplock          # options: compliance, enterprise, non_snaplock
+  #     volume_efficiency:
+  #         enable_inline_compression: true
+  #         enable_compression:        true
+  #         policy:                    '-'
+  # snapmirror:
+  #   policy:                   DPDefault
 
 # BPER storage environments. Used for naming convention.
 storage_env:

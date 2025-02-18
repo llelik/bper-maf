@@ -44,6 +44,8 @@
       target_vault_cluster:    "{{ target_vault_svm_hostvars[0].cluster_name }}"
       target_vault_cluster_ip: "{{ target_vault_svm_hostvars[0].cluster_mgmt }}"  
   
+  - debug: var=vars_local
+
   - name: Get available aggregates assigned vault SVM
     netapp.ontap.na_ontap_rest_info:
       <<: *auth
@@ -81,7 +83,7 @@
       fields:
         - name
       parameters:
-        snaplock_type:    "{{ '!non_snaplock' if input_snaplock | lower == 'true' else vars_local.destination.volume.snaplock.type }}"
+        snaplock_type:    "{{ '!non_snaplock' if input_snaplock | lower == 'true' else vars_local.source.volume.snaplock.type }}"
     no_log: "{{ nolog }}"
     register: aggregates_supported_vault
 
@@ -98,33 +100,21 @@
       that: 
         - aggregates_supported_vault_list | length > 0
         - vault_svm_supported_aggregates | length > 0
-        #- aggregates_supported_vault_list is subset(svm_aggregates.ontap_info.svm_svms.records[0].aggregates | map(attribute='name') | list)
       msg: 
         - "No aggregates of requested Snaplock type found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
 
   - name: Define destination vault SVM - vars_local facts
     ansible.builtin.set_fact:
-      vars_local_update:
-        snapmirror:
-          destination:
-            cluster:
-              name:          "{{ target_vault_cluster }}"
-              management_ip: "{{ target_vault_cluster_ip }}"
-            svm:
-              name:          "{{ target_vault_svm }}"
-        destination:
-          cluster:
-            name:            "{{ target_vault_cluster }}"
-            management_ip:   "{{ target_vault_cluster_ip }}"
-          svm:
-            name:            "{{ target_vault_svm }}"
-            supported_aggregates:      "{{ vault_svm_supported_aggregates }}"
+      vars_local_update: "{{ lookup('template', 'vars/customers/bper/templates/vault.j2') | from_yaml }}"
               
   - name: Merging logic found facts with vars_local
     ansible.builtin.set_fact:
       vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
+  - debug: var=vars_local
   
   when: 
+    - input_snaplock | lower == 'false' or input_snaplock is not defined
     - inventory_svms_mcc.keys() | length > 0
     - target_svm is defined
+    
 ...
