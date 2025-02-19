@@ -1,0 +1,37 @@
+destination:
+    volume:
+        name:                   {{ new_volume_name | default(vars_local.source.volume.name) }}_vault
+        type:                   dp
+        snaplock:
+            type:               {{ 'non_snaplock' if not input_snaplock | bool else input_sl_params.type | lower }}
+        wait_for_completion:    true
+        language:               c.utf_8
+        size_unit:              gb
+        encrypt:                false
+        volume_efficiency:
+            enable_inline_compression: true
+            enable_compression:        true
+            policy:                    '-'
+    cluster:
+        name:                          {{ target_vault_cluster }}
+        management_ip:                 {{ target_vault_cluster_ip }}
+    svm:
+        name:                          {{ target_vault_svm }}
+        supported_aggregates:          {{ vault_svm_supported_aggregates }}
+snapmirror:
+    policy:                DPDefault
+    source:
+        volume:
+            name:          {{ vars_local.source.volume.name }}
+        cluster:
+            name:          {{ target_svm.cluster_name }}
+        svm:
+            name:          {{ target_svm.name }}
+    destination:
+        volume:
+            name:          {{ new_volume_name | default(vars_local.source.volume.name) }}_vault
+        cluster:
+            name:          {{ target_vault_cluster }}
+            management_ip: {{ target_vault_cluster_ip }}
+        svm:
+            name:          {{ target_vault_svm }}  

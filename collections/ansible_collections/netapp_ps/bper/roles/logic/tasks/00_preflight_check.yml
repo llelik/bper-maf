@@ -19,7 +19,7 @@
           validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
           use_rest:        always
           use_python_keys: true
-      no_log: false
+      no_log: true
 
     - name: Pre-flight availability check - primary storage inventory
       netapp.ontap.na_ontap_rest_info:

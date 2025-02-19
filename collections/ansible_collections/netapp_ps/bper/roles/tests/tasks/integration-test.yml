@@ -138,6 +138,8 @@
     hostname: "{{ dst_cluster.management_ip }}"
   register: dst_vol_info
   no_log: "{{ nolog }}"
+  when: 
+    - vars_local.destination is defined
 
 - name: "Tests: Collect source cluster info - snapmirror"
   netapp.ontap.na_ontap_rest_info:
@@ -155,43 +157,19 @@
     hostname: "{{ dst_cluster.management_ip }}"
   register: sm_info
   no_log: "{{ nolog }}"
+  when: 
+    - vars_local.snapmirror is defined
 
-# - debug:
-#     msg:
-#       - "{{ src_ep_info.ontap_info.protocols_nfs_export_policies }}"
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].encryption }}"
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent}}"
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name}}"
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].language         }}"             
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style   }}"        
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].type                   }}"      
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type            }}"   
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].tiering.policy             }}" 
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].autosize.mode }}" 
-#       - "{{ src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name }}"    
-
-- debug: var=src_vol_info.ontap_info.storage_volumes.records[0].snaplock
-
-# values checked against source and dest cluster info (using collected info and input values)
-- name: "Tests: Assert required objects are present"
-  ansible.builtin.assert:
-    that:
-      - src_qt_info.ontap_info.storage_qtrees.num_records                == 1 # 1 == exists
-      - src_vol_info.ontap_info.storage_volumes.num_records              == 1 # 1 == exists
-      - src_ep_info.ontap_info.protocols_nfs_export_policies.num_records == 1 # 1 == exists 
-      - dst_vol_info.ontap_info.storage_volumes.num_records              == 1 # 1 == exists
-      - sm_info.ontap_info.snapmirror_relationships.num_records          == 1 # 1 == exists
-      - sm_info.ontap_info.snapmirror_relationships.records[0].state     in ['snapmirrored', 'initializing', 'transferring']
-    msg: "One or more of the required objects not found on the source or destination cluster. Please check the configuration."
-  register: assert_result_0
-
-# values checked against the defaults (we don't change defaults with collected data and input values)
+# values checked against the defaults and local values
 - name: "Tests: Assert source volume has default parameters set up"
   ansible.builtin.assert:
     that:
+      - src_qt_info.ontap_info.storage_qtrees.num_records                                  == 1 # 1 == exists
+      - src_vol_info.ontap_info.storage_volumes.num_records                                == 1 # 1 == exists
+      - src_ep_info.ontap_info.protocols_nfs_export_policies.num_records                   == 1 # 1 == exists 
       - src_vol_info.ontap_info.storage_volumes.records[0].guarantee.type                  | lower == vars_defaults.source.volume.space_guarantee               # 'none'
       - src_vol_info.ontap_info.storage_volumes.records[0].space.snapshot.reserve_percent  | int == vars_defaults.source.volume.percent_snapshot_space | int    # 5
-      - src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name            == vars_defaults.source.volume.snapshot_policy.name                  # 'Prod_snapshot_3_3'
+      - src_vol_info.ontap_info.storage_volumes.records[0].snapshot_policy.name            == vars_local.source.volume.snapshot_policy.name                     # 'Prod_snapshot_3_3' or none
       - src_vol_info.ontap_info.storage_volumes.records[0].language                        | lower == vars_defaults.source.volume.language                      # 'c.utf_8'
       - src_vol_info.ontap_info.storage_volumes.records[0].nas.security_style              | lower == vars_defaults.source.volume.security_style                # 'unix'
       - src_vol_info.ontap_info.storage_volumes.records[0].type                            | lower == vars_defaults.source.volume.type                          # 'rw'
@@ -200,31 +178,74 @@
       - src_vol_info.ontap_info.storage_volumes.records[0].efficiency.policy.name          == vars_defaults.source.volume.volume_efficiency.policy              # default
       - src_vol_info.ontap_info.storage_volumes.records[0].encryption.enabled              == vars_defaults.source.volume.encrypt | bool
     msg: "One or more of the default volume parameters are not set on the source volume. Please check the configuration."
-  register: assert_result_1
+    quiet: true
+  ignore_errors: true
+  register: assert_result_0
+  
 
-# Snaplock volume configuration values checked against the input values when input_snaplock=true
-- name: "Tests: Assert Volume Snaplock setup for snaplock volume"
+- set_fact:
+    all_assertions: "{{ all_assertions | default([]) + [True if not assert_result_0.failed else False] }}"
+
+- name: "Tests: Assert destination and snapmirror objects are present"
   ansible.builtin.assert:
     that:
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type              | lower == src_volume.snaplock.type              | lower                # is set as in local vars
-      - dst_vol_info.ontap_info.storage_volumes.records[0].snaplock.type              | lower == dst_volume.snaplock.type              | lower                # is set as in local vars
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.autocommit_period | lower == src_volume.snaplock.autocommit_period | lower                # is set as in local vars
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.retention.default | lower == src_volume.snaplock.retention.default | lower                # is set as in local vars
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.retention.minimum | lower == src_volume.snaplock.retention.minimum | lower                # is set as in local vars
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.retention.maximum | lower == src_volume.snaplock.retention.maximum | lower                # is set as in local vars
-      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.autocommit_period | lower == src_volume.snaplock.autocommit_period | lower                # is set as in local vars
-    msg: "Snaplock type is not set as expected. Please check the configuration."
-  when: src_volume.snaplock.type != 'non_snaplock'
-  register: assert_result_2
+      - dst_vol_info.ontap_info.storage_volumes.records[0].name                 == dst_volume.name
+      - sm_info.ontap_info.snapmirror_relationships.records[0].source.path      == src_svm.name + ':' + src_volume.name
+      - sm_info.ontap_info.snapmirror_relationships.records[0].destination.path == dst_svm.name + ':' + dst_volume.name
+      - dst_vol_info.ontap_info.storage_volumes.num_records                     == 1 # 1 == exists
+      - sm_info.ontap_info.snapmirror_relationships.num_records                 == 1 # 1 == exists
+      - sm_info.ontap_info.snapmirror_relationships.records[0].state | lower    in ['snapmirrored', 'initializing', 'transferring']
+    msg: "One or more of the destination or snapmirror objects not found on the destination cluster. Please check the configuration."
+    quiet: true
+  ignore_errors: true
+  when: 
+    - vars_local.destination is defined
+    - vars_local.snapmirror is defined
+  register: assert_result_1
+
+- set_fact:
+    all_assertions: "{{ all_assertions | default([]) + [True if not assert_result_1.failed else False] }}"
+  when: 
+    - vars_local.destination is defined
+    - vars_local.snapmirror is defined
 
 # Snaplock volume configuration values checked against the input values when input_snaplock=false
 - name: "Tests: Assert Volume Snaplock type setup for non_snaplock volume"
   ansible.builtin.assert:
     that:
       - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type              | lower == src_volume.snaplock.type              | lower                # is set as in local vars
-      - dst_vol_info.ontap_info.storage_volumes.records[0].snaplock.type              | lower == dst_volume.snaplock.type              | lower                # is set as in local vars
     msg: "Snaplock type is not set as expected. Please check the configuration."
+    quiet: true
+  ignore_errors: true
   when: src_volume.snaplock.type == 'non_snaplock'
   register: assert_result_2
+
+- set_fact:
+    all_assertions: "{{ all_assertions | default([]) + [True if not assert_result_2.failed else False] }}"
+  when: src_volume.snaplock.type == 'non_snaplock'
+
+# Snaplock volume configuration values checked against the input values when input_snaplock=true
+- name: "Tests: Assert Volume Snaplock setup for snaplock volume"
+  ansible.builtin.assert:
+    that:
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.type              | lower == src_volume.snaplock.type              | lower                # is set as in local vars
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.autocommit_period | lower == src_volume.snaplock.autocommit_period | lower                # is set as in local vars
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.retention.default | lower == src_volume.snaplock.retention.default | lower                # is set as in local vars
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.retention.minimum | lower == src_volume.snaplock.retention.minimum | lower                # is set as in local vars
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.retention.maximum | lower == src_volume.snaplock.retention.maximum | lower                # is set as in local vars
+      - src_vol_info.ontap_info.storage_volumes.records[0].snaplock.autocommit_period | lower == src_volume.snaplock.autocommit_period | lower                # is set as in local vars
+    msg: "Snaplock type is not set as expected. Please check the configuration."
+    quiet: true
+  ignore_errors: true
+  when: 
+    - src_volume.snaplock.type != 'non_snaplock'
+  register: assert_result_3
+
+- set_fact:
+    all_assertions: "{{ all_assertions | default([]) + [True if not assert_result_3.failed else False] }}"
+  when: 
+    - src_volume.snaplock.type != 'non_snaplock'
+
+- debug: var=all_assertions
 
 ...

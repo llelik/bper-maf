@@ -1,0 +1,30 @@
+  source:
+    volume:
+      name: {{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
+      size: {{ input_size }}
+      junction_path:         /{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
+      snapshot_policy:
+        name:                {{ vars_defaults.source.volume.snapshot_policy.name if not input_snaplock | bool else 'none' }}
+      snaplock:
+        type:                {{ 'non_snaplock' if not input_snaplock | bool else input_sl_params.type | lower }}
+        retention: 
+          default:           {{ input_sl_params.retention.default | default(omit) }}
+          maximum:           {{ input_sl_params.retention.maximum | default(omit) }}
+          minimum:           {{ input_sl_params.retention.minimum | default(omit) }}
+        autocommit_period:   {{ input_sl_params.autocommit_period | default(omit) }}
+        privileged_delete:   {{ input_sl_params.privileged_delete | default(omit) }}
+        append_mode_enabled: {{ input_sl_params.append_mode_enabled | default(omit) }}
+      export_policy:
+        name:        Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
+    qtree:
+      name:          Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
+      export_policy: Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
+    export_policy:
+      name:          Q_{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
+      rules:
+        - client_match: {{ input_clientmatch | default('0.0.0.0/0') }}
+          rule_index: 1
+          ro_rule: any
+          rw_rule: any
+          protocol: nfs
+          super_user_security: sys

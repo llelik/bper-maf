@@ -18,14 +18,4 @@
   ansible.builtin.set_fact:
     input_env_fact: "{{ input_env | netapp_ps.bper.shorten_fus }}"
 
-# - name: Set aggregate Snaplock toggle
-#   ansible.builtin.set_fact:
-#     include_name_regex: lock
-#   when: input_snaplock | lower == 'true'
-
-# - name: Set aggregate Snaplock toggle
-#   ansible.builtin.set_fact:
-#     exclude_name_regex: lock
-#   when: input_snaplock | lower == 'false'
-
 ...

@@ -39,7 +39,7 @@
       loop_control:
         loop_var: svm
         label: svm
-      no_log: false
+      no_log: "{{ nolog }}"
       # we look only at SVMs on clusters with supported aggregates
       when: svm.cluster_mgmt in aggr_supported_inventory
 
@@ -60,7 +60,7 @@
       loop_control:
         loop_var: svm
         label: svm
-      no_log: false
+      no_log: "{{ nolog }}"
       when:
         - svm.ontap_info is defined
 
@@ -89,14 +89,8 @@
             cluster:
               name:          "{{ target_svm.cluster_name }}"
               management_ip: "{{ target_svm.cluster_mgmt }}"
-          snapmirror:
-            source:
-              cluster:
-                name:        "{{ target_svm.cluster_name }}"
-              svm:
-                name:        "{{ target_svm.name }}"
-              volume:
-                name:        "{{ vars_local.source.volume.name }}"
+
+    - debug: var=vars_local
 
     - name: Merging logic local facts with vars_local
       ansible.builtin.set_fact:

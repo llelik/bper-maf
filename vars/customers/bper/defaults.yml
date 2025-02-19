@@ -8,6 +8,8 @@
 # NetApp Deutschland GmbH
 # Professional Services 2024
 ##########################################################################
+vars_templates:
+vars_overrides:
 vars_defaults:
   source:
     volume:
@@ -40,21 +42,6 @@ vars_defaults:
       unix_group:        root
       unix_user:         root
       oplocks:           true
-  destination:
-    volume:
-      wait_for_completion:    true
-      type:                   dp
-      language:               c.utf_8
-      size_unit:              gb
-      encrypt:                false
-      snaplock:
-        type:                 non_snaplock          # options: compliance, enterprise, non_snaplock
-      volume_efficiency:
-          enable_inline_compression: true
-          enable_compression:        true
-          policy:                    '-'
-  snapmirror:
-    policy:                   DPDefault
 
 # BPER storage environments. Used for naming convention.
 storage_env:
@@ -79,7 +66,7 @@ volume_sizes:
 # to reduce console output on large collections
 nolog: true
 # set dryrun to true to see what would be applied (before creating any instance)
-input_dryrun: false
+input_dryrun: False
 # set precheck_inventory to false to skip inventory clusters availability check (SVM check on ONTAP clusters)
 precheck_inventory: false
 playbook_dir: '/root'

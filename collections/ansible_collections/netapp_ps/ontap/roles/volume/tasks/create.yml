@@ -75,7 +75,6 @@
       unix_permissions                : "{{ volume.unix_permissions       | default(omit) }}"
       user_id                         : "{{ volume.user_id                | default(omit) }}"
       volume_security_style           : "{{ volume.security_style         | default(omit) }}"
-      #snaplock                        : "{{ volume.snaplock               | default(omit) }}"
       snaplock:
         type:                           "{{ volume.snaplock.type | default(omit) }}"
         retention: 
@@ -280,4 +279,5 @@
     - volume.luns | default(false)   
   when:  
   - volume.name | default(false)
-  - svm.name | default(false)    
+  - svm.name | default(false)
+...

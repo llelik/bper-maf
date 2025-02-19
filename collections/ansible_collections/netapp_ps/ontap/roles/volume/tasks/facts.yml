@@ -19,7 +19,7 @@
 
   # here we set the authentication object (can be user/pw or certificate)
 - name: Set naming facts - authentication
-  no_log: false
+  no_log: true
   set_fact:
     auth_rest: "{{ netapp_hostname | netapp_ps.ontap.auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"
 
