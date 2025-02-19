@@ -80,6 +80,7 @@
     - (input_snaplock is not defined) or (input_snaplock is not boolean)
     - input_snaplock is not boolean
 
+
 - name: Validate Snaplock input parameters
   ansible.builtin.assert:
     that:
