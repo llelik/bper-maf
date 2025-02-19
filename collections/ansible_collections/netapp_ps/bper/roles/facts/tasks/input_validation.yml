@@ -77,7 +77,7 @@
     msg:
       - "Input data isn't correct. Cannot continue: input_snaplock not given or incorrect value. Input value: {{ input_snaplock | default('') }}"
   when:
-    - (input_snaplock is not defined) or (input_snaplock | lower not in ['true', 'false'])
+    - (input_snaplock is not defined) or (input_snaplock is not boolean)
     - input_snaplock is not boolean
 
 - name: Validate Snaplock input parameters
@@ -98,6 +98,6 @@
       - "Input Snaplock data isn't correct. Cannot continue: input_sl_params not given or incorrect value. Input value: {{ input_sl_params | default('') }}"
   when:
     - input_snaplock is defined
-    - input_snaplock | lower == 'true' or input_snaplock | bool
+    - input_snaplock | bool
 
 ...

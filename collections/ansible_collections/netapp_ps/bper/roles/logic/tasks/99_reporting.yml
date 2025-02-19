@@ -1,12 +1,12 @@
 ##########################################################################
 #
-# - report on success
+# - report on success or failure
 # 
 #
 # 
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
-# Professional Services 2024
+# Professional Services 2024-2025
 ##########################################################################
 ---
 - name: Summary report - some assertions failed
@@ -34,9 +34,11 @@
                                {{ vars_local.snapmirror.destination.svm.name      | default('UNKNOWN') }}:
                                {{ vars_local.snapmirror.destination.volume.name   | default('UNKNOWN') }}]"
       - "*********** REPORT END ***************************"
-  when: 
-    - assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
-    - input_snaplock | lower == 'false'
+  when:
+    - not input_snaplock | bool
+    - not(all_assertions is all)
+    #- assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
+    
 
 - name: Summary report - some assertions failed
   ansible.builtin.debug:
@@ -52,9 +54,11 @@
       - "Export Policy:        {{ vars_local.source.export_policy.name   | default('UNKNOWN') }}"
       - "Source Vol Snaplock:  {{ vars_local.source.volume.snaplock      | default('UNKNOWN') }}"
       - "*********** REPORT END ***************************"
-  when: 
-    - assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
-    - input_snaplock | lower == 'true'
+  when:
+    - input_snaplock | bool
+    - not (all_assertions is all) 
+    #- assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
+    
 
 - name: Summary report - all assertions passed
   ansible.builtin.debug:
@@ -78,8 +82,10 @@
                                {{ sm_info.ontap_info.snapmirror_relationships.records[0].destination.path          | default('UNKNOWN') }}]"
       - "*********** REPORT END ***************************"
   when: 
-    - assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
-    - input_snaplock | lower == 'false'
+    - not input_snaplock | bool
+    - all_assertions is all
+    #- assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
+    
 
 - name: Summary report - all assertions passed
   ansible.builtin.debug:
@@ -94,6 +100,8 @@
       - "Source Vol Snaplock:  {{ src_vol_info.ontap_info.storage_volumes.records[0].snaplock          | default('UNKNOWN') }}"
       - "*********** REPORT END ***************************"
   when: 
-    - assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
-    - input_snaplock | lower == 'true'
+    - input_snaplock | bool
+    - all_assertions is all
+    #- assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
+    
 ...

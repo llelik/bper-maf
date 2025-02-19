@@ -80,7 +80,7 @@
         fields:
           - name
         parameters:
-          snaplock_type:   "{{ '!non_snaplock' if input_snaplock | lower == 'true' else vars_local.source.volume.snaplock.type }}"
+          snaplock_type:   "{{ '!non_snaplock' if input_snaplock | bool else vars_local.source.volume.snaplock.type }}"
       no_log: "{{ nolog }}"
       loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
       loop_control:

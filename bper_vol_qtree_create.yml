@@ -7,8 +7,13 @@
 #   - source qtree
 #   - destination vault volume
 #   - snapmirror relationship
+#   - integration tests
 #   - reporting
 # 
+# Implemented use cases:
+#  1. non_snaplock volume + qtree + export policy + snapmirror
+#  2. snaplock volume + qtree + export policy
+#
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
 # Professional Services 2024-2025
@@ -26,13 +31,13 @@
     https_proxy: ""      
   vars_files:
     - "vars/customers/bper/defaults.yml"
-    #- "vars/customers/bper/local.yml"
+   # - "vars/customers/bper/local.yml"
    # BPER PROD:
    # - "vars/customers/bper/inventory.yml"
    # BPER lab:
-   # - "vars/customers/bper/inventory_bper_lab.yml"
+    - "vars/customers/bper/inventory_bper_lab.yml"
    # NetApp lab:
-    - "vars/customers/bper/inventory_lab_test.yml"
+   # - "vars/customers/bper/inventory_lab_test.yml"
   vars:
     qlogname: "create_vol_qtree_export.bper"       # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
@@ -56,11 +61,12 @@
         name: netapp_ps.bper.facts
       vars:
         qtask: prepare_facts
-######################################################## 
+    
+    # Create local vars based on input values 
     - name: Render local vars
       ansible.builtin.set_fact:
         vars_local: "{{ lookup('template', 'vars/customers/bper/templates/local.j2') | from_yaml }}"
-########################################################
+
     # Check inventory SVMs availability
     - ansible.builtin.include_role:
         name: netapp_ps.bper.logic
@@ -344,26 +350,16 @@
         
         - meta: end_play
     
-    # Reporting block
-    - name: Reporting block
-      block:
-        - name: Post-create validation
-          ansible.builtin.include_role: 
-            name: netapp_ps.bper.tests
-          vars:
-            qtask: integration-test
+    # Reporting section. Fail on errors is diabled to collect all errors in one run
+    - name: Post-create validation
+      ansible.builtin.include_role: 
+        name: netapp_ps.bper.tests
+      vars:
+        qtask: integration-test
 
-        - ansible.builtin.include_role:
-            name: netapp_ps.bper.logic
-          vars:
-            qtask: 99_reporting
-        - meta: end_play
-      rescue:
-        - ansible.builtin.debug:
-            msg: "Post-create validation failed. Please check the logs. Created resource details will be printed."
-        - ansible.builtin.include_role:
-            name: netapp_ps.bper.logic
-          vars:
-            qtask: 99_reporting
+    - ansible.builtin.include_role:
+        name: netapp_ps.bper.logic
+      vars:
+        qtask: 99_reporting
 
 ...
