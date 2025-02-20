@@ -19,7 +19,7 @@ destination:
         name:                          {{ target_vault_svm }}
         supported_aggregates:          {{ vault_svm_supported_aggregates }}
 snapmirror:
-    policy:                DPDefault
+    policy:                prod_vault_new
     source:
         volume:
             name:          {{ vars_local.source.volume.name }}

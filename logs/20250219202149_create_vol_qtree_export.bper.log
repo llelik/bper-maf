@@ -1,0 +1,57 @@
+
+
+ontap/qtree/create
+------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  name: svm_alexeym90_moa_01
+  supported_aggregates:
+  - aggr1_trinidad_01
+  - aggr1_trinidad_02
+
+volume:
+  encrypt: false
+  export_policy:
+    name: Q_BBBBBPR45
+  fractional_reserve: 0
+  junction_path: /BBBBBPR45
+  language: c.utf_8
+  name: BBBBBPR45
+  percent_snapshot_space: 5
+  read_realloc: 'off'
+  security_style: unix
+  size: 10
+  size_unit: gb
+  snaplock:
+    autocommit_period: none
+    retention:
+      default: unspecified
+      maximum: PT1H
+      minimum: PT1H
+    type: enterprise
+  snapshot_policy:
+    name: none
+  space_guarantee: none
+  tiering_policy:
+    name: none
+  type: rw
+  volume_autosize:
+    mode: 'off'
+  volume_efficiency:
+    enable_compression: true
+    enable_inline_compression: true
+    policy: default
+    volume_efficiency: start
+  wait_for_completion: true
+
+qtree:
+  export_policy: Q_BBBBBPR45
+  name: Q_BBBBBPR45
+  oplocks: true
+  security_style: unix
+  unix_group: root
+  unix_user: root
+
