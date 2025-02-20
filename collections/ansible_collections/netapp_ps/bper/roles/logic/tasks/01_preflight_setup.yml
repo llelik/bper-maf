@@ -107,21 +107,21 @@
         vars_local_update:
           source:
             volume:
-              name:          "{{ new_volume_name | default(vars_local.source.volume.name) }}"
-              junction_path: "/{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              name:          "{{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}"
+              junction_path: "/{{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}"
               export_policy:
-                name:        "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+                name:        "Q_{{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}"
             export_policy:
-                name:        "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
+              name:        "Q_{{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}"
             qtree:
-              name:          "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
-              export_policy: "Q_{{ new_volume_name | default(vars_local.source.volume.name) }}"
-      when: existing_volumes_list | length > 0
+              name:          "Q_{{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}"
+              export_policy: "Q_{{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}"
+      #when: existing_volumes_list | length > 0
     
     - name: Merging logic found facts with vars_local
       ansible.builtin.set_fact:
         vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
-      when: existing_volumes_list | length > 0
+      #when: existing_volumes_list | length > 0
     
   when: inventory_svms_mcc.keys() | length > 0
 ...

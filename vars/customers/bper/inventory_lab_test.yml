@@ -27,6 +27,10 @@ inventory_svms_mcc:
       cluster_mgmt: 10.65.59.180
       cluster_name: antigua
       vault_svm: svm_alexeym20
+    - name: svm_alexeym101
+      cluster_mgmt: 10.65.59.180
+      cluster_name: antigua
+      vault_svm: svm_alexeym91_moa_vault
     - name: svm_alexeym20
       cluster_mgmt: 10.65.59.210
       cluster_name: jamacia

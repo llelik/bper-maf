@@ -1,6 +1,6 @@
 destination:
     volume:
-        name:                   {{ new_volume_name | default(vars_local.source.volume.name) }}_vault
+        name:                   {{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}_vault
         type:                   dp
         snaplock:
             type:               {{ 'non_snaplock' if not input_snaplock | bool else input_sl_params.type | lower }}
@@ -29,7 +29,7 @@ snapmirror:
             name:          {{ target_svm.name }}
     destination:
         volume:
-            name:          {{ new_volume_name | default(vars_local.source.volume.name) }}_vault
+            name:          {{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}_vault
         cluster:
             name:          {{ target_vault_cluster }}
             management_ip: {{ target_vault_cluster_ip }}

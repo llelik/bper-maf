@@ -70,7 +70,6 @@
 
 ######## Setting source volume destination aggreate
 # Collecting aggrgates available 
-# of the given Snaplock type across the inventory
 #######################################
 
   - name: Get available aggregates of given Snaplock type on vault cluster 
@@ -81,8 +80,8 @@
         - aggregate_info
       fields:
         - name
-      parameters:
-        snaplock_type:    "{{ '!non_snaplock' if input_snaplock | bool else vars_local.source.volume.snaplock.type }}"
+      #parameters:
+      #  snaplock_type:    "{{ '!non_snaplock' if input_snaplock | bool else vars_local.source.volume.snaplock.type }}"
     no_log: "{{ nolog }}"
     register: aggregates_supported_vault
 
@@ -100,7 +99,7 @@
         - aggregates_supported_vault_list | length > 0
         - vault_svm_supported_aggregates | length > 0
       msg: 
-        - "No aggregates of requested Snaplock type {{ vars_local.source.volume.snaplock.type }} found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
+        - "No aggregates of requested Snaplock type found assigned for the vault SVM {{ target_vault_svm }}. Please check ONTAP cluster SVM configuration."
 
   - name: Define destination vault SVM - vars_local facts
     ansible.builtin.set_fact:

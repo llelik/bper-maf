@@ -17,7 +17,7 @@ def increment_names(names, step=1):
             incremented_number = (number + step) % 100  # Ensure the number remains 2-digit
             incremented_name = name[:-2] + str(incremented_number).zfill(2)
             return incremented_name
-    return None
+    return ""
 
 class FilterModule(object):
     def filters(self):
