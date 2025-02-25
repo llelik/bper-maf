@@ -24,7 +24,7 @@ vars_defaults:
         name:                 'Prod_snapshot_3_3'
       fractional_reserve:     0                     # ONTAP default
       security_style:         unix
-      encrypt:                false
+      encrypt:                true
       snaplock:
         type:                 non_snaplock          # options: compliance, enterprise, non_snaplock
       tiering_policy:
