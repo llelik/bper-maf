@@ -22,7 +22,6 @@
 
   # get best aggregate
   - name: "Find best aggregate [{{ volume.name }}]" 
-    #####get_best_aggregate:
     get_best_aggr_selective:
       <<: *auth
       svm_name                 : "{{ svm.name }}"
@@ -45,8 +44,9 @@
       # nodes_to_exclude         : 
     register: aggr_lookup
     delegate_to: localhost
+    when: 1 == 0
     
-  - fail: msg=STOP
+  #- fail: msg=STOP
 
   # create the volume
   - name: "Create volume [{{ volume.name }}]"
@@ -56,7 +56,8 @@
       vserver:                 "{{ svm.name }}"    
       name:                    "{{ volume.name }}"
       is_infinite: False
-      aggregate_name                  : "{{ aggr_lookup.aggregate.name    | default(omit) }}"
+      #aggregate_name                  : "{{ aggr_lookup.aggregate.name    | default(omit) }}"
+      aggregate_name:                   "{{ volume.aggregate_name         | default(omit) }}"
       size                            : "{{ volume.size                   | default(omit) }}"
       size_unit                       : "{{ volume.size_unit              | default(omit) }}"
       space_guarantee                 : "{{ volume.space_guarantee        | default(omit) }}"

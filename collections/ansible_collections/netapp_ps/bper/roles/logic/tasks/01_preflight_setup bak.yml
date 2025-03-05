@@ -22,7 +22,6 @@
           use_rest:        always
           use_python_keys: true
       no_log: true
-      
     - debug: var=vars_local
 ######### Incrementing volume name by 1
 # We retrieve existing volumes with generated name pattern without last 2 digits
@@ -66,6 +65,37 @@
     - debug:
         msg: "Volume with default base name {{ vars_local.source.volume.name | default('None') }} is not found existing - this name will be used for target volume name"
       when: existing_volumes_list | length == 0
+
+######## Setting source volume destination aggreate
+# Collecting aggrgates available 
+# of the given Snaplock type across the inventory
+#######################################
+
+    - name: Get available aggregates of requested type 
+      netapp.ontap.na_ontap_rest_info:
+        <<: *auth
+        hostname: "{{ cluster_ip }}"
+        gather_subset:
+          - aggregate_info
+        fields:
+          - name
+        parameters:
+          snaplock_type:   "{{ '!non_snaplock' if input_snaplock | bool else vars_local.source.volume.snaplock.type }}"
+      no_log: "{{ nolog }}"
+      loop: "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique }}"
+      loop_control:
+        loop_var: cluster_ip
+      register: aggregates_supported
+ 
+    - debug: 
+        msg: "Found {{ aggregates_supported.results | selectattr('ontap_info.storage_aggregates.num_records', '>', 0) | map(attribute='ontap_info.storage_aggregates.num_records' ) | sum }} aggregates of requested Snaplock type {{ vars_local.source.volume.snaplock.type }} on all inventory clusters"
+
+    ######### Inventory of clusters with supported aggregates of requested Snaplock type 
+    # contains the list of clusters with supported aggregates 
+    # taken from the list of all clusters which have aggregates of given Snaplock type records > 0
+    - name: Define cluster list with supported aggregate type
+      set_fact:
+        aggr_supported_inventory: "{{ aggregates_supported.results | selectattr('ontap_info.storage_aggregates.num_records', '>', 0) | map(attribute='cluster_ip') | list }}"
 
 ######### Incrementing volume name by 1 cont.
 # if list was empty - new_volume_name is set to None 

@@ -1,7 +1,7 @@
   source:
     volume:
       name: {{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
-      size: {{ input_size }}
+      size: {{ input_size | int * 1024}}
       junction_path:         /{{ input_proc | upper }}{{ storage_env[input_env_fact] | default(input_env_fact) }}01
       snapshot_policy:
         name:                {{ vars_defaults.source.volume.snapshot_policy.name if not input_snaplock | bool else 'none' }}

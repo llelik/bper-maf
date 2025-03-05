@@ -24,9 +24,9 @@ snapmirror:
         volume:
             name:          {{ vars_local.source.volume.name }}
         cluster:
-            name:          {{ target_svm.cluster_name }}
+            name:          {{ vars_local.source.cluster.name }}
         svm:
-            name:          {{ target_svm.name }}
+            name:          {{ vars_local.source.svm.name }}
     destination:
         volume:
             name:          {{ vars_local.source.volume.name if new_volume_name == '' else new_volume_name }}_vault

@@ -135,7 +135,7 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
             # extract volume_count per node
             volume_count_node = aggregate['volume_count_node']
             # extract cluster
-            cluster = aggregate["cluster_mgmt_ip"]
+            cluster_mgmt_ip = aggregate["cluster_mgmt_ip"]
             # Extract required fields from aggregate
             name = aggregate["name"]
             # log(f"Analyzing {name}")
@@ -161,7 +161,7 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
             # create an aggregate result object
             # log(f"Collecting object")
             o = dict(
-                cluster             = cluster,
+                cluster_mgmt_ip     = cluster_mgmt_ip,
                 name                = name,
                 node                = node,
                 size_mb             = size_mb,
@@ -219,7 +219,7 @@ def get_aggregates_clusters(cluster_mgmt_addresses, username, password, key_file
             # extract volume_count per node
             volume_count_node = aggregate['volume_count_node']
             # extract cluster
-            cluster = aggregate["cluster_mgmt_ip"]
+            cluster_mgmt_ip = aggregate["cluster_mgmt_ip"]
             # Extract required fields from aggregate
             name = aggregate["name"]
             # log(f"Analyzing {name}")
@@ -245,7 +245,7 @@ def get_aggregates_clusters(cluster_mgmt_addresses, username, password, key_file
             # create an aggregate result object
             # log(f"Collecting object")
             o = dict(
-                cluster             = cluster,
+                cluster_mgmt_ip     = cluster_mgmt_ip,
                 name                = name,
                 node                = node,
                 size_mb             = size_mb,
@@ -350,7 +350,7 @@ def run_module():
         nodes_to_exclude          = dict(type='list', required=False, default=[]),
         features                  = dict(type='list', elements='dict', options=dict(
                                         feature=dict(required=True,type='str',choices=['snaplock_type']),
-                                        type   =dict(required=True,type='str',choices=['non_snaplock', 'enterprise', 'compliance'])), 
+                                        type   =dict(required=True,type='str',choices=['non_snaplock', 'enterprise', 'compliance', '!non_snaplock'])), 
                                     required=False, default=[])
     )
 

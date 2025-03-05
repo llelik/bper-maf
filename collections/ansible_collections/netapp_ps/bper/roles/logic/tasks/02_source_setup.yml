@@ -19,8 +19,49 @@
           password:        "{{ ontap_password | default(omit) }}"
           validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
           use_rest:        always
-          #use_python_keys: true
       no_log: true
+
+######## Setting source volume destination aggreate
+# Collecting aggrgates available 
+# of the given Snaplock type across the inventory
+#######################################
+    - name: "Find best aggregate 0" 
+      netapp_ps.ontap.get_best_aggr_selective:
+        hostname_list:               "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique}}"
+        <<: *auth
+        svm_name:                    ""
+        debug:                       True
+        size_mb:                     "{{ vars_local.source.volume.size | default(0) }}"
+        weight_volume_count_node:    0
+        weight_used_pct:             0
+        weight_provisioned_pct:      0
+        weight_available_space:      1
+        threshold_volume_count_node: 480
+        threshold_volume_count:      180
+        features:
+          - feature: snaplock_type
+            type: "{{ '!non_snaplock' if input_snaplock | bool else vars_local.source.volume.snaplock.type }}"
+      register: aggr_lookup
+
+    - debug: var=aggr_lookup
+    - debug:
+        msg:
+          - "Best aggregate cluster is {{ aggr_lookup.aggregate.cluster_mgmt_ip }}"
+          - "Best aggregate is {{ aggr_lookup.aggregate.name }}"
+
+    - debug: var=aggr_lookup.summary 
+
+    - name: Set the list of SVMs with access on best aggregate
+      set_fact:
+        target_svms_list: "{{ inventory_svms_mcc.hosts | selectattr('cluster_mgmt', '==', aggr_lookup.aggregate.cluster_mgmt_ip) | map(attribute='name') | list }}"
+
+    - debug: var=target_svms_list
+
+    - name: Check if we have SVMs available for selected aggregate
+      ansible.builtin.assert:
+        that:
+          - target_svms_list | length > 0
+        msg: "No SVMs found for the best aggregate. Exiting. Check SVM configuration."
 
     ########## Collecting volume count for all source candidate SVMs
     # across the list of clusters with aggregates of supported type
@@ -31,125 +72,36 @@
         gather_subset:
           - volume_info
         parameters:
-          svm.name: "{{ svm.name }}"
+          svm.name: "{{ svm }}"
         fields:
           - name
-        hostname: "{{ svm.cluster_mgmt }}"
+        hostname: "{{ aggr_lookup.aggregate.cluster_mgmt_ip }}"
       register: svms_volcount
-      loop: "{{ inventory_svms_mcc.hosts }}"
+      loop: "{{ target_svms_list }}"
       loop_control:
         loop_var: svm
         label: svm
-      no_log: "{{ nolog }}"
-      # we look only at SVMs on clusters with supported aggregates
-      when: svm.cluster_mgmt in aggr_supported_inventory
-
-    - debug: 
-        msg: "Clusters inventory with supported aggregates of type {{ vars_local.source.volume.snaplock.type }}: {{ aggr_supported_inventory }}"
-    - ansible.builtin.assert:
-        that:
-          - aggr_supported_inventory | length > 0
-        msg: "No clusters found with supported aggregates. Exiting. Check cluster inventory."
-
-    - debug: var=aggr_supported_inventory
-
-    
+      no_log: false #"{{ nolog }}"
+     
 
     ########## Building a list of source SVMs with volume count and it's hosting cluster to sort
     - name: Collect volume count on source SVMs
       ansible.builtin.set_fact:
         data_svm_volcount_list: "{{ data_svm_volcount_list | default([]) + [ {
-        'name':         svm.svm.name,
-        'cluster_mgmt': svm.svm.cluster_mgmt,
-        'cluster_name': svm.svm.cluster_name,
+        'name':         svm.svm,
         'count':        svm.ontap_info.storage_volumes.num_records      
         } ] }}"
       loop: "{{ svms_volcount.results }}"
       loop_control:
         loop_var: svm
         label: svm
-      no_log: "{{ nolog }}"
+      no_log: false #"{{ nolog }}"
       when:
         - svm.ontap_info is defined
-   
+
     - name: Define most suiting source SVM details by vol count
       ansible.builtin.set_fact:
         target_svm: "{{ data_svm_volcount_list | sort(attribute='count') | first }}"
- 
-    - name: Set list of supported aggregates for source SVM 
-      set_fact:
-        svm_aggr_supported_list: "{{ aggregates_supported.results| selectattr('cluster_ip', '==', target_svm.cluster_mgmt)|map(attribute='ontap_info.storage_aggregates.records') |flatten|map(attribute='name') |list }}"
-    
-    - debug: var=svm_aggr_supported_list
-    - fail:
-        msg: "Target SVM does not support any aggregates of requested Snaplock type. Exiting. Check SVM configuration."
-      when: svm_aggr_supported_list | length == 0
-
-    ###################### DEBUG
-
-    - name: "Find best aggregate 0" 
-    #####get_best_aggregate:
-      netapp_ps.ontap.get_best_aggr_selective:
-        hostname_list:            "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique}}"       #"{{ aggr_supported_inventory }}"
-        <<: *auth
-        svm_name                 : ""  #"{{ svm.name }}"
-        debug                    : True
-        size_mb                  : 5000 #"{{ volume.size | default(0) }}"
-        #aggr_names_list          : "{{ svm.supported_aggregates | default([]) }}"
-        weight_volume_count_node      : 0
-        weight_used_pct          : 0
-        weight_provisioned_pct   : 0
-        weight_available_space   : 1
-        features:
-          - feature: snaplock_type
-            type: "{{ vars_local.source.volume.snaplock.type if input_snaplock | bool else 'non_snaplock' }}" #non_snaplock
-
-        threshold_volume_count_node: 140
-        #threshold_volume_count   : 180
-        # threshold_used_pct       : 
-        #threshold_provisioned_pct: 10000000
-        # threshold_available_space: 
-
-      register: aggr_lookup
-    - debug: var=aggr_lookup
-    - debug:
-        msg:
-          - "Best aggregate cluster is {{ aggr_lookup.aggregate.cluster }}"
-          - "Best aggregate is {{ aggr_lookup.aggregate.name }}"
-          - "Summary {{ aggr_lookup.summary }}" 
-    
-    
-    - name: "Find best aggregate 1" 
-      netapp_ps.ontap.get_best_aggr_selective:
-        <<: *auth
-        hostname:                jamaica.muccbc.hq.netapp.com
-        svm_name                 : "" #"{{ svm.name }}"
-        debug                    : True
-        size_mb                  : 5000 #"{{ volume.size | default(0) }}"
-        #aggr_names_list          : "{{ svm_aggr_supported_list }}"
-        weight_volume_count      : 0
-        weight_used_pct          : 0
-        weight_provisioned_pct   : 1
-        weight_available_space   : 0
-        threshold_volume_count: 400
-        # threshold_volume_count   : 
-        # threshold_used_pct       : 
-        # threshold_provisioned_pct: 10000000
-        # threshold_available_space: 
-
-      register: aggr_lookup1
-      #hen: 1 == 0
-    - debug: var=aggr_lookup1
-    
-    
-    - fail: msg=STOP
-
-    ###################### END DEBUG
-
-
-
-
-
 
     - name: Defining target source SVM - vars_local facts
       ansible.builtin.set_fact:
@@ -157,14 +109,22 @@
           source:
             svm:
               name:          "{{ target_svm.name }}"
-              supported_aggregates:    "{{ svm_aggr_supported_list }}"
             cluster:
-              name:          "{{ target_svm.cluster_name }}"
-              management_ip: "{{ target_svm.cluster_mgmt }}"
+              name:          "{{ inventory_svms_mcc.hosts | selectattr('name', '==', target_svm.name) | map(attribute='cluster_name') }}"
+              management_ip: "{{ aggr_lookup.aggregate.cluster_mgmt_ip }}"
+            volume:
+              aggregate_name: "{{ aggr_lookup.aggregate.name }}"
 
     - name: Merging logic local facts with vars_local
       ansible.builtin.set_fact:
         vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
-    
+
+    ###################### DEBUG
+    - debug: var=vars_local
+    #- fail: msg=STOP
+
+    ###################### END DEBUG
+
+
   when: inventory_svms_mcc.keys() | length > 0
 ...
