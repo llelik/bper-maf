@@ -103,24 +103,20 @@
         features:
           - feature: snaplock_type
             type: "{{ vars_local.source.volume.snaplock.type if input_snaplock | bool else 'non_snaplock' }}" #non_snaplock
-            
+
         threshold_volume_count_node: 140
         #threshold_volume_count   : 180
         # threshold_used_pct       : 
         #threshold_provisioned_pct: 10000000
         # threshold_available_space: 
-        ####exclude_name_regex       : "{{ volume.aggregate_exclude_name_regex | default(omit) }}"
-        ####include_name_regex       : "{{ volume.aggregate_include_name_regex | default(omit) }}"
-        # exclude_node_regex       : 
-        #include_node_regex         : "{{ volume.aggregate_include_node_regex | default('.*') }}"
-        # names_to_exclude         :
-        # nodes_to_exclude         : 
+
       register: aggr_lookup
     - debug: var=aggr_lookup
     - debug:
         msg:
           - "Best aggregate cluster is {{ aggr_lookup.aggregate.cluster }}"
           - "Best aggregate is {{ aggr_lookup.aggregate.name }}"
+          - "Summary {{ aggr_lookup.summary }}"
     
     
     
@@ -141,15 +137,10 @@
         # threshold_used_pct       : 
         # threshold_provisioned_pct: 10000000
         # threshold_available_space: 
-        ####exclude_name_regex       : "{{ volume.aggregate_exclude_name_regex | default(omit) }}"
-        ####include_name_regex       : "{{ volume.aggregate_include_name_regex | default(omit) }}"
-        # exclude_node_regex       : 
-        #include_node_regex         : "{{ volume.aggregate_include_node_regex | default('.*') }}"
-        # names_to_exclude         :
-        # nodes_to_exclude         : 
+
       register: aggr_lookup1
-      when: 1 == 0
-    #- debug: var=aggr_lookup1
+      #hen: 1 == 0
+    - debug: var=aggr_lookup1
     
     
     - fail: msg=STOP

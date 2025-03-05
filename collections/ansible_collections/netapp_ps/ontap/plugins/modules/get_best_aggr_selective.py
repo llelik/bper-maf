@@ -360,7 +360,12 @@ def run_module():
 
     module = AnsibleModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
+        mutually_exclusive=[('include_name_regex', 'include_name_regex'), 
+                            ('include_node_regex', 'include_node_regex'),
+                            ('exclude_name_regex', 'names_to_exclude'),
+                            ('exclude_node_regex', 'nodes_to_exclude')]
+
     )
 
     # store input to vars, some are global
@@ -414,18 +419,20 @@ def run_module():
     try:
         log(names_to_exclude)
         # check mutually exclusive parameters
-        if(exclude_name_regex and include_name_regex):
-            raise AttributeError("'include_name_regex' and 'include_name_regex' are mutually exclusive")
-        if(exclude_node_regex and include_node_regex):
-            raise AttributeError("'include_node_regex' and 'include_node_regex' are mutually exclusive")
-        if(exclude_name_regex and names_to_exclude):
-            raise AttributeError("'exclude_name_regex' and 'names_to_exclude' are mutually exclusive")
-        if(exclude_node_regex and nodes_to_exclude):
-            raise AttributeError("'exclude_node_regex' and 'nodes_to_exclude' are mutually exclusive")
+        # if(exclude_name_regex and include_name_regex):
+        #     raise AttributeError("'include_name_regex' and 'include_name_regex' are mutually exclusive")
+        # if(exclude_node_regex and include_node_regex):
+        #     raise AttributeError("'include_node_regex' and 'include_node_regex' are mutually exclusive")
+        # if(exclude_name_regex and names_to_exclude):
+        #     raise AttributeError("'exclude_name_regex' and 'names_to_exclude' are mutually exclusive")
+        # if(exclude_node_regex and nodes_to_exclude):
+        #     raise AttributeError("'exclude_node_regex' and 'nodes_to_exclude' are mutually exclusive")
 
         # get all aggregates
         if hostname:
-            aggregates = get_aggregates(hostname, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list, features)
+            hostname_list = [hostname]
+            aggregates = get_aggregates_clusters(hostname_list, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list, features)
+            #aggregates = get_aggregates(hostname, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list, features)
         elif hostname_list:
             aggregates = get_aggregates_clusters(hostname_list, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list, features)
         
