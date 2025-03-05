@@ -19,7 +19,7 @@
           password:        "{{ ontap_password | default(omit) }}"
           validate_certs:  "{{ auth_rest_validate_certs | default(false) }}"
           use_rest:        always
-          use_python_keys: true
+          #use_python_keys: true
       no_log: true
 
     ########## Collecting volume count for all source candidate SVMs
@@ -27,6 +27,7 @@
     - name: Get volume count for all source candidate SVMs
       netapp.ontap.na_ontap_rest_info:
         <<: *auth
+        use_python_keys: true
         gather_subset:
           - volume_info
         parameters:
@@ -49,6 +50,10 @@
         that:
           - aggr_supported_inventory | length > 0
         msg: "No clusters found with supported aggregates. Exiting. Check cluster inventory."
+
+    - debug: var=aggr_supported_inventory
+
+    
 
     ########## Building a list of source SVMs with volume count and it's hosting cluster to sort
     - name: Collect volume count on source SVMs
@@ -79,6 +84,82 @@
     - fail:
         msg: "Target SVM does not support any aggregates of requested Snaplock type. Exiting. Check SVM configuration."
       when: svm_aggr_supported_list | length == 0
+
+    ###################### DEBUG
+
+    - name: "Find best aggregate 0" 
+    #####get_best_aggregate:
+      netapp_ps.ontap.get_best_aggr_selective:
+        hostname_list:            "{{ inventory_svms_mcc.hosts | map(attribute='cluster_mgmt') | list | unique}}"       #"{{ aggr_supported_inventory }}"
+        <<: *auth
+        svm_name                 : ""  #"{{ svm.name }}"
+        debug                    : True
+        size_mb                  : 5000 #"{{ volume.size | default(0) }}"
+        #aggr_names_list          : "{{ svm.supported_aggregates | default([]) }}"
+        weight_volume_count_node      : 0
+        weight_used_pct          : 0
+        weight_provisioned_pct   : 0
+        weight_available_space   : 1
+        features:
+          - feature: snaplock_type
+            type: "{{ vars_local.source.volume.snaplock.type if input_snaplock | bool else 'non_snaplock' }}" #non_snaplock
+            
+        threshold_volume_count_node: 140
+        #threshold_volume_count   : 180
+        # threshold_used_pct       : 
+        #threshold_provisioned_pct: 10000000
+        # threshold_available_space: 
+        ####exclude_name_regex       : "{{ volume.aggregate_exclude_name_regex | default(omit) }}"
+        ####include_name_regex       : "{{ volume.aggregate_include_name_regex | default(omit) }}"
+        # exclude_node_regex       : 
+        #include_node_regex         : "{{ volume.aggregate_include_node_regex | default('.*') }}"
+        # names_to_exclude         :
+        # nodes_to_exclude         : 
+      register: aggr_lookup
+    - debug: var=aggr_lookup
+    - debug:
+        msg:
+          - "Best aggregate cluster is {{ aggr_lookup.aggregate.cluster }}"
+          - "Best aggregate is {{ aggr_lookup.aggregate.name }}"
+    
+    
+    
+    - name: "Find best aggregate 1" 
+      netapp_ps.ontap.get_best_aggr_selective:
+        <<: *auth
+        hostname:                jamaica.muccbc.hq.netapp.com
+        svm_name                 : "" #"{{ svm.name }}"
+        debug                    : True
+        size_mb                  : 5000 #"{{ volume.size | default(0) }}"
+        #aggr_names_list          : "{{ svm_aggr_supported_list }}"
+        weight_volume_count      : 0
+        weight_used_pct          : 0
+        weight_provisioned_pct   : 1
+        weight_available_space   : 0
+        threshold_volume_count: 400
+        # threshold_volume_count   : 
+        # threshold_used_pct       : 
+        # threshold_provisioned_pct: 10000000
+        # threshold_available_space: 
+        ####exclude_name_regex       : "{{ volume.aggregate_exclude_name_regex | default(omit) }}"
+        ####include_name_regex       : "{{ volume.aggregate_include_name_regex | default(omit) }}"
+        # exclude_node_regex       : 
+        #include_node_regex         : "{{ volume.aggregate_include_node_regex | default('.*') }}"
+        # names_to_exclude         :
+        # nodes_to_exclude         : 
+      register: aggr_lookup1
+      when: 1 == 0
+    #- debug: var=aggr_lookup1
+    
+    
+    - fail: msg=STOP
+
+    ###################### END DEBUG
+
+
+
+
+
 
     - name: Defining target source SVM - vars_local facts
       ansible.builtin.set_fact:

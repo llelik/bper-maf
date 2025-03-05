@@ -28,7 +28,7 @@ def b2m(bytes_value, decimal_places=2):
 # Get aggregates using REST API
 def get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath):
     url = f"https://{cluster_mgmt_ip}/api/storage/aggregates?fields=space.block_storage,volume_count,node.name"
-    log(f"GET {url}")
+    log(f"GET AGGR {url}")
     if(username and password):
         response = requests.get(url, auth=(username, password), verify=False)
     else:
@@ -38,20 +38,40 @@ def get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_
     return response_json.get("records", [])
 
 # Get selected aggregates data using REST API
-def get_selected_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, aggr_list):
+def get_selected_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, aggr_list, features=[]):
     aggr_list_comma = ",". join(str(aggr_name) for aggr_name in aggr_list)
+    node_vol_count = {}
+    
+    
     if aggr_list == []:
         url = f"https://{cluster_mgmt_ip}/api/storage/aggregates?fields=space.block_storage,volume_count,node.name"
     else:
         url = f"https://{cluster_mgmt_ip}/api/storage/aggregates?fields=space.block_storage,volume_count,node.name&name={aggr_list_comma}"
+    
+    if features:
+        url += "&"
+        for feature in features:
+            url += f"{feature['feature']}={feature['type']},"
+        url = url[:-1]
+    
     log(f"GET {url}")
+    
     if(username and password):
         response = requests.get(url, auth=(username, password), verify=False)
     else:
         response = requests.get(url, cert=(cert_filepath,key_filepath), verify=False)
-
+    
     response_json = response.json()
-    return response_json.get("records", [])
+    #log(f"RESPONSE AGGR {response_json}")
+    aggr_ret = []
+    for aggr in response_json.get("records", []):
+        aggr_cluster = aggr
+        node_vol_count[aggr['node']['name']] =+ aggr['volume_count']
+        aggr_cluster['cluster_mgmt_ip'] = cluster_mgmt_ip
+        aggr_cluster['volume_count_node'] = node_vol_count[aggr['node']['name']]
+        aggr_ret.append(aggr_cluster)
+    #log(f"to be returned: {aggr_ret}")
+    return aggr_ret
 
 # Get volumes using REST API
 def get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath):
@@ -63,18 +83,6 @@ def get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_fil
         response = requests.get(url, cert=(cert_filepath,key_filepath), verify=False)
     response_json = response.json()
     return response_json.get("records", [])
-
-# Get existing volume information using REST API
-# def get_existing_volume_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, volume_name, svm_name):
-#     url = f"https://{cluster_mgmt_ip}/api/storage/volumes?fields=aggregates&name={volume_name}&svm.name={svm_name}"
-#     log(f"GET {url}")
-#     if(username and password):
-#         response = requests.get(url, auth=(username, password), verify=False)
-#     else:
-#         response = requests.get(url, cert=(cert_filepath,key_filepath), verify=False)
-#     response_json = response.json()
-#     log(f"RESPONSE {response_json}")
-#     return response_json.get("records", [])
 
 # Get aggregates configured for SVM using REST API
 def get_aggregates_svm_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, svm_name=""):
@@ -94,7 +102,7 @@ def log(t):
     summary.append(t)
 
 # get aggregates
-def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, requested_size_mb, requested_volume_count=1, svm_name="", aggr_names_list=[]):
+def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, requested_size_mb, requested_volume_count=1, svm_name="", aggr_names_list=[], features=[]):
 
     result = []
 
@@ -102,6 +110,7 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
     log(f"Get aggregate data from rest")
     #aggregates = get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
     aggregates = get_selected_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, aggr_names_list)
+    
     log(f"RESPONSE {aggregates}")
     # get volumes for vol count parameter filter
     volumes = get_volumes_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
@@ -123,6 +132,10 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
             #if aggregate["name"] not in aggregates_svm_names:
             #    continue
 
+            # extract volume_count per node
+            volume_count_node = aggregate['volume_count_node']
+            # extract cluster
+            cluster = aggregate["cluster_mgmt_ip"]
             # Extract required fields from aggregate
             name = aggregate["name"]
             # log(f"Analyzing {name}")
@@ -148,6 +161,7 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
             # create an aggregate result object
             # log(f"Collecting object")
             o = dict(
+                cluster             = cluster,
                 name                = name,
                 node                = node,
                 size_mb             = size_mb,
@@ -157,11 +171,97 @@ def get_aggregates(cluster_mgmt_ip, username, password, key_filepath, cert_filep
                 physical_used_mb    = physical_used_mb,
                 physical_used_pct   = round( physical_used_mb / size_mb * 100 ),
                 volume_count        = volume_count + requested_volume_count,
+                volume_count_node   = volume_count_node, 
                 provisioned_size_mb = provisioned_size_mb,
                 provisioned_pct     = round( provisioned_size_mb / size_mb *100 )
             )
             result.append(o)
-        return result
+    return result
+
+# get aggregates
+def get_aggregates_clusters(cluster_mgmt_addresses, username, password, key_filepath, cert_filepath, requested_size_mb, requested_volume_count=1, svm_name="", aggr_names_list=[], features=[]):
+
+    result = []
+    aggregates_clusters = []
+    volumes_clusters = []
+    
+    for cls_addr in cluster_mgmt_addresses:
+        #get_aggregates_node_volcount(cls_ip, username, password, key_filepath, cert_filepath)
+
+        # get all aggregates
+        # log(f"Get aggregate data from rest")
+        #aggregates = get_aggregates_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath)
+        aggregates = get_selected_aggregates_rest(cls_addr, username, password, key_filepath, cert_filepath, aggr_names_list, features)
+        
+        if aggregates:
+            #log(f"Aggr with cluster: {aggregates}")
+            aggregates_clusters += aggregates
+            #log(f"RESPONSE {aggregates_clusters}")
+        # get volumes for vol count parameter filter
+        volumes = get_volumes_rest(cls_addr, username, password, key_filepath, cert_filepath)
+        volumes_clusters += volumes
+        # check for only aggregates available for SVM
+
+        svm_name = ""
+        if svm_name != "":
+            aggregates_svm = get_aggregates_svm_rest(cluster_mgmt_ip, username, password, key_filepath, cert_filepath, svm_name)
+            aggregates_svm_names = [
+                a["name"] 
+                for a in aggregates_svm[0]['aggregates']
+            ]
+            log(f"Filtering aggregates for SVM '{svm_name}', aggregates available: {aggregates_svm_names}")
+
+    if aggregates_clusters:
+        for aggregate in aggregates_clusters:
+            #if aggregate["name"] not in aggregates_svm_names:
+            #    continue
+            
+            # extract volume_count per node
+            volume_count_node = aggregate['volume_count_node']
+            # extract cluster
+            cluster = aggregate["cluster_mgmt_ip"]
+            # Extract required fields from aggregate
+            name = aggregate["name"]
+            # log(f"Analyzing {name}")
+            node = aggregate["node"]["name"]
+            space = aggregate["space"]["block_storage"]
+            
+            # log(f"Get volumes for aggregate {name} (from cache)")
+            # Filter volumes for this aggregate
+            volumes_for_aggregate = [
+                volume
+                for volume in volumes
+                if volume["aggregates"][0]["name"] == name
+            ]
+            volume_count = len(volumes_for_aggregate)
+
+            # log(f"Correcting space info")
+            # convert a few values
+            size_mb             = b2m(space["size"])                                         # convert to mb
+            used_mb             = b2m(space["used"]) + requested_size_mb                     # convert to mb
+            available_mb        = b2m(space["available"]) - requested_size_mb                # convert to mb & substract requested space
+            physical_used_mb    = b2m(space["physical_used"])  + requested_size_mb           # convert to mb
+            provisioned_size_mb = b2m(sum(v["space"]["size"] for v in volumes_for_aggregate)) + requested_size_mb                     # calc provisioned space
+            # create an aggregate result object
+            # log(f"Collecting object")
+            o = dict(
+                cluster             = cluster,
+                name                = name,
+                node                = node,
+                size_mb             = size_mb,
+                available_mb        = available_mb,
+                used_mb             = used_mb,
+                used_pct            = round( used_mb / size_mb *100 ),
+                physical_used_mb    = physical_used_mb,
+                physical_used_pct   = round( physical_used_mb / size_mb * 100 ),
+                volume_count        = volume_count + requested_volume_count,
+                volume_count_node   = volume_count_node, 
+                provisioned_size_mb = provisioned_size_mb,
+                provisioned_pct     = round( provisioned_size_mb / size_mb *100 )
+            )
+            result.append(o)
+    return result
+
 
    
 # Function to rank and normalize ranks for each property with given weights and sort orders
@@ -219,7 +319,8 @@ def filter_data_list(data_list, exclude_name_regex="", include_name_regex="",
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-        hostname                  = dict(type='str', required=True),
+        hostname                  = dict(type='str', required=False),
+        hostname_list             = dict(type='list', required=False),
         username                  = dict(type='str', required=False, default=''),
         password                  = dict(type='str', required=False, default='', no_log=True),
         key_filepath              = dict(type='str', required=False, default=''),
@@ -235,16 +336,22 @@ def run_module():
         weight_used_pct           = dict(type='float', required=False, default=0),
         weight_provisioned_pct    = dict(type='float', required=False, default=0),
         weight_available_space    = dict(type='float', required=False, default=1),   # by default we only rank by available space
+        weight_volume_count_node = dict(type='float', required=False, default=0),
         threshold_volume_count    = dict(type='int', required=False, default=5000),  # extreme high default : no volume count check
         threshold_used_pct        = dict(type='int', required=False, default=100000000000), # extreme high default : if thin provisioned, we can go over 100%
         threshold_provisioned_pct = dict(type='int', required=False, default=100000000000), # extreme high default : overprovisioning is possible
         threshold_available_space = dict(type='int', required=False, default=-1000000000000), # extreme low default : if thin provisioned, we can go under 0
+        threshold_volume_count_node = dict(type='int', required=False, default=500),
         exclude_name_regex        = dict(type='str', required=False, default=''),
         include_name_regex        = dict(type='str', required=False, default=''),
         exclude_node_regex        = dict(type='str', required=False, default=''),
         include_node_regex        = dict(type='str', required=False, default=''),
         names_to_exclude          = dict(type='list', required=False, default=[]),
-        nodes_to_exclude          = dict(type='list', required=False, default=[])
+        nodes_to_exclude          = dict(type='list', required=False, default=[]),
+        features                  = dict(type='list', elements='dict', options=dict(
+                                        feature=dict(required=True,type='str',choices=['snaplock_type']),
+                                        type   =dict(required=True,type='str',choices=['non_snaplock', 'enterprise', 'compliance'])), 
+                                    required=False, default=[])
     )
 
     # seed the result dict in the result object
@@ -263,6 +370,7 @@ def run_module():
     aggregates=[]
     best_candidate = None    
     hostname                  = module.params['hostname']
+    hostname_list             = module.params['hostname_list']
     username                  = module.params['username']
     password                  = module.params['password']
     key_filepath              = module.params['key_filepath']
@@ -275,30 +383,33 @@ def run_module():
     weight_used_pct           = module.params['weight_used_pct']
     weight_provisioned_pct    = module.params['weight_provisioned_pct']
     weight_available_space    = module.params['weight_available_space']
+    weight_volume_count_node  = module.params['weight_volume_count_node']
     threshold_volume_count    = module.params['threshold_volume_count']
     threshold_used_pct        = module.params['threshold_used_pct']
     threshold_provisioned_pct = module.params['threshold_provisioned_pct']
     threshold_available_space = module.params['threshold_available_space']
+    threshold_volume_count_node = module.params['threshold_volume_count_node']
     exclude_name_regex        = module.params['exclude_name_regex']
     include_name_regex        = module.params['include_name_regex']
     exclude_node_regex        = module.params['exclude_node_regex']
     include_node_regex        = module.params['include_node_regex']
     names_to_exclude          = module.params['names_to_exclude']
     nodes_to_exclude          = module.params['nodes_to_exclude']
+    features                  = module.params['features']
 
     # we must authenticate with either username and password or key and cert
     if not (username and password) and not (key_filepath and cert_filepath):
         raise AttributeError("Either username and password or key and cert must be provided")
 
     # fixed properties list to rank
-    properties_to_rank = ["volume_count","used_pct", "provisioned_pct", "available_mb"]
+    properties_to_rank = ["volume_count_node", "volume_count","used_pct", "provisioned_pct", "available_mb"]
     # set weights in list
-    weights = [weight_volume_count, weight_used_pct, weight_provisioned_pct, weight_available_space]  # Replace these with your desired weights
+    weights = [weight_volume_count_node, weight_volume_count, weight_used_pct, weight_provisioned_pct, weight_available_space]  # Replace these with your desired weights
     # Define the sort orders for each property ("ascending" for True, "descending" for False)
     # only available space is descending
-    sort_orders = [True, True, True, False]
+    sort_orders = [True, True, True, True, False]
     # set thresholds
-    thresholds = [threshold_volume_count, threshold_used_pct, threshold_provisioned_pct, threshold_available_space]
+    thresholds = [threshold_volume_count_node, threshold_volume_count, threshold_used_pct, threshold_provisioned_pct, threshold_available_space]
 
     try:
         log(names_to_exclude)
@@ -313,7 +424,11 @@ def run_module():
             raise AttributeError("'exclude_node_regex' and 'nodes_to_exclude' are mutually exclusive")
 
         # get all aggregates
-        aggregates = get_aggregates(hostname, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list)
+        if hostname:
+            aggregates = get_aggregates(hostname, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list, features)
+        elif hostname_list:
+            aggregates = get_aggregates_clusters(hostname_list, username, password, key_filepath, cert_filepath, requested_size_mb, 1, svm_name, aggr_names_list, features)
+        
         result["all_aggregates"] = aggregates
         print(*message, file=sys.stdout)
 
@@ -326,7 +441,6 @@ def run_module():
             aggregates = filter_data_list(aggregates, exclude_name_regex, include_name_regex,
                                                 exclude_node_regex, include_node_regex,
                                                 names_to_exclude, nodes_to_exclude)
-            
             # rank them and sort by rank
             aggregates = rank_normalize_sort(aggregates, properties_to_rank, weights, thresholds, sort_orders)
         else:
