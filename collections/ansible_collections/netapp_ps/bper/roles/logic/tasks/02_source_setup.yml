@@ -116,8 +116,7 @@
         msg:
           - "Best aggregate cluster is {{ aggr_lookup.aggregate.cluster }}"
           - "Best aggregate is {{ aggr_lookup.aggregate.name }}"
-          - "Summary {{ aggr_lookup.summary }}"
-    
+          - "Summary {{ aggr_lookup.summary }}" 
     
     
     - name: "Find best aggregate 1" 
