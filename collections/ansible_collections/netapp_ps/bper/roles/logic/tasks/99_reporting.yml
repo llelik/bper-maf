@@ -37,8 +37,6 @@
   when:
     - not input_snaplock | bool
     - not(all_assertions is all)
-    #- assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
-    
 
 - name: Summary report - some assertions failed
   ansible.builtin.debug:
@@ -57,8 +55,6 @@
   when:
     - input_snaplock | bool
     - not (all_assertions is all) 
-    #- assert_result_0.failed == true or assert_result_1.failed == true or assert_result_2.failed | default('false')|bool == true
-    
 
 - name: Summary report - all assertions passed
   ansible.builtin.debug:
@@ -84,8 +80,6 @@
   when: 
     - not input_snaplock | bool
     - all_assertions is all
-    #- assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
-    
 
 - name: Summary report - all assertions passed
   ansible.builtin.debug:
@@ -102,6 +96,5 @@
   when: 
     - input_snaplock | bool
     - all_assertions is all
-    #- assert_result_0.failed == false and assert_result_1.failed == false and assert_result_2.failed | default('false')|bool == false
     
 ...

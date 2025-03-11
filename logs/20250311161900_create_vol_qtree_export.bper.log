@@ -1,0 +1,49 @@
+
+
+ontap/volume/create
+-------------------
+cluster:
+  management_ip: 10.65.59.220
+  name: trinidad
+
+svm:
+  name: svm_alexeym90_cse_01
+  supported_aggregates:
+  - aggr1_trinidad_01
+  - aggr1_trinidad_02
+
+volume:
+  encrypt: false
+  export_policy:
+    name: Q_NNNNNPR01
+  fractional_reserve: 0
+  junction_path: /NNNNNPR01
+  language: c.utf_8
+  name: NNNNNPR01
+  percent_snapshot_space: 5
+  read_realloc: 'off'
+  security_style: unix
+  size: 5
+  size_unit: gb
+  snaplock:
+    autocommit_period: PT100H
+    retention:
+      default: PT1H
+      maximum: PT1H
+      minimum: PT1H
+    type: compliance
+  snapshot_policy:
+    name: none
+  space_guarantee: none
+  tiering_policy:
+    name: none
+  type: rw
+  volume_autosize:
+    mode: 'off'
+  volume_efficiency:
+    enable_compression: true
+    enable_inline_compression: true
+    policy: default
+    volume_efficiency: start
+  wait_for_completion: true
+

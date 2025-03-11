@@ -1,0 +1,22 @@
+
+
+ontap/snapmirror/delete
+-----------------------
+snapmirror:
+  destination:
+    cluster:
+      management_ip: 10.65.59.210
+      name: jamaica
+    svm:
+      name: svm_alexeym20
+    volume:
+      name: NNNNNPR01_vault
+  policy: prod_vault_new
+  source:
+    cluster:
+      name: antigua
+    svm:
+      name: svm_alexeym101
+    volume:
+      name: NNNNNPR01
+

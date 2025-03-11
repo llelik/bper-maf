@@ -6,7 +6,7 @@
 # 
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
-# Professional Services 2024
+# Professional Services 2024-2025
 ##########################################################################
 ---
 - name: Vault SVM finder
@@ -44,8 +44,6 @@
       target_vault_cluster:    "{{ target_vault_svm_hostvars[0].cluster_name }}"
       target_vault_cluster_ip: "{{ target_vault_svm_hostvars[0].cluster_mgmt }}"  
   
-  - debug: var=vars_local
-
   - name: Get available aggregates assigned vault SVM
     netapp.ontap.na_ontap_rest_info:
       <<: *auth
@@ -80,8 +78,6 @@
         - aggregate_info
       fields:
         - name
-      #parameters:
-      #  snaplock_type:    "{{ '!non_snaplock' if input_snaplock | bool else vars_local.source.volume.snaplock.type }}"
     no_log: "{{ nolog }}"
     register: aggregates_supported_vault
 
@@ -108,7 +104,6 @@
   - name: Merging logic found facts with vars_local
     ansible.builtin.set_fact:
       vars_local: "{{ vars_local | default({}) | combine(vars_local_update, recursive=true)}}"
-  - debug: var=vars_local
   
   when: 
     - not (input_snaplock | bool) or (input_snaplock is not defined)

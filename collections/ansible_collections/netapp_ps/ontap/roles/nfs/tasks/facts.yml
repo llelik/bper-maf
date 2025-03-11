@@ -6,7 +6,6 @@
     svm           : "{{ 'svm'            | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
     cluster       : "{{ 'cluster'        | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
-#- debug: var=qtree
 
 - name: Set naming facts
   no_log: true

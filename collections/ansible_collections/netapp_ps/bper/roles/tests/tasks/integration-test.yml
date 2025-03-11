@@ -8,7 +8,7 @@
 #          language:               c.utf_8
 #          type:                   rw
 #          size_unit:              gb
-#          encrypt:                false
+#          encrypt:                true
 #          snapshot_policy:
 #            name:                 Prod_snapshot_3_3
 #          fractional_reserve:     0                 #ONTAP default
@@ -65,7 +65,7 @@
     dst_volume:  "{{ 'volume'   | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c='destination') }}"
     dst_svm:     "{{ 'svm'      | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c='destination') }}"
     dst_cluster: "{{ 'cluster'  | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c='destination') }}"
-  no_log: false #"{{ nolog }}"
+  no_log: "{{ nolog }}"
 
 - name: "Tests: Collect source cluster info - qtree"
   netapp.ontap.na_ontap_rest_info:

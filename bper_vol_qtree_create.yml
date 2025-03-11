@@ -17,7 +17,7 @@
 # Alexey Mikhaylov
 # NetApp Deutschland GmbH
 # Professional Services 2024-2025
-# version: 1.1.0
+# version: 1.1.0-prod
 ##########################################################################
 ---
 - name: "Create: volume, qtree, export_policy, destination volume, snapmirror"
@@ -31,13 +31,10 @@
     https_proxy: ""      
   vars_files:
     - "vars/customers/bper/defaults.yml"
-   # - "vars/customers/bper/local.yml"
    # BPER PROD:
-   # - "vars/customers/bper/inventory.yml"
+    - "vars/customers/bper/inventory_bper_prod.yml"
    # BPER lab:
-    - "vars/customers/bper/inventory_bper_lab.yml"
-   # NetApp lab:
-   # - "vars/customers/bper/inventory_lab_test.yml"
+   # - "vars/customers/bper/inventory_bper_lab.yml"
   vars:
     qlogname: "create_vol_qtree_export.bper"       # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
@@ -105,7 +102,6 @@
 # here is no block/rescue when creating export policy
 # since if it wasn't created - there is nothing to rollback
     # CREATE
-    - ansible.builtin.debug: var=vars_local
     - name: "Create export policy block"
       block:
         # Collect export policy facts variables

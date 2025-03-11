@@ -22,7 +22,6 @@
           use_rest:        always
           use_python_keys: true
       no_log: true
-    - debug: var=vars_local
 ######### Incrementing volume name by 1
 # We retrieve existing volumes with generated name pattern without last 2 digits
 # This should give a list of volumes named vol01,vol02,vol03 etc. (filetr=vol*)
