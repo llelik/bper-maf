@@ -4,7 +4,7 @@
 ## MAF automation implementation for BPER Services ScpA
 ### Ansilble playbook: create volumes, qtree and setup Snapmirror relationship
 
-### Document version: 1.1.0
+### Document version: 1.1.0-prod
 ### Alexey Mikhaylov, NetApp
 ### February 2025
 
@@ -81,9 +81,10 @@ Requested operation:
 
 1. Create a single volume with 1 qtree on primary Metrocluster (MCC) ONTAP system 
 2. Volume name must be unique across MCC environment
+3. Volume encryption must be enabled. NAE or NVE, depending on aggregate capabilities
 3. Qtree must be exported via NFS to the given network
-4. Once primary volume is created - secondary volume must be created as SnapMirror destination for vaulting purposes
-5. SnapMirror relationship must be established
+4. Once primary volume is created - secondary volume must be created as SnapMirror destination for vaulting purposes [non_snaplock only]
+5. SnapMirror relationship must be established for non-Snaplock volumes, Snaplock volumes only reside on snaplock capable aggregates
 6. Playbook must support integration with VMWare Aria solution (via remote ssh exec)
 
 # 3. Requirements
@@ -277,7 +278,7 @@ The follwoing input values are supported:
 #### input_snaplock (mandatory):
 
 * is defined
-* is in ['true', 'false']
+* is in [False, True]
   
 #### input_clientmatch (mandatory):  
 
@@ -291,7 +292,7 @@ The follwoing input values are supported:
   
 #### input_dryrun (optional):  
 
-* is in ['true', 'false', 'yes', 'no'] if defined
+* is in [True, False] if defined
 
 
 Validation: input values are validated before main tasks execition. If they do not satisfy the requirements - play exits.
@@ -341,7 +342,6 @@ Default values do not include values that are being generated.
 Variables provided to the play has the following structure:
 
 ````yaml
-
 vars_defaults:
     source:                   # definition of source instancies
         volume:               # parameters for source volume
@@ -353,13 +353,36 @@ vars_defaults:
         qtree:
             security_style: *default_value*
             oplocks:        *default_value*
-    destination:              # definition of destination instancies
-        volume:               # parameters for source volume
-                type:       *default_value*
-    snapmirror:               # definition of destination instancies
-        policy:             *default_value*
 ````
 
+Snaplock variables (applicable only for source volume):  
+
+````yaml
+source:                   # definition of source instancies
+  volume:               # parameters for source volume
+      snaplock:
+        type:                ['non_snaplock','enterprise','compliance']
+        retention: 
+          default:           *input value*
+          maximum:           *input value*
+          minimum:           *input value*
+        autocommit_period:   *input value*
+        privileged_delete:   *not in use*
+        append_mode_enabled: *not in use*
+````
+
+````yaml
+vars_local:
+  destination:              # definition of destination instancies
+      volume:               # parameters for source volume
+          type:       *default_value*
+          name:       *template generated value*
+      etc...
+  snapmirror:               # definition of destination instancies
+      policy:         *default_value*
+      source:         *template generated value*
+      etc...
+````
 <div style="page-break-after: always;"></div>
 
 ### 5.7 Name generation and variable merge
@@ -378,13 +401,14 @@ Variables values are being collected and generated in the following tasks:
 - bper/logic/02_source_setup.yml
 - bper/logic/03_vault_setup.yml
 
-There are 2 global variables involved in the process of values generation:
+There are 3 global variables involved in the process of values generation:
 
-1. Defaults (var/defaults.yml: vars_defaults)
-2. Local vars (var/local.yml: vars_local)
+1. Default vars (vars/defaults.yml: vars_defaults) to keep default values that are subject of change
+2. Local vars (vars/templates/local.j2 - Jinja template: => vars_local) to setup source volume parameters changes
+3. Local vars (vars/templates/vault.j2 - Jinja template: => vars_local) to setup destination vault volume parameters changes and snapmirror configuration
 
-vars_local is the global variable, values for what are being collected throughout roles execution above.
-When local variables collection and generation is completed - they are having the same structure as vars_defaults but contain non-default values.  
+vars_local is the global variable, values for what are being collected throughout roles execution above and generated as per naming convention.
+When local variables collection and generation is completed - they are having the same structure (adding destination and snapmirror configuration) as vars_defaults but contain non-default values.  
 These values based on the play execution and valid only for this execution.
 
 Every execution of any instance create or delete role preceeds variables merge procedure.
@@ -400,15 +424,15 @@ Variables collection and generation workflow:
 5. 01_preflight setup role task: using new volume name the following values are being generated:
    1. qtree name
    2. export policy name
-   3. destination volume name
-   4. snapmirror source values
-   5. snapmirror destination values
+   3. destination volume name [non_snaplock only]
+   4. snapmirror source values [non_snaplock only]
+   5. snapmirror destination values [non_snaplock only]
 6. 01_preflight setup role task: values are being added to vars_local variable
 7. 02_source_setup role task: selects source SVM basing on volume count and retrieves avaliable aggregates for this SVM
 8. 02_source_setup role task: values are being added to vars_local variable
-9. 03_vailt_setup role task: identifying destination vault SVM, sets and adds variables for Snapmirror
+9. 03_vault_setup role task: identifying destination vault SVM, sets and adds variables for Snapmirror [non_snaplock only]
 
-Once vars_local variables are generated they are merged with vars_defauls before every create or delete operation.  
+Once vars_local variables are rendered as Jinja template they are merged with vars_defauls before every create or delete operation.  
 
 
 ### 5.8 Logging
@@ -420,7 +444,7 @@ Logfile contains values passed to the create/delete role for the future review.
 
 ### 5.9 Dryrun
 
-Dryrun {true, false} is instructing the playbook to print extra debug information.
+Dryrun [True, False] is instructing the playbook to print extra debug information.
 If enabled the final global variables will be printed and playbook ends without creating any instance.
 input_dryrun is set to false by default in vars/defaults.yml - it can be overwritten by extra varsiable passed to the playbook on execution.  
 
@@ -463,13 +487,13 @@ Values setup includes:
 1. Merges vars_local with vars_default variables
 2. Creates qtree on source volume with specified parameters in merged variables
   
-### 6.5 Create destination volume
+### 6.5 Create destination volume [non_snaplock only]
 
 1. Merges vars_local with vars_default variables
 2. Selects most suitable aggregate to place the volume
 3. Creates vault volume on seconary ONTAP cluster with specified parameters in merged variables
   
-### 6.6 Create Snapmirror
+### 6.6 Create Snapmirror [non_snaplock only]
 
 1. Merges vars_local with vars_default variables
 2. Creates Snapmirror relationship from primary SVM:volume to secondary SVM:volume with specified parameters in merged variables
@@ -507,7 +531,7 @@ Example:
 >ansible-playbook bper_vol_qtree_create.yml -e '{"input_password":"SecretP@ssword","input_username":"admin","input_env":"PR","input_size":"10","input_proc":"BBBBB","input_clientmatch":"0.0.0.0/0","input_dryrun":"false","input_snaplock":"false"}'  
   
 [snaplock]  
->ansible-playbook bper_vol_qtree_create.yml -e '{"input_password":"netapp01","input_username":"admin","input_env":"PR","input_size":"10","input_proc":"BBBBB","input_clientmatch":"0.0.0.0/0","input_dryrun":"false","input_snaplock":"true","input_sl_params":{"type":"enterprise","autocommit_period":"none","retention":{"minimum":"PT1H","maximum":"PT1H","default":"unspecified"}}}'  
+>ansible-playbook bper_vol_qtree_create.yml -e '{"input_password":"SecretP@ssword","input_username":"admin","input_env":"PR","input_size":"10","input_proc":"BBBBB","input_clientmatch":"0.0.0.0/0","input_dryrun":"false","input_snaplock":"true","input_sl_params":{"type":"enterprise","autocommit_period":"none","retention":{"minimum":"PT1H","maximum":"PT1H","default":"unspecified"}}}'  
 
 ````
 

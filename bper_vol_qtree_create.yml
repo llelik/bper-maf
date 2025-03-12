@@ -35,6 +35,7 @@
     - "vars/customers/bper/inventory_bper_prod.yml"
    # BPER lab:
    # - "vars/customers/bper/inventory_bper_lab.yml"
+   # - "vars/customers/bper/inventory_lab_test.yml"
   vars:
     qlogname: "create_vol_qtree_export.bper"       # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
